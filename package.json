@@ -1,6 +1,6 @@
 {
   "name": "vibesync-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
   "keywords": [
     "ai-collaboration",
