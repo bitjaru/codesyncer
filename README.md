@@ -321,13 +321,31 @@ grep -r "@vibesync-decision" ./src
 
 We welcome contributions! VibeSync is open source and community-driven.
 
-### Areas for Contribution:
-- Add support for more AI tools (Cursor, Copilot, etc.)
-- Additional language translations
-- More tech stack templates
-- Documentation improvements
+### 🚀 Quick Start for Contributors
 
-[Contribution Guidelines](./CONTRIBUTING.md)
+1. **Fork** this repository
+2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/vibesync-cli.git`
+3. **Create a branch**: `git checkout -b feature/amazing-feature`
+4. **Make changes** and commit: `git commit -m "feat: Add amazing feature"`
+5. **Push** to your fork: `git push origin feature/amazing-feature`
+6. **Open a Pull Request** on GitHub
+
+### 🎯 Priority Areas for Contribution
+
+- 🤖 **Add support for more AI tools** (Cursor, Copilot, Continue.dev)
+- 🌐 **Additional language translations** (Japanese, Chinese, Spanish)
+- 📦 **More tech stack templates** (Go, Rust, Ruby, PHP)
+- 📝 **Documentation improvements**
+- 🐛 **Bug fixes**
+
+### 📖 Guidelines
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines.
+
+### 💬 Questions?
+
+- 📝 Open an [Issue](https://github.com/bitjaru/vibesync-cli/issues)
+- 💡 Start a [Discussion](https://github.com/bitjaru/vibesync-cli/discussions)
 
 ---
 

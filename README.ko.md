@@ -321,13 +321,31 @@ grep -r "@vibesync-decision" ./src
 
 기여를 환영합니다! VibeSync는 오픈소스이며 커뮤니티 중심입니다.
 
-### 기여 가능 분야:
-- 더 많은 AI 도구 지원 추가 (Cursor, Copilot 등)
-- 추가 언어 번역
-- 더 많은 기술 스택 템플릿
-- 문서 개선
+### 🚀 기여자를 위한 빠른 시작
 
-[기여 가이드라인](./CONTRIBUTING.md)
+1. **Fork** 이 레포지토리를 Fork 하세요
+2. **Clone** Fork한 레포를 클론: `git clone https://github.com/YOUR_USERNAME/vibesync-cli.git`
+3. **브랜치 생성**: `git checkout -b feature/amazing-feature`
+4. **변경사항 작성** 후 커밋: `git commit -m "feat: 멋진 기능 추가"`
+5. **Push** Fork에 푸시: `git push origin feature/amazing-feature`
+6. GitHub에서 **Pull Request 생성**
+
+### 🎯 우선순위 높은 기여 분야
+
+- 🤖 **더 많은 AI 도구 지원 추가** (Cursor, Copilot, Continue.dev)
+- 🌐 **추가 언어 번역** (일본어, 중국어, 스페인어)
+- 📦 **더 많은 기술 스택 템플릿** (Go, Rust, Ruby, PHP)
+- 📝 **문서 개선**
+- 🐛 **버그 수정**
+
+### 📖 가이드라인
+
+자세한 기여 가이드는 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참조하세요.
+
+### 💬 질문이 있으신가요?
+
+- 📝 [Issue](https://github.com/bitjaru/vibesync-cli/issues)를 열어주세요
+- 💡 [Discussion](https://github.com/bitjaru/vibesync-cli/discussions)을 시작하세요
 
 ---
 
