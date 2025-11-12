@@ -24,13 +24,12 @@ export async function scanForRepositories(rootPath: string): Promise<RepositoryI
       const isRepo = await isValidRepository(folderPath);
 
       if (isRepo) {
-        const type = await detectProjectType(folderPath, entry.name);
         const hasCodeSyncer = await hasCodeSyncerSetup(folderPath);
 
         repos.push({
           name: entry.name,
           path: folderPath,
-          type,
+          type: undefined, // AI will analyze
           description: undefined, // AI will analyze
           techStack: undefined, // AI will analyze
           hasCodeSyncer,
@@ -83,130 +82,10 @@ async function isValidRepository(folderPath: string): Promise<boolean> {
   }
 }
 
-/**
- * Detect project type based on folder structure, files, and repository name
- */
-async function detectProjectType(folderPath: string, repoName: string): Promise<'frontend' | 'backend' | 'mobile' | 'fullstack'> {
-  try {
-    // Analyze repository name for hints
-    const nameLower = repoName.toLowerCase();
-    const nameHints = {
-      backend: ['server', 'api', 'backend', 'service', 'socket', 'gateway', 'middleware'],
-      frontend: ['client', 'frontend', 'web', 'app', 'ui', 'admin', 'dashboard'],
-      mobile: ['mobile', 'ios', 'android', 'app'],
-    };
-
-    // Check for Java projects (Spring Boot)
-    const hasPomXml = await fs.pathExists(path.join(folderPath, 'pom.xml'));
-    const hasGradle = await fs.pathExists(path.join(folderPath, 'build.gradle'));
-    if (hasPomXml || hasGradle) {
-      // Check if it's Android (mobile) or Spring (backend)
-      const hasAndroid = await fs.pathExists(path.join(folderPath, 'app', 'src', 'main', 'AndroidManifest.xml'));
-      if (hasAndroid) {
-        return 'mobile';
-      }
-      return 'backend'; // Java Spring Boot
-    }
-
-    // Check for Python projects (Django, FastAPI)
-    const hasRequirements = await fs.pathExists(path.join(folderPath, 'requirements.txt'));
-    const hasPipfile = await fs.pathExists(path.join(folderPath, 'Pipfile'));
-    if (hasRequirements || hasPipfile) {
-      try {
-        let content = '';
-        if (hasRequirements) {
-          content = await fs.readFile(path.join(folderPath, 'requirements.txt'), 'utf-8');
-        }
-        // Check for web frameworks
-        if (content.includes('django') || content.includes('fastapi') || content.includes('flask')) {
-          return 'backend';
-        }
-      } catch {
-        // If can't read file, default to backend
-      }
-      return 'backend'; // Python backend
-    }
-
-    // Check for Node.js projects
-    const packageJsonPath = path.join(folderPath, 'package.json');
-    if (await fs.pathExists(packageJsonPath)) {
-      const packageJson = await fs.readJson(packageJsonPath);
-      const deps = {
-        ...packageJson.dependencies,
-        ...packageJson.devDependencies,
-      };
-
-      // Check for mobile
-      if (deps['react-native'] || deps['expo'] || deps['@react-native']) {
-        return 'mobile';
-      }
-
-      // Strong hint from repo name (socket server, api server, etc.)
-      if (nameHints.backend.some(keyword => nameLower.includes(keyword))) {
-        // If it has socket.io or backend keywords in name, prioritize backend
-        if (deps['socket.io'] || deps['express'] || deps['fastify'] || deps['@nestjs/core']) {
-          return 'backend';
-        }
-      }
-
-      // Check for frontend (React, Vue, etc.)
-      if (deps['react'] || deps['vue'] || deps['angular'] || deps['svelte']) {
-        // Check repo name hints
-        if (nameHints.frontend.some(keyword => nameLower.includes(keyword))) {
-          return 'frontend';
-        }
-
-        // Check if it's Next.js (could be fullstack)
-        if (deps['next']) {
-          // If has database or backend hints in name, it's fullstack
-          if (deps['prisma'] || deps['mongoose'] || deps['@prisma/client'] ||
-              nameLower.includes('fullstack') || nameLower.includes('full-stack')) {
-            return 'fullstack';
-          }
-          // If name suggests frontend only, return frontend
-          if (nameHints.frontend.some(keyword => nameLower.includes(keyword))) {
-            return 'frontend';
-          }
-          // Next.js with no DB is usually frontend
-          return 'frontend';
-        }
-        return 'frontend';
-      }
-
-      // Check for backend (Express, Fastify, NestJS, Socket.IO)
-      if (deps['express'] || deps['fastify'] || deps['koa'] || deps['@nestjs/core'] ||
-          deps['socket.io'] || deps['ws']) {
-        return 'backend';
-      }
-    }
-
-    // Check for mobile-specific files
-    const hasPodfile = await fs.pathExists(path.join(folderPath, 'ios', 'Podfile'));
-    const hasAndroidGradle = await fs.pathExists(path.join(folderPath, 'android', 'build.gradle'));
-    if (hasPodfile || hasAndroidGradle) {
-      return 'mobile';
-    }
-
-    // Use repo name as fallback
-    if (nameHints.backend.some(keyword => nameLower.includes(keyword))) {
-      return 'backend';
-    }
-    if (nameHints.frontend.some(keyword => nameLower.includes(keyword))) {
-      return 'frontend';
-    }
-    if (nameHints.mobile.some(keyword => nameLower.includes(keyword))) {
-      return 'mobile';
-    }
-
-    // Default to fullstack if can't determine
-    return 'fullstack';
-  } catch {
-    return 'fullstack';
-  }
-}
-
-// Tech stack and description detection removed
-// AI will analyze these accurately during setup phase
+// All project analysis removed - AI will analyze during setup phase
+// - Project type (frontend/backend/mobile/fullstack)
+// - Tech stack
+// - Description
 
 /**
  * Check if CodeSyncer is already set up in the repository
