@@ -127,28 +127,42 @@ You'll be asked:
 
 **That's all CodeSyncer does!** It provides the framework and rules. Now your AI takes over.
 
-### Step 5: Let AI Set Everything Up
+---
 
-Launch Claude Code (or your preferred AI assistant) and say:
+## ⚠️ IMPORTANT: Step 5 - Let AI Set Everything Up
+
+> **🎯 Don't skip this step!** This is where the magic happens.
+
+**Launch Claude Code** (or your preferred AI assistant) and say:
 
 ```
 "Read .codesyncer/SETUP_GUIDE.md and follow the instructions to set up"
 ```
 
-**What the AI will do:**
-1. **Analyze** each repository by reading actual code
-2. **Ask you** critical questions (never assumes):
-   - API endpoints
-   - Business logic and pricing
-   - Authentication methods
-   - Database schemas
-   - External service integrations
-3. **Generate documentation** based on your answers:
-   - `.codesyncer/MASTER_CODESYNCER.md` (multi-repo navigation)
-   - `<repo>/.claude/CLAUDE.md` (coding rules)
-   - `<repo>/.claude/ARCHITECTURE.md` (project structure)
-   - `<repo>/.claude/DECISIONS.md` (decision log)
-   - `<repo>/.claude/COMMENT_GUIDE.md` (tag guide)
+### What happens next (automatically):
+
+**1️⃣ AI Analyzes Your Code**
+- Reads actual files in each repository
+- Detects tech stack, patterns, and structure
+- Understands your project architecture
+
+**2️⃣ AI Asks Critical Questions** (Never assumes!)
+- ❓ "What are your API endpoints?"
+- ❓ "What's your pricing and business logic?"
+- ❓ "Which authentication method do you use?"
+- ❓ "What's your database schema?"
+- ❓ "Which external services do you integrate?"
+
+**3️⃣ AI Generates Complete Documentation**
+- `.codesyncer/MASTER_CODESYNCER.md` → Multi-repo navigation
+- `<repo>/.claude/CLAUDE.md` → Coding rules
+- `<repo>/.claude/ARCHITECTURE.md` → Project structure
+- `<repo>/.claude/DECISIONS.md` → Decision log
+- `<repo>/.claude/COMMENT_GUIDE.md` → Comment tag guide
+
+> **💡 Why this works**: AI analyzes YOUR actual code and asks YOU questions. The generated docs are tailored to your specific project, not generic templates.
+
+---
 
 ### Step 6: Start Coding!
 
