@@ -392,6 +392,17 @@ If VibeSync helps your team, please:
 - 📝 Write about your experience
 - 🤝 Contribute improvements
 
+### 💰 Support Development
+
+If you'd like to support the development of VibeSync, you can donate via cryptocurrency:
+
+**Ethereum (ETH) / ERC-20 Tokens:**
+```
+0x0a12177c448778a37Fa4EeA57d33D06713F200De
+```
+
+Your support helps maintain and improve VibeSync! 🙏
+
 ---
 
 ## 📮 Contact
