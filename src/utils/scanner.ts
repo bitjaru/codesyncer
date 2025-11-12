@@ -26,13 +26,14 @@ export async function scanForRepositories(rootPath: string): Promise<RepositoryI
       if (isRepo) {
         const type = await detectProjectType(folderPath);
         const techStack = await detectTechStack(folderPath, type);
+        const description = await detectDescription(folderPath, type, techStack);
         const hasCodeSyncer = await hasCodeSyncerSetup(folderPath);
 
         repos.push({
           name: entry.name,
           path: folderPath,
           type,
-          description: '', // Will be filled by user input
+          description, // Auto-detected description
           techStack, // Auto-detected tech stack
           hasCodeSyncer,
         });
@@ -241,6 +242,16 @@ async function detectTechStack(folderPath: string, type: 'frontend' | 'backend' 
       if (deps['react-native']) techStack.push('React Native');
       if (deps['expo']) techStack.push('Expo');
 
+      // Real-time & Communication
+      if (deps['socket.io'] || deps['socket.io-client']) techStack.push('Socket.IO');
+      if (deps['ws']) techStack.push('WebSocket');
+
+      // Database
+      if (deps['prisma'] || deps['@prisma/client']) techStack.push('Prisma');
+      if (deps['mongoose']) techStack.push('MongoDB');
+      if (deps['pg']) techStack.push('PostgreSQL');
+      if (deps['mysql'] || deps['mysql2']) techStack.push('MySQL');
+
       // Build tools
       if (deps['vite']) techStack.push('Vite');
       if (deps['webpack']) techStack.push('Webpack');
@@ -260,6 +271,55 @@ async function detectTechStack(folderPath: string, type: 'frontend' | 'backend' 
   } catch (error) {
     // Fallback to defaults
     return ['TypeScript'];
+  }
+}
+
+/**
+ * Detect project description from package.json or generate from tech stack
+ */
+async function detectDescription(
+  folderPath: string,
+  type: 'frontend' | 'backend' | 'mobile' | 'fullstack',
+  techStack: string[]
+): Promise<string> {
+  try {
+    // Try to get description from package.json
+    const packageJsonPath = path.join(folderPath, 'package.json');
+    if (await fs.pathExists(packageJsonPath)) {
+      const packageJson = await fs.readJson(packageJsonPath);
+      if (packageJson.description && packageJson.description.trim()) {
+        return packageJson.description.trim();
+      }
+    }
+
+    // Generate description based on tech stack and type
+    const mainTech = techStack[0] || 'Unknown';
+    const secondaryTech = techStack.slice(1, 3).join(', ');
+
+    // Check for specific patterns in tech stack
+    if (techStack.some(t => t.toLowerCase().includes('socket'))) {
+      return `Real-time ${type} server with WebSocket`;
+    }
+
+    if (type === 'fullstack') {
+      return `Full-stack application using ${mainTech}${secondaryTech ? ' with ' + secondaryTech : ''}`;
+    }
+
+    if (type === 'frontend') {
+      return `Frontend application built with ${mainTech}${secondaryTech ? ' and ' + secondaryTech : ''}`;
+    }
+
+    if (type === 'backend') {
+      return `Backend API server using ${mainTech}${secondaryTech ? ' and ' + secondaryTech : ''}`;
+    }
+
+    if (type === 'mobile') {
+      return `Mobile application built with ${mainTech}${secondaryTech ? ' and ' + secondaryTech : ''}`;
+    }
+
+    return `${type} repository`;
+  } catch {
+    return `${type} repository`;
   }
 }
 
