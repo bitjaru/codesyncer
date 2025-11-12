@@ -7,13 +7,13 @@ import { UpdateOptions, Language } from '../types';
 import { scanForRepositories, hasMasterSetup } from '../utils/scanner';
 
 export async function updateCommand(options: UpdateOptions) {
-  console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update System\n'));
+  console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update\n'));
 
   const currentDir = process.cwd();
 
   // Check if master setup exists
   if (!(await hasMasterSetup(currentDir))) {
-    console.log(chalk.red('✗ No CodeSyncer master setup found.'));
+    console.log(chalk.red('✗ No CodeSyncer setup found.'));
     console.log(chalk.gray('Run `codesyncer init` first.\n'));
     return;
   }
@@ -30,6 +30,37 @@ export async function updateCommand(options: UpdateOptions) {
     // Default to English
   }
 
+  // Show detected language and offer to change
+  const { confirmLang } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'confirmLang',
+      message: `Detected language: ${lang === 'ko' ? '한국어 (Korean)' : 'English'}. Continue?`,
+      choices: [
+        { name: 'Yes', value: 'yes' },
+        { name: 'Change language', value: 'change' },
+      ],
+      default: 'yes',
+    },
+  ]);
+
+  if (confirmLang === 'change') {
+    const { newLang } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'newLang',
+        message: 'Select language:',
+        choices: [
+          { name: 'English', value: 'en' },
+          { name: '한국어 (Korean)', value: 'ko' },
+        ],
+      },
+    ]);
+    lang = newLang;
+  }
+
+  console.log();
+
   // Ask user for update mode (unless --hard flag is provided)
   let isHardUpdate = options.hard || false;
 
@@ -38,18 +69,14 @@ export async function updateCommand(options: UpdateOptions) {
       {
         type: 'list',
         name: 'updateMode',
-        message: lang === 'ko' ? '업데이트 방식을 선택하세요:' : 'Select update mode:',
+        message: 'Update mode:',
         choices: [
           {
-            name: lang === 'ko'
-              ? '📝 일반 업데이트 - 누락된 파일만 생성'
-              : '📝 Normal Update - Generate missing files only',
+            name: '📝 Normal - Missing files only',
             value: 'normal',
           },
           {
-            name: lang === 'ko'
-              ? '🔍 하드 업데이트 - 모든 파일 스캔 및 내용 업데이트'
-              : '🔍 Hard Update - Deep scan and update all existing files',
+            name: '🔍 Deep - Review all files',
             value: 'hard',
           },
         ],
@@ -61,16 +88,10 @@ export async function updateCommand(options: UpdateOptions) {
   }
 
   if (isHardUpdate) {
-    console.log(chalk.bold.yellow(lang === 'ko'
-      ? '\n🔍 하드 업데이트 모드: 모든 파일을 스캔하고 업데이트합니다.\n'
-      : '\n🔍 Hard update mode: Scanning and updating all files.\n'));
-  } else {
-    console.log(chalk.bold.cyan(lang === 'ko'
-      ? '\n📝 일반 업데이트 모드: 누락된 파일만 생성합니다.\n'
-      : '\n📝 Normal update mode: Generating missing files only.\n'));
+    console.log(chalk.bold.blue('\n🔍 Deep scan mode\n'));
   }
 
-  const spinner = ora(lang === 'ko' ? '변경사항 스캔 중...' : 'Scanning for changes...').start();
+  const spinner = ora('Scanning...').start();
 
   // Scan for repositories
   const foundRepos = await scanForRepositories(currentDir);
@@ -101,7 +122,7 @@ export async function updateCommand(options: UpdateOptions) {
     }
   }
 
-  spinner.succeed(lang === 'ko' ? '스캔 완료' : 'Scan complete');
+  spinner.succeed('Scan complete');
 
   // Check if root CLAUDE.md exists
   const rootClaudePath = path.join(currentDir, 'CLAUDE.md');
@@ -112,41 +133,41 @@ export async function updateCommand(options: UpdateOptions) {
 
   if (!hasChanges) {
     console.log(chalk.green('\n✓ Everything is up to date!\n'));
-    console.log(chalk.gray(`  ${lang === 'ko' ? '총 레포지토리' : 'Total repositories'}: ${foundRepos.length}`));
-    console.log(chalk.gray(`  ${lang === 'ko' ? 'CodeSyncer 설정 완료' : 'With CodeSyncer setup'}: ${foundRepos.filter((r) => r.hasCodeSyncer).length}\n`));
+    console.log(chalk.gray(`  Total repositories: ${foundRepos.length}`));
+    console.log(chalk.gray(`  With CodeSyncer: ${foundRepos.filter((r) => r.hasCodeSyncer).length}\n`));
     return;
   }
 
-  console.log(chalk.bold(lang === 'ko' ? '\n📊 스캔 결과:\n' : '\n📊 Scan Results:\n'));
+  console.log(chalk.bold('\n📊 Scan Results:\n'));
 
   // Show repository summary
-  console.log(chalk.cyan(`  ${lang === 'ko' ? '총 레포지토리' : 'Total repositories'}: ${foundRepos.length}`));
+  console.log(chalk.cyan(`  Total repositories: ${foundRepos.length}`));
   console.log();
 
   if (isHardUpdate) {
     // Hard update mode: Show all repositories
-    console.log(chalk.bold.blue(`  🔍 ${lang === 'ko' ? '하드 업데이트 모드 - 모든 레포지토리 재검토 필요:' : 'Hard update mode - All repositories will be reviewed:'}`));
+    console.log(chalk.bold.blue(`  🔍 Deep mode - All repositories will be reviewed:`));
     console.log();
     foundRepos.forEach((repo) => {
       const needsSetup = reposNeedingSetup.find(r => r.repo === repo.name);
       if (needsSetup) {
-        console.log(chalk.yellow(`    📁 ${repo.name}: ${chalk.red(`누락된 파일 ${needsSetup.missingFiles.length}개`)}`));
+        console.log(chalk.yellow(`    📁 ${repo.name}: ${chalk.red(`${needsSetup.missingFiles.length} missing`)}`));
         needsSetup.missingFiles.forEach((file) => {
           console.log(chalk.gray(`      ✗ .claude/${file}`));
         });
       } else {
-        console.log(chalk.cyan(`    📁 ${repo.name}: ${chalk.green('✓ 설정 완료')} ${chalk.gray('(내용 재검토 필요)')}`));
+        console.log(chalk.cyan(`    📁 ${repo.name}: ${chalk.green('✓ Setup')} ${chalk.gray('(needs review)')}`));
       }
     });
     console.log();
   } else {
     // Normal update mode: Show only repos needing setup
     if (reposNeedingSetup.length > 0) {
-      console.log(chalk.bold.yellow(`  ⚠️  ${reposNeedingSetup.length} ${lang === 'ko' ? '개의 레포지토리에 누락된 파일:' : 'repository(ies) with missing files:'}`));
+      console.log(chalk.bold.yellow(`  ⚠️  ${reposNeedingSetup.length} repo(s) with missing files:`));
       reposNeedingSetup.forEach(({ repo, missingFiles }) => {
         const allMissing = missingFiles.length === requiredFiles.length;
         if (allMissing) {
-          console.log(chalk.gray(`    📁 ${repo}: ${chalk.red('CodeSyncer 미설정')}`));
+          console.log(chalk.gray(`    📁 ${repo}: ${chalk.red('No CodeSyncer')}`));
         } else {
           console.log(chalk.gray(`    📁 ${repo}:`));
           missingFiles.forEach((file) => {
@@ -162,27 +183,27 @@ export async function updateCommand(options: UpdateOptions) {
       repo => !reposNeedingSetup.find(r => r.repo === repo.name)
     );
     if (fullyConfiguredRepos.length > 0) {
-      console.log(chalk.green(`  ✓ ${fullyConfiguredRepos.length} ${lang === 'ko' ? '개의 레포지토리 설정 완료' : 'repository(ies) fully configured'}`));
+      console.log(chalk.green(`  ✓ ${fullyConfiguredRepos.length} repo(s) fully configured`));
       console.log();
     }
   }
 
   // Check and create root CLAUDE.md if missing
   if (!hasRootClaude) {
-    console.log(chalk.bold.yellow('\n⚠️  Missing root CLAUDE.md (new in v2.1.2)\n'));
-    console.log(chalk.gray('This file allows Claude to automatically load context at session start.\n'));
+    console.log(chalk.bold.yellow('\n⚠️  Missing root CLAUDE.md\n'));
+    console.log(chalk.gray('Allows AI to auto-load context at session start.\n'));
 
     const { createRootClaude } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'createRootClaude',
-        message: lang === 'ko' ? '루트 CLAUDE.md를 생성할까요?' : 'Create root CLAUDE.md?',
+        message: 'Create root CLAUDE.md?',
         default: true,
       },
     ]);
 
     if (createRootClaude) {
-      const spinner = ora(lang === 'ko' ? '루트 CLAUDE.md 생성 중...' : 'Creating root CLAUDE.md...').start();
+      const spinner = ora('Creating...').start();
 
       try {
         // Read template
@@ -218,37 +239,24 @@ export async function updateCommand(options: UpdateOptions) {
         // Write root CLAUDE.md
         await fs.writeFile(rootClaudePath, template, 'utf-8');
 
-        spinner.succeed(lang === 'ko' ? '루트 CLAUDE.md 생성 완료!' : 'Root CLAUDE.md created!');
+        spinner.succeed('Root CLAUDE.md created!');
         console.log(chalk.green(`  ✓ ${rootClaudePath}\n`));
-        console.log(chalk.cyan(lang === 'ko'
-          ? '💡 이제 Claude가 세션 시작 시 자동으로 컨텍스트를 로드합니다!'
-          : '💡 Claude will now automatically load context at session start!\n'));
+        console.log(chalk.cyan('💡 AI will auto-load context at session start!\n'));
 
         // Show next steps for AI
-        console.log(chalk.bold(lang === 'ko' ? '\n🤖 다음 단계 (AI 어시스턴트에게):' : '\n🤖 Next Steps (Tell your AI):'));
-        console.log(chalk.gray('─'.repeat(60)));
+        console.log(chalk.bold('\n🤖 Next Steps:'));
+        console.log(chalk.gray('─'.repeat(50)));
         console.log();
-
-        if (lang === 'ko') {
-          console.log(chalk.bold('옵션 1) 새 세션 시작'));
-          console.log(chalk.gray('  Claude가 자동으로 루트 CLAUDE.md를 찾아서 읽습니다.'));
-          console.log();
-          console.log(chalk.bold('옵션 2) 현재 세션에서 바로 적용'));
-          console.log(chalk.yellow('  "CLAUDE.md 읽어줘"'));
-          console.log();
-        } else {
-          console.log(chalk.bold('Option 1) Start a new session'));
-          console.log(chalk.gray('  Claude will automatically find and read root CLAUDE.md'));
-          console.log();
-          console.log(chalk.bold('Option 2) Apply immediately in current session'));
-          console.log(chalk.yellow('  "Read CLAUDE.md"'));
-          console.log();
-        }
-
-        console.log(chalk.gray('─'.repeat(60)));
+        console.log(chalk.bold('Option 1) Start a new AI session'));
+        console.log(chalk.gray('  Auto-loads root CLAUDE.md'));
+        console.log();
+        console.log(chalk.bold('Option 2) Apply now'));
+        console.log(chalk.yellow('  Tell AI: "Read CLAUDE.md"'));
+        console.log();
+        console.log(chalk.gray('─'.repeat(50)));
         console.log();
       } catch (error) {
-        spinner.fail(lang === 'ko' ? '루트 CLAUDE.md 생성 실패' : 'Failed to create root CLAUDE.md');
+        spinner.fail('Failed to create root CLAUDE.md');
         console.error(chalk.red(`Error: ${error}\n`));
       }
     }
@@ -258,31 +266,25 @@ export async function updateCommand(options: UpdateOptions) {
   const needsUpdateGuide = reposNeedingSetup.length > 0 || isHardUpdate;
 
   if (needsUpdateGuide) {
-    if (reposNeedingSetup.length > 0) {
-      console.log(chalk.bold.yellow(lang === 'ko'
-        ? '\n⚠️  일부 레포지토리에 누락된 파일이 있습니다\n'
-        : '\n⚠️  Some repositories have missing files\n'));
+    if (reposNeedingSetup.length > 0 && !isHardUpdate) {
+      console.log(chalk.bold.yellow('\n⚠️  Some repos have missing files\n'));
     }
 
-    if (isHardUpdate && reposNeedingSetup.length === 0) {
-      console.log(chalk.bold.yellow(lang === 'ko'
-        ? '\n🔍 하드 업데이트: 모든 레포지토리 파일을 스캔하고 업데이트합니다\n'
-        : '\n🔍 Hard update: Scanning and updating all repository files\n'));
+    if (isHardUpdate) {
+      console.log(chalk.bold.blue('\n🔍 Deep mode: Review all files\n'));
     }
 
     const { generateUpdateGuide } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'generateUpdateGuide',
-        message: lang === 'ko'
-          ? 'AI가 읽을 UPDATE_GUIDE.md를 생성할까요?'
-          : 'Generate UPDATE_GUIDE.md for AI to read?',
+        message: 'Generate UPDATE_GUIDE.md for AI?',
         default: true,
       },
     ]);
 
     if (generateUpdateGuide) {
-      const spinner = ora(lang === 'ko' ? 'UPDATE_GUIDE.md 생성 중...' : 'Creating UPDATE_GUIDE.md...').start();
+      const spinner = ora('Creating UPDATE_GUIDE...').start();
 
       try {
         const updateGuidePath = path.join(currentDir, '.codesyncer', 'UPDATE_GUIDE.md');
@@ -709,28 +711,22 @@ rm .codesyncer/UPDATE_GUIDE.md
 
         await fs.writeFile(updateGuidePath, updateGuide, 'utf-8');
 
-        spinner.succeed(lang === 'ko' ? 'UPDATE_GUIDE.md 생성 완료!' : 'UPDATE_GUIDE.md created!');
+        spinner.succeed('UPDATE_GUIDE.md created!');
         console.log(chalk.green(`  ✓ ${updateGuidePath}\n`));
-        console.log(chalk.gray(lang === 'ko'
-          ? '  💡 이 파일은 작업 완료 후 삭제됩니다'
-          : '  💡 This file will be deleted after tasks are completed\n'));
+        console.log(chalk.gray('  💡 Delete after tasks complete\n'));
 
         // Show instructions
-        console.log(chalk.bold(lang === 'ko' ? '\n🤖 다음 단계 (AI 어시스턴트에게):' : '\n🤖 Next Steps (Tell your AI):'));
-        console.log(chalk.gray('─'.repeat(60)));
+        console.log(chalk.bold('\n🤖 Next Steps:'));
+        console.log(chalk.gray('─'.repeat(50)));
         console.log();
-        console.log(chalk.yellow(lang === 'ko'
-          ? '  ".codesyncer/UPDATE_GUIDE.md 읽고 지시사항대로 누락된 파일들 생성해줘"'
-          : '  "Read .codesyncer/UPDATE_GUIDE.md and generate missing files as instructed"'));
+        console.log(chalk.yellow('  "Read .codesyncer/UPDATE_GUIDE.md and follow instructions"'));
         console.log();
-        console.log(chalk.gray(lang === 'ko'
-          ? '  ✓ 작업 완료 후: "UPDATE_GUIDE.md 삭제해줘"'
-          : '  ✓ After completion: "Delete UPDATE_GUIDE.md"'));
+        console.log(chalk.gray('  ✓ After: "Delete UPDATE_GUIDE.md"'));
         console.log();
-        console.log(chalk.gray('─'.repeat(60)));
+        console.log(chalk.gray('─'.repeat(50)));
         console.log();
       } catch (error) {
-        spinner.fail(lang === 'ko' ? 'UPDATE_GUIDE.md 생성 실패' : 'Failed to create UPDATE_GUIDE.md');
+        spinner.fail('Failed to create UPDATE_GUIDE.md');
         console.error(chalk.red(`Error: ${error}\n`));
       }
     }
