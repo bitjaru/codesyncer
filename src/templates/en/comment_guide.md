@@ -1,324 +1,582 @@
 # Comment Writing Guide
 
-> **CodeSyncer Comment System** - Permanently record all inferences and decisions
+> **Manage All Context with Comments** - Code is the documentation
 
 ---
 
-## 📋 Comment Tag Reference
+## 🎯 Core Principle
 
-### 5 Essential Tags
+**Record all decisions and context directly in code.**
 
-| Tag | Purpose | When to Use | Importance |
-|-----|---------|-------------|------------|
-| `@codesyncer-rule` | Special rules | Non-standard implementations | ⭐⭐⭐ |
-| `@codesyncer-inference` | Inference content | AI inferred content and rationale | ⭐⭐⭐⭐⭐ |
-| `@codesyncer-decision` | Decision made | Post-discussion decisions | ⭐⭐⭐⭐⭐ |
-| `@codesyncer-todo` | TODO | Needs user confirmation | ⭐⭐⭐⭐ |
-| `@codesyncer-context` | Business context | Domain knowledge, background | ⭐⭐⭐ |
+- ❌ Write quality standards in separate docs → AI can't read
+- ✅ Explain quality standards in code comments → Permanent record
+
+---
+
+## 📋 Comment Tag System (10 Tags)
+
+### Basic Tags (5)
+
+| Tag | Purpose | Required Info |
+|-----|---------|--------------|
+| `@codesyncer-inference` | Inference + rationale | "What" + "Why" |
+| `@codesyncer-decision` | Decision made | [Date] + reason |
+| `@codesyncer-todo` | Needs confirmation | Specific task |
+| `@codesyncer-context` | Business context | Domain knowledge |
+| `@codesyncer-rule` | Special rule | Exception case |
+
+### Extended Tags (5) - Complete Context Preservation
+
+| Tag | Purpose | When to Use |
+|-----|---------|-------------|
+| `@codesyncer-why` | Detailed explanation | When code alone isn't clear |
+| `@codesyncer-tradeoff` | Pros and cons | When there are trade-offs |
+| `@codesyncer-alternative` | Other options | When alternatives considered |
+| `@codesyncer-pattern` | Pattern name | Reusable pattern |
+| `@codesyncer-reference` | Reference link | External docs/issues |
 
 ### Legacy Compatibility
 
-Existing `@claude-*` tags are fully compatible:
 ```typescript
-@claude-rule        = @codesyncer-rule
-@claude-inference   = @codesyncer-inference
-@claude-decision    = @codesyncer-decision
-@claude-todo        = @codesyncer-todo
-@claude-context     = @codesyncer-context
+@claude-* = @codesyncer-*  // Legacy tags fully compatible
 ```
 
 ---
 
-## 📝 Comment Levels
+## 💡 Real Examples: All Context in Comments
 
-### 1. 📄 File Level (JSDoc)
-
-**When**: Top of file, module-wide description
+### 1️⃣ Quality Standards in Comments
 
 ```typescript
 /**
- * User authentication service
+ * Payment processing service
  *
- * @codesyncer-context JWT-based authentication system
- * @codesyncer-rule Store tokens in httpOnly cookies (XSS prevention)
- * @author CodeSyncer
- * @date 2024-10-17
+ * @codesyncer-context Real-time card payment (PG: Stripe)
+ * @codesyncer-rule All amounts as integers (avoid decimal errors)
+ * @codesyncer-pattern Transaction Script (simple payments don't need domain model)
+ *
+ * Quality standards:
+ * - Timeout: 30s (PG recommendation)
+ * - Retry: 3 times (idempotency required)
+ * - Logging: Record all payment attempts
+ * - Error handling: User-friendly messages
  */
-```
+export class PaymentService {
+  /**
+   * Process payment
+   *
+   * @codesyncer-why Synchronous implementation (need immediate confirmation)
+   * @codesyncer-tradeoff Sync: Fast feedback | Async: Higher throughput
+   * @codesyncer-decision [2024-11-12] Chose sync (UX priority)
+   */
+  async processPayment(
+    amount: number,
+    cardToken: string
+  ): Promise<PaymentResult> {
+    // @codesyncer-inference: Minimum 100 (PG policy)
+    if (amount < 100) {
+      throw new ValidationError('Minimum payment is 100');
+    }
 
-### 2. 🔧 Function/Class/Component Level
+    // @codesyncer-why: Generate idempotency key (prevent duplicate charges)
+    const idempotencyKey = this.generateIdempotencyKey(amount, cardToken);
 
-**When**: Above each function, class, component definition
-
-```tsx
-/**
- * Order creation form
- *
- * @codesyncer-context 6-step order process
- * @codesyncer-inference Auto-save at each step (common UX pattern)
- * @codesyncer-decision [2024-10-15] Zustand for state management (complex form state)
- */
-export default function OrderForm() {
-  // ...
-}
-```
-
-### 3. 📝 Inline Level
-
-**When**: Above or beside code lines
-
-```typescript
-// @codesyncer-inference: Page size 20 (standard table UX)
-const PAGE_SIZE = 20;
-
-// @codesyncer-todo: Need to confirm mainApi endpoint URL
-const API_URL = '/api/temp';
-
-// @codesyncer-decision: [2024-10-17] Soft Delete (30-day recovery)
-async function deleteUser(id: string) {
-  // @codesyncer-inference: Using deleted_at flag (for recovery feature)
-  return db.update(id, { deleted_at: new Date() });
-}
-
-const maxRetry = 3; // @codesyncer-inference: 3 retries (stability)
-```
-
----
-
-## ✅ Good Comment Examples
-
-### Example 1: Business Logic
-
-```tsx
-/**
- * Calculate shipping fee
- *
- * @codesyncer-context Shipping fee policy
- * - Over $300: Free shipping
- * - Under $300: $30
- * - Remote areas: +$30
- *
- * @codesyncer-decision [2024-10-10] Policy finalized (Marketing team agreement)
- * @codesyncer-rule Policy changes require Marketing team approval
- */
-function calculateShippingFee(orderAmount: number, region: string): number {
-  // @codesyncer-inference: $300 threshold (industry standard)
-  const FREE_SHIPPING_THRESHOLD = 30000;
-
-  // @codesyncer-decision: [2024-10-10] Base fee $30
-  const BASIC_FEE = 3000;
-
-  // @codesyncer-todo: Confirm remote area list
-  const EXTRA_FEE_REGIONS = ['Jeju', 'Ulleungdo'];
-
-  if (orderAmount >= FREE_SHIPPING_THRESHOLD) {
-    return 0;
+    // @codesyncer-pattern: Retry with Exponential Backoff
+    return await this.retryWithBackoff(async () => {
+      return await stripe.charge({
+        amount,
+        source: cardToken,
+        idempotencyKey
+      });
+    }, {
+      maxRetries: 3,
+      initialDelay: 1000
+    });
   }
 
-  const baseFee = BASIC_FEE;
-  const extraFee = EXTRA_FEE_REGIONS.includes(region) ? 3000 : 0;
-
-  return baseFee + extraFee;
+  /**
+   * @codesyncer-pattern Exponential Backoff
+   * @codesyncer-reference https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+   */
+  private async retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    options: RetryOptions
+  ): Promise<T> {
+    // ... implementation
+  }
 }
 ```
 
-### Example 2: Data Structure
+### 2️⃣ Complex Business Logic Explanation
 
-```tsx
+```typescript
 /**
- * User interface
+ * Discount calculator
  *
- * @codesyncer-context GDPR compliance required
- * @codesyncer-rule Personal data must be encrypted
+ * @codesyncer-context Compound discount policy (stackable)
+ * - Member tier discount: 5-15%
+ * - Coupon discount: Fixed amount or percentage
+ * - Promotion discount: Conditional
+ *
+ * @codesyncer-decision [2024-11-10] Fixed discount order (marketing agreement)
+ * 1. Member tier discount
+ * 2. Coupon discount
+ * 3. Promotion discount
+ *
+ * @codesyncer-why Order matters (final amount differs)
+ * @codesyncer-alternative Sum discounts then apply → Rejected (complex cases)
  */
-interface User {
-  id: string;
+function calculateFinalPrice(
+  basePrice: number,
+  user: User,
+  coupon?: Coupon,
+  promotion?: Promotion
+): number {
+  // @codesyncer-context: Save all intermediate calculations (refund tracking)
+  const breakdown: PriceBreakdown = {
+    basePrice,
+    discounts: []
+  };
 
-  // @codesyncer-inference: Using email as username (common pattern)
-  email: string;
+  let currentPrice = basePrice;
 
-  // @codesyncer-decision: [2024-10-12] bcrypt hashing (security team recommendation)
-  passwordHash: string;
+  // Step 1: Member tier discount
+  // @codesyncer-inference: GOLD 15%, SILVER 10%, BRONZE 5% (common pattern)
+  const memberDiscount = this.calculateMemberDiscount(user.tier);
+  if (memberDiscount > 0) {
+    currentPrice -= memberDiscount;
+    breakdown.discounts.push({
+      type: 'MEMBER',
+      amount: memberDiscount
+    });
+  }
 
-  // @codesyncer-context: For Soft Delete
-  // @codesyncer-decision: [2024-10-15] Permanent delete after 30 days (GDPR)
-  deletedAt?: Date;
+  // Step 2: Coupon discount
+  // @codesyncer-rule: Apply coupon to discounted price (important!)
+  if (coupon) {
+    const couponDiscount = this.applyCoupon(currentPrice, coupon);
+    currentPrice -= couponDiscount;
+    breakdown.discounts.push({
+      type: 'COUPON',
+      amount: couponDiscount,
+      couponId: coupon.id
+    });
+  }
 
-  createdAt: Date;
-  updatedAt: Date;
+  // Step 3: Promotion discount
+  // @codesyncer-todo: Confirm promotion stacking policy
+  if (promotion) {
+    const promoDiscount = this.applyPromotion(currentPrice, promotion);
+    currentPrice -= promoDiscount;
+    breakdown.discounts.push({
+      type: 'PROMOTION',
+      amount: promoDiscount,
+      promotionId: promotion.id
+    });
+  }
+
+  // @codesyncer-rule: Final amount must be non-negative
+  return Math.max(0, currentPrice);
 }
 ```
 
-### Example 3: Component
+### 3️⃣ Performance Optimization Record
 
-```tsx
+```typescript
 /**
- * Order list table component
+ * Order list API
  *
- * @codesyncer-context Customer order history view
- * @codesyncer-inference Pagination needed (large dataset)
- * @codesyncer-decision [2024-10-16] Using TanStack Table (performance)
+ * @codesyncer-context Heavy users have 100k+ orders (performance issue)
+ * @codesyncer-decision [2024-11-12] Pagination + Index + Caching
+ *
+ * Performance goals:
+ * - Response time: < 500ms (P95)
+ * - Concurrent users: 1000 TPS
+ * - Cache hit rate: > 80%
  */
-export function OrderListTable({ orders }: OrderListTableProps) {
-  // @codesyncer-inference: 20 items per page (UX standard)
-  const [pageSize, setPageSize] = useState(20);
+export class OrderController {
+  /**
+   * @codesyncer-pattern Cursor-based Pagination
+   * @codesyncer-why Offset pagination gets slower with depth (OFFSET 10000)
+   * @codesyncer-tradeoff Cursor: Fast | Offset: Page numbers
+   * @codesyncer-alternative Offset pagination → Test showed P95 3s (rejected)
+   * @codesyncer-reference https://use-the-index-luke.com/no-offset
+   */
+  async getOrders(userId: string, cursor?: string, limit = 20) {
+    // @codesyncer-inference: Redis cache 5min (real-time vs performance)
+    const cacheKey = `orders:${userId}:${cursor}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
 
-  // @codesyncer-todo: Add sorting options (date, amount, status)
+    // @codesyncer-pattern: Index Hint
+    // @codesyncer-why Force use of userId + createdAt compound index
+    const orders = await db.query(`
+      SELECT /*+ INDEX(orders idx_user_created) */
+        id, total, status, created_at
+      FROM orders
+      WHERE user_id = ?
+        ${cursor ? 'AND created_at < ?' : ''}
+      ORDER BY created_at DESC
+      LIMIT ?
+    `, cursor ? [userId, cursor, limit] : [userId, limit]);
 
-  return (
-    <Table>
-      {/* @codesyncer-rule: Switch to card layout on mobile */}
-      {/* ... */}
-    </Table>
-  );
+    const result = {
+      data: orders,
+      nextCursor: orders.length === limit
+        ? orders[orders.length - 1].created_at
+        : null
+    };
+
+    // @codesyncer-inference: 5min TTL (orders rarely change)
+    await redis.setex(cacheKey, 300, JSON.stringify(result));
+
+    return result;
+  }
 }
+```
+
+### 4️⃣ Security Requirements
+
+```typescript
+/**
+ * Authentication middleware
+ *
+ * @codesyncer-context Financial service (security first)
+ * @codesyncer-rule OWASP Top 10 compliance required
+ *
+ * Security checklist:
+ * ✅ SQL Injection prevention (Prepared statements)
+ * ✅ XSS prevention (CSP headers)
+ * ✅ CSRF prevention (Token validation)
+ * ✅ Rate limiting (100 req/min)
+ * ✅ No sensitive info in logs
+ */
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
+  try {
+    // @codesyncer-rule: Token from httpOnly cookie only (XSS prevention)
+    const token = req.cookies.access_token;
+
+    if (!token) {
+      // @codesyncer-why: 401 vs 403 distinction (security best practice)
+      // 401: Not authenticated | 403: Not authorized
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // @codesyncer-decision [2024-11-12] Session over JWT (more secure)
+    // @codesyncer-tradeoff JWT: Stateless | Session: Revocable
+    const session = await sessionStore.get(token);
+
+    if (!session) {
+      // @codesyncer-why: Minimal error messages (reduce info leakage)
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // @codesyncer-pattern: Session Rotation
+    // @codesyncer-reference: OWASP Session Management Cheat Sheet
+    if (session.shouldRotate()) {
+      const newToken = await sessionStore.rotate(session.id);
+      res.cookie('access_token', newToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict'
+      });
+    }
+
+    req.user = session.user;
+    next();
+
+  } catch (error) {
+    // @codesyncer-rule: Never log sensitive information
+    logger.error('Authentication error', {
+      // ❌ Never: token, password, email
+      ip: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+```
+
+### 5️⃣ Error Handling Strategy
+
+```typescript
+/**
+ * External API wrapper
+ *
+ * @codesyncer-context External service unstable (95% SLA)
+ * @codesyncer-pattern Circuit Breaker + Retry + Timeout
+ * @codesyncer-reference Netflix Hystrix pattern
+ *
+ * Error handling strategy:
+ * - Timeout: 30s
+ * - Retry: 3 times (Exponential Backoff)
+ * - Circuit Breaker: Open after 5 failures
+ * - Fallback: Return cached data
+ */
+export class ExternalApiClient {
+  private circuitBreaker = new CircuitBreaker({
+    failureThreshold: 5,
+    resetTimeout: 60000
+  });
+
+  /**
+   * @codesyncer-why Handle all errors in one place (consistency)
+   * @codesyncer-alternative Try-catch per call → Too much duplication
+   */
+  async call<T>(
+    endpoint: string,
+    options?: RequestOptions
+  ): Promise<Result<T>> {
+    // @codesyncer-pattern: Circuit Breaker
+    if (this.circuitBreaker.isOpen()) {
+      logger.warn('Circuit breaker is open', { endpoint });
+      return this.getFallback<T>(endpoint);
+    }
+
+    try {
+      // @codesyncer-inference: 30s timeout (external API recommendation)
+      const response = await this.retryWithTimeout(
+        () => fetch(endpoint, options),
+        { timeout: 30000, maxRetries: 3 }
+      );
+
+      this.circuitBreaker.recordSuccess();
+      return Result.ok(response.data);
+
+    } catch (error) {
+      this.circuitBreaker.recordFailure();
+
+      // @codesyncer-pattern: Error Classification
+      if (error instanceof TimeoutError) {
+        logger.warn('API timeout', { endpoint, duration: error.duration });
+        return this.getFallback<T>(endpoint);
+      }
+
+      if (error instanceof NetworkError) {
+        logger.error('Network error', { endpoint, error });
+        return this.getFallback<T>(endpoint);
+      }
+
+      // @codesyncer-why: Propagate unexpected errors (handle upstream)
+      throw error;
+    }
+  }
+
+  /**
+   * @codesyncer-pattern: Fallback with Stale Cache
+   * @codesyncer-why Stale data better than no data
+   */
+  private async getFallback<T>(endpoint: string): Promise<Result<T>> {
+    const staleData = await cache.getStale<T>(endpoint);
+    if (staleData) {
+      logger.info('Returning stale cache', { endpoint });
+      return Result.ok(staleData, { isStale: true });
+    }
+
+    return Result.error('Service unavailable');
+  }
+}
+```
+
+### 6️⃣ Test Strategy Documentation
+
+```typescript
+/**
+ * Payment service tests
+ *
+ * @codesyncer-context Payment is critical path (zero bugs tolerated)
+ *
+ * Test strategy:
+ * - Unit: All public methods
+ * - Integration: PG API calls (Mocked)
+ * - E2E: Full payment flow (Staging)
+ * - Coverage goal: 95%+
+ *
+ * @codesyncer-rule Payment changes require QA approval
+ */
+describe('PaymentService', () => {
+  describe('processPayment', () => {
+    /**
+     * @codesyncer-pattern: AAA (Arrange-Act-Assert)
+     * @codesyncer-why Test readability and maintainability
+     */
+    it('should process payment successfully', async () => {
+      // Arrange: Setup test data
+      const service = new PaymentService();
+      const amount = 10000;
+      const cardToken = 'tok_test_1234';
+
+      // @codesyncer-inference: Mock PG API (prevent actual charges)
+      const mockStripe = jest.spyOn(stripe, 'charge')
+        .mockResolvedValue({ id: 'ch_1234', status: 'succeeded' });
+
+      // Act: Execute
+      const result = await service.processPayment(amount, cardToken);
+
+      // Assert: Verify
+      expect(result.isSuccess).toBe(true);
+      expect(result.data.status).toBe('succeeded');
+
+      // @codesyncer-why: Verify call parameters (ensure correct values)
+      expect(mockStripe).toHaveBeenCalledWith({
+        amount,
+        source: cardToken,
+        idempotencyKey: expect.any(String)
+      });
+    });
+
+    /**
+     * @codesyncer-pattern: Edge Case Testing
+     * @codesyncer-why Bugs often occur at boundaries
+     */
+    it('should reject payment below minimum amount', async () => {
+      const service = new PaymentService();
+
+      // @codesyncer-context: Minimum 100 (PG policy)
+      await expect(
+        service.processPayment(99, 'tok_test')
+      ).rejects.toThrow('Minimum payment is 100');
+    });
+  });
+});
 ```
 
 ---
 
-## ❌ Bad Comment Examples
+## 🎯 Comment Writing Principles
 
-### Comments to Avoid
+### ✅ DO (Best Practices)
 
-```tsx
+```typescript
+// ✅ Specific reason and rationale
+// @codesyncer-inference: Page size 20 (user research, <3 scrolls)
+const PAGE_SIZE = 20;
+
+// ✅ Date and context
+// @codesyncer-decision: [2024-11-12] PostgreSQL (complex queries + ACID)
+
+// ✅ Trade-offs explicit
+// @codesyncer-tradeoff: Caching +50% perf, +20% memory
+
+// ✅ Record alternatives
+// @codesyncer-alternative: MongoDB → Rejected (schema changes frequent)
+
+// ✅ Pattern name (reusable)
+// @codesyncer-pattern: Repository Pattern (data access abstraction)
+```
+
+### ❌ DON'T (Anti-patterns)
+
+```typescript
 // ❌ Too vague
 // @codesyncer-inference: Did this
 const value = 10;
 
+// ❌ Repeats code
+// @codesyncer-context: Create user // Code already says this
+function createUser() {}
+
 // ❌ No rationale
 // @codesyncer-decision: Changed
-const API_URL = '/api/new';
-
-// ❌ Meaningless
-// @codesyncer-todo: Later
-function doSomething() {}
-
-// ❌ Lacks context
-// @codesyncer-context: Important
-const IMPORTANT_VALUE = 42;
-```
-
-### Improved Versions
-
-```tsx
-// ✅ Specific rationale
-// @codesyncer-inference: Default 10 (typical retry wait time)
-const RETRY_DELAY = 10;
-
-// ✅ Clear reason and date
-// @codesyncer-decision: [2024-10-17] Changed to /api/v2 (API version upgrade)
-const API_URL = '/api/v2';
-
-// ✅ Specific TODO
-// @codesyncer-todo: Add error handling (network errors, timeouts)
-function fetchData() {}
-
-// ✅ Business context explanation
-// @codesyncer-context: VAT rate (10% as of 2024)
-const TAX_RATE = 0.1;
+const API_URL = '/new';
 ```
 
 ---
 
 ## 🔍 Comment Search
 
-### Bash Commands
+### Project-wide Search
 
 ```bash
 # Find all inferences
 grep -r "@codesyncer-inference" ./src
 
-# Check TODO list
+# Find TODOs
 grep -r "@codesyncer-todo" ./src
 
-# Discussion decisions
+# Find decisions
 grep -r "@codesyncer-decision" ./src
 
-# Special rules
-grep -r "@codesyncer-rule" ./src
+# Find patterns (reuse)
+grep -r "@codesyncer-pattern" ./src
 
-# Business context
-grep -r "@codesyncer-context" ./src
+# Find specific pattern
+grep -r "@codesyncer-pattern.*Retry" ./src
 ```
 
 ### VS Code Search
 
-1. `Cmd/Ctrl + Shift + F` (Global search)
-2. Enter search term: `@codesyncer-todo`
-3. File filter: `src/**/*.{ts,tsx,js,jsx}`
+```
+Cmd/Ctrl + Shift + F
+→ @codesyncer-todo
+→ src/**/*.{ts,tsx,js,jsx}
+```
 
 ---
 
 ## 📊 Comment Statistics
 
-ARCHITECTURE.md automatically provides statistics:
+Auto-aggregated in ARCHITECTURE.md:
 
 ```markdown
 ## Comment Tag Statistics
 - @codesyncer-inference: 45
 - @codesyncer-decision: 12
-- @codesyncer-todo: 8
-- @codesyncer-rule: 5
-- @codesyncer-context: 15
+- @codesyncer-pattern: 8
+- @codesyncer-todo: 3
 ```
 
-Manual refresh with "update stats" command
+Command: `"update stats"`
 
 ---
 
-## 💡 Comment Writing Tips
+## 💡 Why Comments Replace Documentation
 
-### 1. Always provide rationale for inferences
+### Problems with Separate Docs
+```
+❌ Separate documentation
+   → AI can't read
+   → Code and docs diverge
+   → Docs never updated
 
-```tsx
-// ❌ @codesyncer-inference: Using useState
-// ✅ @codesyncer-inference: Using useState (simple local state, Zustand unnecessary)
+❌ Long guide documents
+   → Exceeds AI context
+   → Not actually applied
+   → Forgotten
 ```
 
-### 2. Include date and reason for decisions
-
-```tsx
-// ❌ @codesyncer-decision: Using Stripe
-// ✅ @codesyncer-decision: [2024-10-15] Using Stripe (international payment support needed)
+### Benefits of Comment-based Approach
 ```
+✅ Record directly in code
+   → Permanent preservation
+   → Git version control
+   → Always in sync with code
 
-### 3. Be specific with TODOs
-
-```tsx
-// ❌ @codesyncer-todo: Needs fix
-// ✅ @codesyncer-todo: Add error boundary (fallback UI for API failures)
-```
-
-### 4. Focus on "why" for context
-
-```tsx
-// ❌ @codesyncer-context: Authentication
-// ✅ @codesyncer-context: OAuth 2.0 authentication (Google, Kakao login support)
-```
-
-### 5. Rules only for exceptional cases
-
-```tsx
-// ❌ @codesyncer-rule: Using TypeScript (this is obvious)
-// ✅ @codesyncer-rule: This file only allows any type (external library has no types)
+✅ Only where needed
+   → Context efficient
+   → Searchable
+   → AI actually references
 ```
 
 ---
 
 ## 🎯 Checklist
 
-After writing code, verify:
+After writing code:
 
-- [ ] Added `@codesyncer-inference` for inferences?
-- [ ] Recorded discussion decisions with `@codesyncer-decision`?
-- [ ] Marked items needing confirmation with `@codesyncer-todo`?
-- [ ] Explained business logic with `@codesyncer-context`?
-- [ ] Specified special rules with `@codesyncer-rule`?
-- [ ] Included specific rationale in all comments?
+- [ ] All inferences have `@codesyncer-inference` + rationale
+- [ ] Decisions have `@codesyncer-decision` + [date] + reason
+- [ ] Trade-offs marked with `@codesyncer-tradeoff`
+- [ ] Reusable patterns tagged `@codesyncer-pattern`
+- [ ] Items needing confirmation have `@codesyncer-todo`
+- [ ] Complex logic explained with `@codesyncer-why`
 
 ---
 
-**Version**: 1.0.0
+**Version**: 2.0.0
 **Last Updated**: [TODAY]
 
-*This comment system permanently records all decisions in code.*
+*Comments are the documentation. Record all context in code.*

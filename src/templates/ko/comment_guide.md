@@ -1,324 +1,582 @@
 # 주석 작성 가이드
 
-> **CodeSyncer 주석 시스템** - 모든 추론과 결정을 영구 기록
+> **주석으로 모든 컨텍스트 관리** - 코드가 곧 문서
 
 ---
 
-## 📋 주석 태그 레퍼런스
+## 🎯 핵심 원칙
 
-### 5가지 필수 태그
+**모든 결정과 맥락은 코드에 직접 기록합니다.**
 
-| 태그 | 용도 | 사용 시점 | 중요도 |
-|------|------|-----------|--------|
-| `@codesyncer-rule` | 특별 규칙 | 일반적이지 않은 구현 방식 | ⭐⭐⭐ |
-| `@codesyncer-inference` | 추론 내용 | AI가 추론한 내용과 근거 | ⭐⭐⭐⭐⭐ |
-| `@codesyncer-decision` | 결정 사항 | 의논 후 결정된 내용 | ⭐⭐⭐⭐⭐ |
-| `@codesyncer-todo` | TODO | 사용자 확인 필요 | ⭐⭐⭐⭐ |
-| `@codesyncer-context` | 비즈니스 맥락 | 도메인 지식, 배경 설명 | ⭐⭐⭐ |
+- ❌ 별도 문서에 품질 기준 작성 → AI가 읽지 못함
+- ✅ 코드 주석으로 품질 기준 설명 → 영구 보존
+
+---
+
+## 📋 주석 태그 시스템 (10가지)
+
+### 기본 태그 (5가지)
+
+| 태그 | 용도 | 필수 정보 |
+|------|------|----------|
+| `@codesyncer-inference` | 추론 + 근거 | "무엇" + "왜" |
+| `@codesyncer-decision` | 결정 사항 | [날짜] + 이유 |
+| `@codesyncer-todo` | 확인 필요 | 구체적인 작업 |
+| `@codesyncer-context` | 비즈니스 맥락 | 도메인 지식 |
+| `@codesyncer-rule` | 특별 규칙 | 예외 사항 |
+
+### 확장 태그 (5가지) - 컨텍스트 완전 보존
+
+| 태그 | 용도 | 언제 사용 |
+|------|------|----------|
+| `@codesyncer-why` | 이유 상세 설명 | 코드만으로 이해 어려울 때 |
+| `@codesyncer-tradeoff` | 장단점 | 선택의 trade-off 있을 때 |
+| `@codesyncer-alternative` | 대안들 | 다른 방법 고려했을 때 |
+| `@codesyncer-pattern` | 패턴명 | 재사용 가능한 패턴 |
+| `@codesyncer-reference` | 참조 링크 | 외부 문서/이슈 참조 |
 
 ### 레거시 호환
 
-기존 `@claude-*` 태그도 완전히 호환됩니다:
 ```typescript
-@claude-rule        = @codesyncer-rule
-@claude-inference   = @codesyncer-inference
-@claude-decision    = @codesyncer-decision
-@claude-todo        = @codesyncer-todo
-@claude-context     = @codesyncer-context
+@claude-* = @codesyncer-*  // 기존 태그도 완전 호환
 ```
 
 ---
 
-## 📝 주석 레벨
+## 💡 실전 예시: 모든 컨텍스트를 주석으로
 
-### 1. 📄 파일 레벨 (JSDoc)
-
-**언제**: 파일 최상단, 모듈 전체 설명
+### 1️⃣ 품질 기준을 주석으로 관리
 
 ```typescript
 /**
- * User authentication service
+ * 결제 처리 서비스
  *
- * @codesyncer-context JWT 기반 인증 시스템
- * @codesyncer-rule 토큰은 httpOnly 쿠키에 저장 (XSS 방지)
- * @author CodeSyncer
- * @date 2024-10-17
+ * @codesyncer-context 실시간 카드 결제 처리 (PG사: Stripe)
+ * @codesyncer-rule 모든 금액은 정수로 처리 (소수점 오류 방지)
+ * @codesyncer-pattern Transaction Script (단순 결제는 도메인 모델 불필요)
+ *
+ * 품질 기준:
+ * - 타임아웃: 30초 (PG사 권장)
+ * - 재시도: 3회 (멱등성 보장 필수)
+ * - 로깅: 모든 결제 시도 기록
+ * - 에러 처리: 사용자 친화적 메시지
  */
-```
+export class PaymentService {
+  /**
+   * 결제 실행
+   *
+   * @codesyncer-why 동기 처리로 구현 (결제 완료 즉시 확인 필요)
+   * @codesyncer-tradeoff 동기: 빠른 피드백 | 비동기: 높은 처리량
+   * @codesyncer-decision [2024-11-12] 동기 방식 선택 (UX 우선)
+   */
+  async processPayment(
+    amount: number,
+    cardToken: string
+  ): Promise<PaymentResult> {
+    // @codesyncer-inference: 최소 금액 100원 (PG사 정책)
+    if (amount < 100) {
+      throw new ValidationError('최소 결제 금액은 100원입니다');
+    }
 
-### 2. 🔧 함수/클래스/컴포넌트 레벨
+    // @codesyncer-why: 멱등성 키 생성 (중복 결제 방지)
+    const idempotencyKey = this.generateIdempotencyKey(amount, cardToken);
 
-**언제**: 각 함수, 클래스, 컴포넌트 정의 위
-
-```tsx
-/**
- * 주문 생성 폼
- *
- * @codesyncer-context 6단계 주문 프로세스
- * @codesyncer-inference 각 단계마다 자동 저장 (일반적인 UX 패턴)
- * @codesyncer-decision [2024-10-15] Zustand로 상태 관리 (복잡한 폼 상태)
- */
-export default function OrderForm() {
-  // ...
-}
-```
-
-### 3. 📝 인라인 레벨
-
-**언제**: 코드 라인 위 또는 옆
-
-```typescript
-// @codesyncer-inference: 페이지 크기 20 (일반적인 테이블 UX)
-const PAGE_SIZE = 20;
-
-// @codesyncer-todo: mainApi 엔드포인트 URL 확인 필요
-const API_URL = '/api/temp';
-
-// @codesyncer-decision: [2024-10-17] Soft Delete (30일 복구 가능)
-async function deleteUser(id: string) {
-  // @codesyncer-inference: deleted_at 플래그 사용 (복구 기능용)
-  return db.update(id, { deleted_at: new Date() });
-}
-
-const maxRetry = 3; // @codesyncer-inference: 3회 재시도 (안정성)
-```
-
----
-
-## ✅ 좋은 주석 예시
-
-### 예시 1: 비즈니스 로직
-
-```tsx
-/**
- * 배송비 계산 함수
- *
- * @codesyncer-context 배송비 정책
- * - 3만원 이상: 무료 배송
- * - 3만원 미만: 3,000원
- * - 제주/도서산간: +3,000원
- *
- * @codesyncer-decision [2024-10-10] 정책 확정 (마케팅팀 협의)
- * @codesyncer-rule 정책 변경 시 반드시 마케팅팀 승인 필요
- */
-function calculateShippingFee(orderAmount: number, region: string): number {
-  // @codesyncer-inference: 3만원 기준 (업계 표준)
-  const FREE_SHIPPING_THRESHOLD = 30000;
-
-  // @codesyncer-decision: [2024-10-10] 기본 배송비 3,000원
-  const BASIC_FEE = 3000;
-
-  // @codesyncer-todo: 제주/도서산간 지역 목록 확인 필요
-  const EXTRA_FEE_REGIONS = ['제주', '울릉도'];
-
-  if (orderAmount >= FREE_SHIPPING_THRESHOLD) {
-    return 0;
+    // @codesyncer-pattern: Retry with Exponential Backoff
+    return await this.retryWithBackoff(async () => {
+      return await stripe.charge({
+        amount,
+        source: cardToken,
+        idempotencyKey
+      });
+    }, {
+      maxRetries: 3,
+      initialDelay: 1000
+    });
   }
 
-  const baseFee = BASIC_FEE;
-  const extraFee = EXTRA_FEE_REGIONS.includes(region) ? 3000 : 0;
-
-  return baseFee + extraFee;
+  /**
+   * @codesyncer-pattern Exponential Backoff
+   * @codesyncer-reference https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+   */
+  private async retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    options: RetryOptions
+  ): Promise<T> {
+    // ... 구현
+  }
 }
 ```
 
-### 예시 2: 데이터 구조
+### 2️⃣ 복잡한 비즈니스 로직 설명
 
-```tsx
+```typescript
 /**
- * 사용자 인터페이스
+ * 할인 계산기
  *
- * @codesyncer-context GDPR 준수 필요
- * @codesyncer-rule 개인정보는 암호화 저장
+ * @codesyncer-context 복합 할인 정책 (중복 적용 가능)
+ * - 회원 등급 할인: 5-15%
+ * - 쿠폰 할인: 고정 금액 또는 비율
+ * - 프로모션 할인: 특정 조건 충족 시
+ *
+ * @codesyncer-decision [2024-11-10] 할인 순서 고정 (마케팅팀 합의)
+ * 1. 회원 등급 할인
+ * 2. 쿠폰 할인
+ * 3. 프로모션 할인
+ *
+ * @codesyncer-why 순서가 중요함 (최종 금액이 달라짐)
+ * @codesyncer-alternative 할인율 합산 후 적용 → 거부됨 (복잡한 케이스 처리 어려움)
  */
-interface User {
-  id: string;
+function calculateFinalPrice(
+  basePrice: number,
+  user: User,
+  coupon?: Coupon,
+  promotion?: Promotion
+): number {
+  // @codesyncer-context: 모든 중간 계산 저장 (환불 시 추적용)
+  const breakdown: PriceBreakdown = {
+    basePrice,
+    discounts: []
+  };
 
-  // @codesyncer-inference: email을 username으로 사용 (일반적 패턴)
-  email: string;
+  let currentPrice = basePrice;
 
-  // @codesyncer-decision: [2024-10-12] bcrypt 해싱 (보안팀 권고)
-  passwordHash: string;
+  // Step 1: 회원 등급 할인
+  // @codesyncer-inference: GOLD 15%, SILVER 10%, BRONZE 5% (일반적 패턴)
+  const memberDiscount = this.calculateMemberDiscount(user.tier);
+  if (memberDiscount > 0) {
+    currentPrice -= memberDiscount;
+    breakdown.discounts.push({
+      type: 'MEMBER',
+      amount: memberDiscount
+    });
+  }
 
-  // @codesyncer-context: Soft Delete용
-  // @codesyncer-decision: [2024-10-15] 30일 후 완전 삭제 (GDPR)
-  deletedAt?: Date;
+  // Step 2: 쿠폰 할인
+  // @codesyncer-rule: 쿠폰은 할인된 금액에 적용 (중요!)
+  if (coupon) {
+    const couponDiscount = this.applyCoupon(currentPrice, coupon);
+    currentPrice -= couponDiscount;
+    breakdown.discounts.push({
+      type: 'COUPON',
+      amount: couponDiscount,
+      couponId: coupon.id
+    });
+  }
 
-  createdAt: Date;
-  updatedAt: Date;
+  // Step 3: 프로모션 할인
+  // @codesyncer-todo: 프로모션 중복 적용 정책 확인 필요
+  if (promotion) {
+    const promoDiscount = this.applyPromotion(currentPrice, promotion);
+    currentPrice -= promoDiscount;
+    breakdown.discounts.push({
+      type: 'PROMOTION',
+      amount: promoDiscount,
+      promotionId: promotion.id
+    });
+  }
+
+  // @codesyncer-rule: 최종 금액은 0 이상이어야 함
+  return Math.max(0, currentPrice);
 }
 ```
 
-### 예시 3: 컴포넌트
+### 3️⃣ 성능 최적화 기록
 
-```tsx
+```typescript
 /**
- * 주문 목록 테이블 컴포넌트
+ * 주문 목록 조회 API
  *
- * @codesyncer-context 고객용 주문 내역 조회
- * @codesyncer-inference 페이지네이션 필요 (대량 데이터)
- * @codesyncer-decision [2024-10-16] TanStack Table 사용 (성능)
+ * @codesyncer-context 주문이 많은 사용자는 10만 건 이상 (성능 이슈)
+ * @codesyncer-decision [2024-11-12] 페이지네이션 + 인덱스 + 캐싱
+ *
+ * 성능 목표:
+ * - 응답 시간: < 500ms (P95)
+ * - 동시 접속: 1000 TPS
+ * - 캐시 히트율: > 80%
  */
-export function OrderListTable({ orders }: OrderListTableProps) {
-  // @codesyncer-inference: 페이지당 20개 (UX 표준)
-  const [pageSize, setPageSize] = useState(20);
+export class OrderController {
+  /**
+   * @codesyncer-pattern Cursor-based Pagination
+   * @codesyncer-why Offset 페이징은 뒤로 갈수록 느려짐 (OFFSET 10000)
+   * @codesyncer-tradeoff Cursor: 빠름 | Offset: 페이지 번호 표시 가능
+   * @codesyncer-alternative Offset 페이징 → 테스트 결과 P95 3초 (거부)
+   * @codesyncer-reference https://use-the-index-luke.com/no-offset
+   */
+  async getOrders(userId: string, cursor?: string, limit = 20) {
+    // @codesyncer-inference: Redis 캐싱 5분 (실시간성 vs 성능)
+    const cacheKey = `orders:${userId}:${cursor}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
 
-  // @codesyncer-todo: 정렬 옵션 추가 (날짜, 금액, 상태)
+    // @codesyncer-pattern: Index Hint
+    // @codesyncer-why userId + createdAt 복합 인덱스 사용 강제
+    const orders = await db.query(`
+      SELECT /*+ INDEX(orders idx_user_created) */
+        id, total, status, created_at
+      FROM orders
+      WHERE user_id = ?
+        ${cursor ? 'AND created_at < ?' : ''}
+      ORDER BY created_at DESC
+      LIMIT ?
+    `, cursor ? [userId, cursor, limit] : [userId, limit]);
 
-  return (
-    <Table>
-      {/* @codesyncer-rule: 모바일에서는 카드 레이아웃으로 변경 */}
-      {/* ... */}
-    </Table>
-  );
+    const result = {
+      data: orders,
+      nextCursor: orders.length === limit
+        ? orders[orders.length - 1].created_at
+        : null
+    };
+
+    // @codesyncer-inference: 5분 TTL (주문은 자주 변경되지 않음)
+    await redis.setex(cacheKey, 300, JSON.stringify(result));
+
+    return result;
+  }
 }
+```
+
+### 4️⃣ 보안 요구사항 명시
+
+```typescript
+/**
+ * 사용자 인증 미들웨어
+ *
+ * @codesyncer-context 금융 서비스 (보안 최우선)
+ * @codesyncer-rule OWASP Top 10 준수 필수
+ *
+ * 보안 체크리스트:
+ * ✅ SQL Injection 방지 (Prepared Statement)
+ * ✅ XSS 방지 (CSP 헤더)
+ * ✅ CSRF 방지 (토큰 검증)
+ * ✅ Rate Limiting (분당 100 요청)
+ * ✅ 민감 정보 로깅 금지
+ */
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
+  try {
+    // @codesyncer-rule: 토큰은 httpOnly 쿠키에서만 (XSS 방지)
+    const token = req.cookies.access_token;
+
+    if (!token) {
+      // @codesyncer-why: 401 vs 403 구분 (보안 best practice)
+      // 401: 인증 안됨 | 403: 권한 없음
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // @codesyncer-decision [2024-11-12] JWT 대신 세션 사용 (더 안전)
+    // @codesyncer-tradeoff JWT: Stateless | Session: Revoke 가능
+    const session = await sessionStore.get(token);
+
+    if (!session) {
+      // @codesyncer-why: 에러 메시지 최소화 (공격자에게 정보 제공 최소화)
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // @codesyncer-pattern: Session Rotation
+    // @codesyncer-reference: OWASP Session Management Cheat Sheet
+    if (session.shouldRotate()) {
+      const newToken = await sessionStore.rotate(session.id);
+      res.cookie('access_token', newToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict'
+      });
+    }
+
+    req.user = session.user;
+    next();
+
+  } catch (error) {
+    // @codesyncer-rule: 민감 정보 로깅 금지
+    logger.error('Authentication error', {
+      // ❌ token, password, email 등 민감 정보 절대 금지
+      ip: req.ip,
+      userAgent: req.get('user-agent')
+    });
+
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+```
+
+### 5️⃣ 에러 핸들링 전략
+
+```typescript
+/**
+ * 외부 API 호출 래퍼
+ *
+ * @codesyncer-context 외부 서비스 불안정 (SLA 95%)
+ * @codesyncer-pattern Circuit Breaker + Retry + Timeout
+ * @codesyncer-reference Netflix Hystrix pattern
+ *
+ * 에러 처리 전략:
+ * - Timeout: 30초
+ * - Retry: 3회 (Exponential Backoff)
+ * - Circuit Breaker: 5번 실패 시 open
+ * - Fallback: 캐시된 데이터 반환
+ */
+export class ExternalApiClient {
+  private circuitBreaker = new CircuitBreaker({
+    failureThreshold: 5,
+    resetTimeout: 60000
+  });
+
+  /**
+   * @codesyncer-why 모든 에러를 한 곳에서 처리 (일관성)
+   * @codesyncer-alternative 각 호출마다 try-catch → 코드 중복 심함
+   */
+  async call<T>(
+    endpoint: string,
+    options?: RequestOptions
+  ): Promise<Result<T>> {
+    // @codesyncer-pattern: Circuit Breaker
+    if (this.circuitBreaker.isOpen()) {
+      logger.warn('Circuit breaker is open', { endpoint });
+      return this.getFallback<T>(endpoint);
+    }
+
+    try {
+      // @codesyncer-inference: 30초 타임아웃 (외부 API 권장값)
+      const response = await this.retryWithTimeout(
+        () => fetch(endpoint, options),
+        { timeout: 30000, maxRetries: 3 }
+      );
+
+      this.circuitBreaker.recordSuccess();
+      return Result.ok(response.data);
+
+    } catch (error) {
+      this.circuitBreaker.recordFailure();
+
+      // @codesyncer-pattern: Error Classification
+      if (error instanceof TimeoutError) {
+        logger.warn('API timeout', { endpoint, duration: error.duration });
+        return this.getFallback<T>(endpoint);
+      }
+
+      if (error instanceof NetworkError) {
+        logger.error('Network error', { endpoint, error });
+        return this.getFallback<T>(endpoint);
+      }
+
+      // @codesyncer-why: 예상치 못한 에러는 전파 (상위에서 처리)
+      throw error;
+    }
+  }
+
+  /**
+   * @codesyncer-pattern: Fallback with Stale Cache
+   * @codesyncer-why 오래된 데이터라도 없는 것보다 낫다
+   */
+  private async getFallback<T>(endpoint: string): Promise<Result<T>> {
+    const staleData = await cache.getStale<T>(endpoint);
+    if (staleData) {
+      logger.info('Returning stale cache', { endpoint });
+      return Result.ok(staleData, { isStale: true });
+    }
+
+    return Result.error('Service unavailable');
+  }
+}
+```
+
+### 6️⃣ 테스트 전략 문서화
+
+```typescript
+/**
+ * 결제 서비스 테스트
+ *
+ * @codesyncer-context 결제는 critical path (버그 허용 불가)
+ *
+ * 테스트 전략:
+ * - Unit: 모든 public 메서드
+ * - Integration: PG사 API 호출 (Mock)
+ * - E2E: 실제 결제 플로우 (Staging)
+ * - 커버리지 목표: 95% 이상
+ *
+ * @codesyncer-rule 결제 로직 수정 시 QA 필수 승인
+ */
+describe('PaymentService', () => {
+  describe('processPayment', () => {
+    /**
+     * @codesyncer-pattern: AAA (Arrange-Act-Assert)
+     * @codesyncer-why 테스트 가독성과 유지보수성
+     */
+    it('should process payment successfully', async () => {
+      // Arrange: 테스트 데이터 준비
+      const service = new PaymentService();
+      const amount = 10000;
+      const cardToken = 'tok_test_1234';
+
+      // @codesyncer-inference: PG사 API는 Mock (실제 과금 방지)
+      const mockStripe = jest.spyOn(stripe, 'charge')
+        .mockResolvedValue({ id: 'ch_1234', status: 'succeeded' });
+
+      // Act: 실제 실행
+      const result = await service.processPayment(amount, cardToken);
+
+      // Assert: 결과 검증
+      expect(result.isSuccess).toBe(true);
+      expect(result.data.status).toBe('succeeded');
+
+      // @codesyncer-why: 호출 파라미터 검증 (올바른 값 전달 확인)
+      expect(mockStripe).toHaveBeenCalledWith({
+        amount,
+        source: cardToken,
+        idempotencyKey: expect.any(String)
+      });
+    });
+
+    /**
+     * @codesyncer-pattern: Edge Case Testing
+     * @codesyncer-why 경계 조건에서 버그 많이 발생
+     */
+    it('should reject payment below minimum amount', async () => {
+      const service = new PaymentService();
+
+      // @codesyncer-context: 최소 금액 100원 (PG사 정책)
+      await expect(
+        service.processPayment(99, 'tok_test')
+      ).rejects.toThrow('최소 결제 금액은 100원입니다');
+    });
+  });
+});
 ```
 
 ---
 
-## ❌ 나쁜 주석 예시
+## 🎯 주석 작성 원칙
 
-### 피해야 할 주석들
+### ✅ DO (해야 할 것)
 
-```tsx
-// ❌ 너무 모호함
-// @codesyncer-inference: 이렇게 했음
+```typescript
+// ✅ 구체적인 이유와 근거
+// @codesyncer-inference: 페이지 크기 20 (사용자 연구 결과, 스크롤 3번 이내)
+const PAGE_SIZE = 20;
+
+// ✅ 날짜와 맥락
+// @codesyncer-decision: [2024-11-12] PostgreSQL 선택 (복잡한 쿼리 + ACID 필요)
+
+// ✅ Trade-off 명시
+// @codesyncer-tradeoff: 캐싱으로 성능 50% 개선, 메모리 사용 20% 증가
+
+// ✅ 대안 기록
+// @codesyncer-alternative: MongoDB 검토 → JSON 스키마 변경 빈번해 거부
+
+// ✅ 패턴 명시 (재사용)
+// @codesyncer-pattern: Repository Pattern (데이터 접근 추상화)
+```
+
+### ❌ DON'T (하지 말 것)
+
+```typescript
+// ❌ 너무 모호
+// @codesyncer-inference: 이렇게 함
 const value = 10;
+
+// ❌ 코드 그대로 반복
+// @codesyncer-context: 사용자 생성 // 코드 보면 알 수 있음
+function createUser() {}
 
 // ❌ 근거 없음
 // @codesyncer-decision: 변경함
-const API_URL = '/api/new';
-
-// ❌ 의미 없음
-// @codesyncer-todo: 나중에
-function doSomething() {}
-
-// ❌ 맥락 부족
-// @codesyncer-context: 중요함
-const IMPORTANT_VALUE = 42;
-```
-
-### 개선된 버전
-
-```tsx
-// ✅ 구체적인 근거
-// @codesyncer-inference: 기본값 10 (일반적인 재시도 대기 시간)
-const RETRY_DELAY = 10;
-
-// ✅ 명확한 이유와 날짜
-// @codesyncer-decision: [2024-10-17] /api/v2로 변경 (API 버전업)
-const API_URL = '/api/v2';
-
-// ✅ 구체적인 TODO
-// @codesyncer-todo: 에러 케이스 핸들링 추가 (네트워크 오류, 타임아웃)
-function fetchData() {}
-
-// ✅ 비즈니스 맥락 설명
-// @codesyncer-context: VAT 세율 (2024년 기준 10%)
-const TAX_RATE = 0.1;
+const API_URL = '/new';
 ```
 
 ---
 
 ## 🔍 주석 검색
 
-### Bash 명령어
+### 프로젝트 전체 검색
 
 ```bash
-# 모든 추론 내용 찾기
+# 모든 추론 찾기
 grep -r "@codesyncer-inference" ./src
 
-# TODO 목록 확인
+# 확인 필요한 TODO
 grep -r "@codesyncer-todo" ./src
 
-# 의논 결정 사항
+# 의논 후 결정 사항
 grep -r "@codesyncer-decision" ./src
 
-# 특별 규칙
-grep -r "@codesyncer-rule" ./src
+# 패턴 찾기 (재사용)
+grep -r "@codesyncer-pattern" ./src
 
-# 비즈니스 맥락
-grep -r "@codesyncer-context" ./src
+# 특정 패턴 찾기
+grep -r "@codesyncer-pattern.*Retry" ./src
 ```
 
 ### VS Code 검색
 
-1. `Cmd/Ctrl + Shift + F` (전체 검색)
-2. 검색어 입력: `@codesyncer-todo`
-3. 파일 필터: `src/**/*.{ts,tsx,js,jsx}`
+```
+Cmd/Ctrl + Shift + F
+→ @codesyncer-todo
+→ src/**/*.{ts,tsx,js,jsx}
+```
 
 ---
 
 ## 📊 주석 통계
 
-ARCHITECTURE.md에서 자동으로 통계를 제공합니다:
+ARCHITECTURE.md에 자동 집계:
 
 ```markdown
 ## 주석 태그 통계
 - @codesyncer-inference: 45개
 - @codesyncer-decision: 12개
-- @codesyncer-todo: 8개
-- @codesyncer-rule: 5개
-- @codesyncer-context: 15개
+- @codesyncer-pattern: 8개
+- @codesyncer-todo: 3개
 ```
 
-"통계 업데이트" 명령으로 수동 갱신 가능
+명령어: `"통계 업데이트"`
 
 ---
 
-## 💡 주석 작성 팁
+## 💡 주석이 문서를 대체하는 이유
 
-### 1. 추론은 항상 근거와 함께
+### 기존 방식의 문제
+```
+❌ 별도 문서 작성
+   → AI가 읽지 못함
+   → 코드와 문서 불일치
+   → 문서 업데이트 안됨
 
-```tsx
-// ❌ @codesyncer-inference: useState 사용
-// ✅ @codesyncer-inference: useState 사용 (간단한 로컬 상태, Zustand 불필요)
+❌ 긴 가이드 문서
+   → AI context 초과
+   → 실제로 적용 안됨
+   → 까먹음
 ```
 
-### 2. 결정은 날짜와 이유
-
-```tsx
-// ❌ @codesyncer-decision: Stripe 사용
-// ✅ @codesyncer-decision: [2024-10-15] Stripe 사용 (해외 결제 지원 필요)
+### 주석 기반의 장점
 ```
+✅ 코드에 직접 기록
+   → 영구 보존
+   → Git으로 버전 관리
+   → 코드와 항상 일치
 
-### 3. TODO는 구체적으로
-
-```tsx
-// ❌ @codesyncer-todo: 수정 필요
-// ✅ @codesyncer-todo: 에러 바운더리 추가 (API 실패 시 폴백 UI)
-```
-
-### 4. 맥락은 "왜"에 집중
-
-```tsx
-// ❌ @codesyncer-context: 인증
-// ✅ @codesyncer-context: OAuth 2.0 인증 (Google, Kakao 로그인 지원)
-```
-
-### 5. 규칙은 예외적인 경우만
-
-```tsx
-// ❌ @codesyncer-rule: TypeScript 사용 (이건 당연함)
-// ✅ @codesyncer-rule: 이 파일만 any 타입 허용 (외부 라이브러리 타입 없음)
+✅ 필요한 곳에만
+   → Context 효율적
+   → 검색 가능
+   → AI가 실제 참고
 ```
 
 ---
 
 ## 🎯 체크리스트
 
-코드 작성 후 확인:
+코드 작성 후:
 
-- [ ] 추론한 내용에 `@codesyncer-inference` 추가했나?
-- [ ] 의논 결정은 `@codesyncer-decision`으로 기록했나?
-- [ ] 확인 필요한 부분은 `@codesyncer-todo`로 표시했나?
-- [ ] 비즈니스 로직에 `@codesyncer-context` 설명했나?
-- [ ] 특별한 규칙은 `@codesyncer-rule`로 명시했나?
-- [ ] 모든 주석에 구체적인 근거를 포함했나?
+- [ ] 모든 추론에 `@codesyncer-inference` + 근거
+- [ ] 결정 사항에 `@codesyncer-decision` + [날짜] + 이유
+- [ ] Trade-off 있으면 `@codesyncer-tradeoff` 명시
+- [ ] 재사용 패턴에 `@codesyncer-pattern` 표시
+- [ ] 확인 필요한 부분 `@codesyncer-todo`
+- [ ] 복잡한 로직에 `@codesyncer-why` 설명
 
 ---
 
-**버전**: 1.0.0
+**버전**: 2.0.0
 **마지막 업데이트**: [TODAY]
 
-*이 주석 시스템으로 모든 의사결정이 코드에 영구 기록됩니다.*
+*주석이 곧 문서입니다. 모든 컨텍스트를 코드에 기록하세요.*

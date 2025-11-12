@@ -138,13 +138,15 @@ Use template: `./templates/[lang]/architecture.md`
 - Actually scan and list real folder structure
 - List actual dependencies
 
-### 3.3 COMMENT_GUIDE.md
-- Comment tag usage guide
-- Examples specific to this project's tech stack
-- Search commands
+### 3.3 COMMENT_GUIDE.md ⭐ **Core Document**
+- **Manage all context with comments** (quality standards, coding standards, all decisions)
+- 10 comment tag system (5 basic + 5 extended)
+- Real examples: quality standards, performance optimization, security, error handling, etc.
+- Principle: Record directly in code instead of separate docs
 
 Use template: `./templates/[lang]/comment_guide.md`
-- Use as-is (already comprehensive)
+- Use as-is (includes all context management examples)
+- AI follows these patterns for writing comments
 
 ### 3.4 DECISIONS.md
 - Decision log template
