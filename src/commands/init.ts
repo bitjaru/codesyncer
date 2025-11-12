@@ -155,8 +155,10 @@ export async function initCommand(options: InitOptions) {
 
     return `- **${repo.name}** (${typeLabel})
   - Path: \`./${repo.name}\`
-  - Tech Stack: ${repo.techStack?.join(', ') || 'To be determined'}
-  - Description: ${repo.description || 'To be analyzed'}`;
+  - ${lang === 'ko' ? 'AI가 분석할 내용' : 'To be analyzed by AI'}:
+    - ${lang === 'ko' ? '기술 스택' : 'Tech stack'}
+    - ${lang === 'ko' ? '프로젝트 설명' : 'Project description'}
+    - ${lang === 'ko' ? '주요 기능' : 'Main features'}`;
   }).join('\n\n');
 
   // Load SETUP_GUIDE template

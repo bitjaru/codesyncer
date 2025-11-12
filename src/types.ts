@@ -37,8 +37,8 @@ export interface RepositoryInfo {
   name: string;
   path: string;
   type: ProjectType;
-  description: string;
-  techStack?: string[];
+  description?: string;  // AI will analyze during setup
+  techStack?: string[];   // AI will analyze during setup
   hasCodeSyncer: boolean;
 }
 
