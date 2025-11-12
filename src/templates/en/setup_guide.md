@@ -158,20 +158,35 @@ Use template: `./templates/[lang]/decisions.md`
 
 ---
 
-## 🌐 Step 4: Generate Master Document
+## 🌐 Step 4: Generate Root Documents
 
-At the workspace root, create `.codesyncer/MASTER_CODESYNCER.md`:
+Create the following files at the workspace root:
 
-### Content:
-- List all repositories with their roles
-- Automatic repository switching rules
-- Keyword-based navigation mapping
-- Multi-repo workflow examples
+### 4.1 CLAUDE.md ⭐ **Claude Reads This First**
+
+Create `CLAUDE.md` at root (automatically discovered by Claude):
+
+Use template: `./templates/[lang]/root_claude.md`
+- Replace [PROJECT_NAME], [GITHUB_USERNAME], [TODAY]
+- Replace [REPO_COUNT] with actual repository count
+- Indicate this is a multi-repo project
+- Instruct to read MASTER_CODESYNCER.md first
+- Specify project-wide common rules
+
+**Important**: This file must exist for Claude to automatically load context at session start!
+
+### 4.2 .codesyncer/MASTER_CODESYNCER.md
+
+Create `.codesyncer/MASTER_CODESYNCER.md` at workspace root:
 
 Use template: `./templates/[lang]/master.md`
 - Replace [REPO_TABLE] with actual detected repos
 - Replace [KEYWORD_MAPPING] with repo-specific keywords
 - Replace [PROJECT_NAME], [GITHUB_USERNAME]
+- List all repositories with their roles
+- Automatic repository switching rules
+- Keyword-based navigation mapping
+- Multi-repo workflow examples
 
 ---
 
@@ -183,8 +198,10 @@ After generating all files, present a summary:
 ✅ CodeSyncer Setup Complete!
 
 Created files:
-📁 .codesyncer/
-   └── MASTER_CODESYNCER.md
+📁 Root/
+   ├── CLAUDE.md ⭐ Claude reads this first
+   └── .codesyncer/
+       └── MASTER_CODESYNCER.md
 
 📁 [repo1]/.claude/
    ├── CLAUDE.md
@@ -197,8 +214,10 @@ Created files:
 
 Next Steps:
 1. Review the generated files
-2. Customize any project-specific rules in CLAUDE.md
-3. Start developing with: "Read CLAUDE.md" in each repo
+2. Customize each repo's CLAUDE.md
+3. Read root CLAUDE.md or individual repo CLAUDE.md to start development
+
+💡 Claude automatically finds and reads root CLAUDE.md!
 
 Ready to start using CodeSyncer!
 ```

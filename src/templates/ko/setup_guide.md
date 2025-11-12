@@ -158,20 +158,35 @@
 
 ---
 
-## 🌐 4단계: 마스터 문서 생성
+## 🌐 4단계: 루트 문서 생성
+
+워크스페이스 루트에 다음 파일들을 생성:
+
+### 4.1 CLAUDE.md ⭐ **클로드가 먼저 읽는 파일**
+
+루트에 `CLAUDE.md` 생성 (클로드가 자동으로 찾는 파일):
+
+템플릿 사용: `./templates/[lang]/root_claude.md`
+- [PROJECT_NAME], [GITHUB_USERNAME], [TODAY] 교체
+- [REPO_COUNT]를 실제 레포지토리 개수로 교체
+- 멀티레포 프로젝트임을 명시
+- MASTER_CODESYNCER.md를 먼저 읽으라고 지시
+- 전체 프로젝트 공통 규칙 명시
+
+**중요**: 이 파일이 있어야 클로드가 세션 시작 시 자동으로 컨텍스트를 로드합니다!
+
+### 4.2 .codesyncer/MASTER_CODESYNCER.md
 
 워크스페이스 루트에 `.codesyncer/MASTER_CODESYNCER.md` 생성:
-
-### 내용:
-- 모든 레포지토리와 역할 나열
-- 자동 레포지토리 전환 규칙
-- 키워드 기반 네비게이션 매핑
-- 멀티 레포 워크플로우 예시
 
 템플릿 사용: `./templates/[lang]/master.md`
 - [REPO_TABLE]을 실제 감지된 레포로 교체
 - [KEYWORD_MAPPING]을 레포별 키워드로 교체
 - [PROJECT_NAME], [GITHUB_USERNAME] 교체
+- 모든 레포지토리와 역할 나열
+- 자동 레포지토리 전환 규칙
+- 키워드 기반 네비게이션 매핑
+- 멀티 레포 워크플로우 예시
 
 ---
 
@@ -183,8 +198,10 @@
 ✅ CodeSyncer 설정 완료!
 
 생성된 파일:
-📁 .codesyncer/
-   └── MASTER_CODESYNCER.md
+📁 루트/
+   ├── CLAUDE.md ⭐ 클로드가 먼저 읽는 파일
+   └── .codesyncer/
+       └── MASTER_CODESYNCER.md
 
 📁 [repo1]/.claude/
    ├── CLAUDE.md
@@ -197,8 +214,10 @@
 
 다음 단계:
 1. 생성된 파일 검토
-2. CLAUDE.md의 프로젝트별 규칙 커스터마이즈
-3. 각 레포에서 "CLAUDE.md 읽어줘"로 개발 시작
+2. 각 레포의 CLAUDE.md 커스터마이즈
+3. 루트 CLAUDE.md 또는 개별 레포 CLAUDE.md 읽고 개발 시작
+
+💡 클로드는 자동으로 루트 CLAUDE.md를 찾아서 읽습니다!
 
 CodeSyncer 사용 준비 완료!
 ```
