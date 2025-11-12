@@ -38,11 +38,11 @@
 
 ## 🔍 주석 태그 통계
 
-- `@vibesync-inference`: 0개
-- `@vibesync-decision`: 0개
-- `@vibesync-todo`: 0개
-- `@vibesync-rule`: 0개
-- `@vibesync-context`: 0개
+- `@codesyncer-inference`: 0개
+- `@codesyncer-decision`: 0개
+- `@codesyncer-todo`: 0개
+- `@codesyncer-rule`: 0개
+- `@codesyncer-context`: 0개
 
 **레거시 태그 (`@claude-*`)**: 0개
 
@@ -56,7 +56,7 @@
 
 현재 TODO가 없습니다.
 
-**검색**: `grep -r "@vibesync-todo" ./src`
+**검색**: `grep -r "@codesyncer-todo" ./src`
 
 ---
 
@@ -144,4 +144,4 @@
 
 ---
 
-*이 문서는 VibeSync에 의해 자동 생성 및 관리됩니다.*
+*이 문서는 CodeSyncer에 의해 자동 생성 및 관리됩니다.*

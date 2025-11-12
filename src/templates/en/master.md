@@ -2,7 +2,7 @@
 
 > Just request a feature, and your AI coding assistant will automatically find and work in the right repository.
 >
-> **Powered by VibeSync** - AI-agnostic multi-repository collaboration system
+> **Powered by CodeSyncer** - AI-agnostic multi-repository collaboration system
 
 ---
 
@@ -150,19 +150,19 @@ Complete: "[summary]"
 
 ## 🏷️ Comment Tag System
 
-VibeSync supports both tag formats:
+CodeSyncer supports both tag formats:
 
-- **`@vibesync-*`** (Recommended): New standard, compatible with all AI tools
+- **`@codesyncer-*`** (Recommended): New standard, compatible with all AI tools
 - **`@claude-*`** (Legacy): Compatible with existing Claude Code projects
 
 ### Available Tags
 
 ```typescript
-@vibesync-rule        // Special rules (@claude-rule compatible)
-@vibesync-inference   // Inference and rationale (@claude-inference compatible)
-@vibesync-decision    // Discussion decisions (@claude-decision compatible)
-@vibesync-todo        // Needs confirmation (@claude-todo compatible)
-@vibesync-context     // Business context (@claude-context compatible)
+@codesyncer-rule        // Special rules (@claude-rule compatible)
+@codesyncer-inference   // Inference and rationale (@claude-inference compatible)
+@codesyncer-decision    // Discussion decisions (@claude-decision compatible)
+@codesyncer-todo        // Needs confirmation (@claude-todo compatible)
+@codesyncer-context     // Business context (@claude-context compatible)
 ```
 
 Both formats work identically, so use whichever you prefer!
@@ -170,10 +170,10 @@ Both formats work identically, so use whichever you prefer!
 ---
 
 **GitHub**: https://github.com/[GITHUB_USERNAME]/[PROJECT_NAME]
-**Version**: 1.0.0 (Powered by VibeSync)
+**Version**: 1.0.0 (Powered by CodeSyncer)
 **Created**: [TODAY]
 
 ---
 
-*VibeSync - AI-powered multi-repository collaboration system*
+*CodeSyncer - AI-powered multi-repository collaboration system*
 *Currently Supported: Claude Code | Coming Soon: Cursor, GitHub Copilot, Continue.dev*

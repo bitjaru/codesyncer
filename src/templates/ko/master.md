@@ -2,7 +2,7 @@
 
 > 기능 요청만 하면 AI 코딩 어시스턴트가 알아서 필요한 레포를 찾아가서 작업합니다.
 >
-> **Powered by VibeSync** - AI-agnostic multi-repository collaboration system
+> **Powered by CodeSyncer** - AI-agnostic multi-repository collaboration system
 
 ---
 
@@ -150,19 +150,19 @@ AI 자동 동작:
 
 ## 🏷️ 주석 태그 시스템
 
-VibeSync는 두 가지 태그 형식을 모두 지원합니다:
+CodeSyncer는 두 가지 태그 형식을 모두 지원합니다:
 
-- **`@vibesync-*`** (권장): 새로운 표준, 모든 AI 도구 호환
+- **`@codesyncer-*`** (권장): 새로운 표준, 모든 AI 도구 호환
 - **`@claude-*`** (레거시): 기존 Claude Code 프로젝트 호환
 
 ### 사용 가능한 태그
 
 ```typescript
-@vibesync-rule        // 특별 규칙 (@claude-rule 호환)
-@vibesync-inference   // 추론 내용과 근거 (@claude-inference 호환)
-@vibesync-decision    // 의논 결정 사항 (@claude-decision 호환)
-@vibesync-todo        // 확인 필요 (@claude-todo 호환)
-@vibesync-context     // 비즈니스 맥락 (@claude-context 호환)
+@codesyncer-rule        // 특별 규칙 (@claude-rule 호환)
+@codesyncer-inference   // 추론 내용과 근거 (@claude-inference 호환)
+@codesyncer-decision    // 의논 결정 사항 (@claude-decision 호환)
+@codesyncer-todo        // 확인 필요 (@claude-todo 호환)
+@codesyncer-context     // 비즈니스 맥락 (@claude-context 호환)
 ```
 
 두 형식 모두 동일하게 작동하므로 편한 것을 사용하세요!
@@ -170,10 +170,10 @@ VibeSync는 두 가지 태그 형식을 모두 지원합니다:
 ---
 
 **GitHub**: https://github.com/[GITHUB_USERNAME]/[PROJECT_NAME]
-**버전**: 1.0.0 (Powered by VibeSync)
+**버전**: 1.0.0 (Powered by CodeSyncer)
 **생성일**: [TODAY]
 
 ---
 
-*VibeSync - AI-powered multi-repository collaboration system*
+*CodeSyncer - AI-powered multi-repository collaboration system*
 *현재 지원: Claude Code | 향후 지원 예정: Cursor, GitHub Copilot, Continue.dev*

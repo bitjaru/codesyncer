@@ -9,11 +9,11 @@ import { addRepoCommand } from './commands/add-repo';
 const program = new Command();
 
 program
-  .name('vibesync')
+  .name('codesyncer')
   .description('AI-powered multi-repository collaboration system')
   .version('1.0.0 (Currently supports: Claude Code only)\n\n' +
     chalk.gray('Want to add support for Cursor, GitHub Copilot, or other AI tools?\n') +
-    chalk.gray('We welcome contributions! https://github.com/bitjaru/vibesync-cli'))
+    chalk.gray('We welcome contributions! https://github.com/bitjaru/codesyncer-cli'))
   .addHelpText('after', `
 ${chalk.bold('Currently Supported AI Tools:')}
   ${chalk.green('✓')} Claude Code
@@ -25,14 +25,14 @@ ${chalk.bold('Coming Soon (Community Contributions Welcome!):')}
   ${chalk.gray('○')} Codeium
 
 ${chalk.bold('Examples:')}
-  $ vibesync init              ${chalk.gray('# Initialize collaboration system')}
-  $ vibesync update            ${chalk.gray('# Update project structure')}
-  $ vibesync add-repo          ${chalk.gray('# Add new repository to workspace')}
+  $ codesyncer init              ${chalk.gray('# Initialize collaboration system')}
+  $ codesyncer update            ${chalk.gray('# Update project structure')}
+  $ codesyncer add-repo          ${chalk.gray('# Add new repository to workspace')}
   `);
 
 program
   .command('init')
-  .description('Initialize VibeSync collaboration system in current directory')
+  .description('Initialize CodeSyncer collaboration system in current directory')
   .option('-l, --lang <language>', 'Language (en/ko)', 'en')
   .option('-a, --ai <tool>', 'AI tool (currently: claude only)', 'claude')
   .action(initCommand);

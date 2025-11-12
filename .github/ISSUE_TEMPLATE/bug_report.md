@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
 - OS: [e.g. macOS 14.0, Windows 11, Ubuntu 22.04]
 - Node.js version: [e.g. 18.17.0]
 - npm version: [e.g. 9.6.7]
-- vibesync-cli version: [e.g. 1.0.0]
+- codesyncer-cli version: [e.g. 1.0.0]
 - AI Tool: [e.g. Claude Code]
 
 ## 📝 Additional Context

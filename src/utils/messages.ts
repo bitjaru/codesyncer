@@ -4,7 +4,7 @@ import chalk from 'chalk';
 export const messages = {
   ko: {
     // Header
-    title: '🎵 VibeSync - AI 협업 시스템 설치',
+    title: '🎵 CodeSyncer - AI 협업 시스템 설치',
     currentSupport: 'Claude Code만 지원',
 
     // Setup mode
@@ -32,7 +32,7 @@ export const messages = {
     setupNew: '(신규)',
 
     // Repository selection
-    selectRepos: 'VibeSync를 설정할 레포지토리 선택:',
+    selectRepos: 'CodeSyncer를 설정할 레포지토리 선택:',
     alreadySetup: '이미 설정됨',
     selectAtLeastOne: '최소 하나의 레포지토리를 선택하세요.',
 
@@ -70,7 +70,7 @@ export const messages = {
     setupCompleted: (name: string) => `${name} 설정 완료`,
 
     // Success
-    success: '✅ VibeSync 설정 완료!',
+    success: '✅ CodeSyncer 설정 완료!',
     createdStructure: '📁 생성된 구조:',
     masterSwitching: '(멀티 레포 전환 로직)',
     workspaceOverview: '(워크스페이스 개요)',
@@ -87,16 +87,16 @@ export const messages = {
 
     // Tips
     quickTip: '💡 팁: 나중에 세부 설정을 변경하려면 각 레포의 .claude/CLAUDE.md를 수정하세요',
-    tagCompatibility: '태그 호환성: @vibesync-* 와 @claude-* 모두 사용 가능',
+    tagCompatibility: '태그 호환성: @codesyncer-* 와 @claude-* 모두 사용 가능',
 
     // Overwrite
-    overwriteWarning: 'VibeSync 마스터 설정이 이미 존재합니다. 덮어쓰시겠습니까?',
+    overwriteWarning: 'CodeSyncer 마스터 설정이 이미 존재합니다. 덮어쓰시겠습니까?',
     setupCancelled: '설정이 취소되었습니다.',
   },
 
   en: {
     // Header
-    title: '🎵 VibeSync - AI Collaboration System Setup',
+    title: '🎵 CodeSyncer - AI Collaboration System Setup',
     currentSupport: 'Currently supports: Claude Code only',
 
     // Setup mode
@@ -124,7 +124,7 @@ export const messages = {
     setupNew: '(new)',
 
     // Repository selection
-    selectRepos: 'Select repositories to set up VibeSync:',
+    selectRepos: 'Select repositories to set up CodeSyncer:',
     alreadySetup: 'Already configured',
     selectAtLeastOne: 'Please select at least one repository.',
 
@@ -162,7 +162,7 @@ export const messages = {
     setupCompleted: (name: string) => `${name} setup completed`,
 
     // Success
-    success: '✅ VibeSync setup complete!',
+    success: '✅ CodeSyncer setup complete!',
     createdStructure: '📁 Created structure:',
     masterSwitching: '(Multi-repo switching logic)',
     workspaceOverview: '(Workspace overview)',
@@ -179,10 +179,10 @@ export const messages = {
 
     // Tips
     quickTip: '💡 Tip: To change detailed settings later, edit .claude/CLAUDE.md in each repository',
-    tagCompatibility: 'Tag compatibility: Both @vibesync-* and @claude-* tags are supported',
+    tagCompatibility: 'Tag compatibility: Both @codesyncer-* and @claude-* tags are supported',
 
     // Overwrite
-    overwriteWarning: 'VibeSync master setup already exists. Overwrite?',
+    overwriteWarning: 'CodeSyncer master setup already exists. Overwrite?',
     setupCancelled: 'Setup cancelled.',
   },
 };

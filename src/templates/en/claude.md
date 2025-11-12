@@ -1,6 +1,6 @@
 # CLAUDE.md - [PROJECT_NAME] Coding Guide v3.0
 
-> **Powered by VibeSync** - AI Collaboration System
+> **Powered by CodeSyncer** - AI Collaboration System
 
 ## 🚀 Quick Start
 
@@ -80,20 +80,20 @@ See `.claude/ARCHITECTURE.md` for detailed structure
 
 **✨ Recommended format** (Compatible with all AI tools):
 ```typescript
-@vibesync-rule        // Special rules (non-standard implementations)
-@vibesync-inference   // Inference and rationale
-@vibesync-decision    // Post-discussion decisions
-@vibesync-todo        // Needs user confirmation
-@vibesync-context     // Business context explanation
+@codesyncer-rule        // Special rules (non-standard implementations)
+@codesyncer-inference   // Inference and rationale
+@codesyncer-decision    // Post-discussion decisions
+@codesyncer-todo        // Needs user confirmation
+@codesyncer-context     // Business context explanation
 ```
 
 **🔄 Legacy format** (Compatible with existing projects):
 ```typescript
-@claude-rule          // Same as @vibesync-rule
-@claude-inference     // Same as @vibesync-inference
-@claude-decision      // Same as @vibesync-decision
-@claude-todo          // Same as @vibesync-todo
-@claude-context       // Same as @vibesync-context
+@claude-rule          // Same as @codesyncer-rule
+@claude-inference     // Same as @codesyncer-inference
+@claude-decision      // Same as @codesyncer-decision
+@claude-todo          // Same as @codesyncer-todo
+@claude-context       // Same as @codesyncer-context
 ```
 
 ### Comment Examples by Level
@@ -103,9 +103,9 @@ See `.claude/ARCHITECTURE.md` for detailed structure
 /**
  * User authentication service
  *
- * @vibesync-context JWT-based authentication system
- * @vibesync-rule Store tokens in httpOnly cookies (XSS prevention)
- * @author VibeSync
+ * @codesyncer-context JWT-based authentication system
+ * @codesyncer-rule Store tokens in httpOnly cookies (XSS prevention)
+ * @author CodeSyncer
  * @date [TODAY]
  */
 ```
@@ -115,8 +115,8 @@ See `.claude/ARCHITECTURE.md` for detailed structure
 /**
  * Order creation form component
  *
- * @vibesync-inference 6-step form structure (common order flow)
- * @vibesync-decision [2024-10-15] Using Zustand for state management (complex form)
+ * @codesyncer-inference 6-step form structure (common order flow)
+ * @codesyncer-decision [2024-10-15] Using Zustand for state management (complex form)
  */
 export default function OrderForm() {
   // ...
@@ -125,13 +125,13 @@ export default function OrderForm() {
 
 #### 📝 Inline Level
 ```tsx
-// @vibesync-inference: Page size 20 (standard UX pattern)
+// @codesyncer-inference: Page size 20 (standard UX pattern)
 const PAGE_SIZE = 20;
 
-// @vibesync-todo: Need to confirm mainApi endpoint
+// @codesyncer-todo: Need to confirm mainApi endpoint
 const API_URL = '/api/temp';
 
-// @vibesync-decision: [2024-10-17] Soft Delete method (30-day recovery)
+// @codesyncer-decision: [2024-10-17] Soft Delete method (30-day recovery)
 async function deleteUser(id: string) {
   return db.update(id, { deleted_at: new Date() });
 }
@@ -141,16 +141,16 @@ async function deleteUser(id: string) {
 
 **✅ Good Comments**
 ```tsx
-// @vibesync-inference: Using localStorage (JWT token storage, common pattern)
-// @vibesync-context: GDPR compliance needed (auto-delete after 30 days)
-// @vibesync-decision: [2024-10-15] Using Stripe (Korean payment support)
+// @codesyncer-inference: Using localStorage (JWT token storage, common pattern)
+// @codesyncer-context: GDPR compliance needed (auto-delete after 30 days)
+// @codesyncer-decision: [2024-10-15] Using Stripe (Korean payment support)
 ```
 
 **❌ Bad Comments**
 ```tsx
-// @vibesync-inference: Did this
-// @vibesync-todo: Later
-// @vibesync-decision: Changed
+// @codesyncer-inference: Did this
+// @codesyncer-todo: Later
+// @codesyncer-decision: Changed
 ```
 
 → Always include **specific reasons and rationale**!
@@ -199,7 +199,7 @@ async function deleteUser(id: string) {
    ↓
 5. Generate code (auto-include comments)
    ↓
-6. If inference made → @vibesync-inference tag
+6. If inference made → @codesyncer-inference tag
    ↓
 7. If decision made → Record in DECISIONS.md
    ↓
@@ -232,7 +232,7 @@ When AI reads this file, it automatically:
 - **Comment Guide**: `.claude/COMMENT_GUIDE.md` - Detailed comment writing guide
 - **Project Structure**: `.claude/ARCHITECTURE.md` - Folder structure, statistics
 - **Discussion Records**: `.claude/DECISIONS.md` - All discussion decisions
-- **Master Document**: `../.vibesync/MASTER_VIBESYNC.md` - Multi-repo switching
+- **Master Document**: `../.codesyncer/MASTER_CODESYNCER.md` - Multi-repo switching
 
 ---
 
@@ -242,26 +242,26 @@ All comment tags are searchable:
 
 ```bash
 # Find all inferences
-grep -r "@vibesync-inference" ./
+grep -r "@codesyncer-inference" ./
 
 # TODO list
-grep -r "@vibesync-todo" ./
+grep -r "@codesyncer-todo" ./
 
 # Discussion decisions
-grep -r "@vibesync-decision" ./
+grep -r "@codesyncer-decision" ./
 
 # Special rules
-grep -r "@vibesync-rule" ./
+grep -r "@codesyncer-rule" ./
 ```
 
 ---
 
-**Version**: 1.0.0 (Powered by VibeSync)
+**Version**: 1.0.0 (Powered by CodeSyncer)
 **Created**: [TODAY]
 **AI Tools**: Currently Claude Code support | Coming: Cursor, GitHub Copilot, Continue.dev
 
-**Tag Compatibility**: Both `@vibesync-*` (recommended) + `@claude-*` (legacy) supported
+**Tag Compatibility**: Both `@codesyncer-*` (recommended) + `@claude-*` (legacy) supported
 
 ---
 
-*This collaboration system is open source. Suggest improvements at [VibeSync GitHub](https://github.com/bitjaru/vibesync-cli)!*
+*This collaboration system is open source. Suggest improvements at [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer-cli)!*

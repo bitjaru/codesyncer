@@ -85,7 +85,7 @@ Decisions are also recorded as comments in code:
 
 ```tsx
 /**
- * @vibesync-decision: [2024-10-17] Soft Delete method
+ * @codesyncer-decision: [2024-10-17] Soft Delete method
  * Reason: 30-day recovery, GDPR compliance
  */
 async function deleteUser(id: string) {
@@ -93,7 +93,7 @@ async function deleteUser(id: string) {
 }
 ```
 
-**Search**: `grep -r "@vibesync-decision" ./src`
+**Search**: `grep -r "@codesyncer-decision" ./src`
 
 ---
 
@@ -135,7 +135,7 @@ How would you like to proceed?
 
 ### 4. Auto Record
 - Add to DECISIONS.md
-- Add `@vibesync-decision` comment to code
+- Add `@codesyncer-decision` comment to code
 - Update ARCHITECTURE.md statistics
 
 ---
@@ -176,7 +176,7 @@ This document auto-updates in these situations:
 
 1. **Discussion-required keyword** detected and decision made
 2. User explicitly requests discussion
-3. When `@vibesync-decision` tag added
+3. When `@codesyncer-decision` tag added
 
 **Manual Addition**: Can write directly in above format
 
@@ -199,10 +199,10 @@ grep "2024-10-" .claude/DECISIONS.md
 ### Find Decisions in Code
 ```bash
 # All decision comments
-grep -r "@vibesync-decision" ./src
+grep -r "@codesyncer-decision" ./src
 
 # Decisions in specific file
-grep "@vibesync-decision" src/services/PaymentService.ts
+grep "@codesyncer-decision" src/services/PaymentService.ts
 ```
 
 ---

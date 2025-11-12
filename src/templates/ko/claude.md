@@ -1,6 +1,6 @@
 # CLAUDE.md - [PROJECT_NAME] 코딩 가이드 v3.0
 
-> **Powered by VibeSync** - AI 협업 시스템
+> **Powered by CodeSyncer** - AI 협업 시스템
 
 ## 🚀 빠른 시작
 
@@ -80,20 +80,20 @@
 
 **✨ 권장 형식** (모든 AI 도구 호환):
 ```typescript
-@vibesync-rule        // 특별 규칙 (일반적이지 않은 구현 방식)
-@vibesync-inference   // 추론 내용과 근거
-@vibesync-decision    // 의논 후 결정 사항
-@vibesync-todo        // 사용자 확인 필요
-@vibesync-context     // 비즈니스 맥락 설명
+@codesyncer-rule        // 특별 규칙 (일반적이지 않은 구현 방식)
+@codesyncer-inference   // 추론 내용과 근거
+@codesyncer-decision    // 의논 후 결정 사항
+@codesyncer-todo        // 사용자 확인 필요
+@codesyncer-context     // 비즈니스 맥락 설명
 ```
 
 **🔄 레거시 형식** (기존 프로젝트 호환):
 ```typescript
-@claude-rule          // @vibesync-rule과 동일
-@claude-inference     // @vibesync-inference와 동일
-@claude-decision      // @vibesync-decision과 동일
-@claude-todo          // @vibesync-todo와 동일
-@claude-context       // @vibesync-context와 동일
+@claude-rule          // @codesyncer-rule과 동일
+@claude-inference     // @codesyncer-inference와 동일
+@claude-decision      // @codesyncer-decision과 동일
+@claude-todo          // @codesyncer-todo와 동일
+@claude-context       // @codesyncer-context와 동일
 ```
 
 ### 주석 레벨별 예시
@@ -103,9 +103,9 @@
 /**
  * User authentication service
  *
- * @vibesync-context JWT 기반 인증 시스템
- * @vibesync-rule 토큰은 httpOnly 쿠키에 저장 (XSS 방지)
- * @author VibeSync
+ * @codesyncer-context JWT 기반 인증 시스템
+ * @codesyncer-rule 토큰은 httpOnly 쿠키에 저장 (XSS 방지)
+ * @author CodeSyncer
  * @date [TODAY]
  */
 ```
@@ -115,8 +115,8 @@
 /**
  * 주문 생성 폼 컴포넌트
  *
- * @vibesync-inference 6단계 폼 구조 (일반적인 주문 플로우)
- * @vibesync-decision [2024-10-15] Zustand로 상태 관리 (복잡한 폼이라)
+ * @codesyncer-inference 6단계 폼 구조 (일반적인 주문 플로우)
+ * @codesyncer-decision [2024-10-15] Zustand로 상태 관리 (복잡한 폼이라)
  */
 export default function OrderForm() {
   // ...
@@ -125,13 +125,13 @@ export default function OrderForm() {
 
 #### 📝 인라인 레벨
 ```tsx
-// @vibesync-inference: 페이지 크기 20 (일반적인 UX 패턴)
+// @codesyncer-inference: 페이지 크기 20 (일반적인 UX 패턴)
 const PAGE_SIZE = 20;
 
-// @vibesync-todo: mainApi 엔드포인트 확인 필요
+// @codesyncer-todo: mainApi 엔드포인트 확인 필요
 const API_URL = '/api/temp';
 
-// @vibesync-decision: [2024-10-17] Soft Delete 방식 (30일 복구 가능)
+// @codesyncer-decision: [2024-10-17] Soft Delete 방식 (30일 복구 가능)
 async function deleteUser(id: string) {
   return db.update(id, { deleted_at: new Date() });
 }
@@ -141,16 +141,16 @@ async function deleteUser(id: string) {
 
 **✅ 좋은 주석**
 ```tsx
-// @vibesync-inference: localStorage 사용 (JWT 토큰 저장용, 일반적 패턴)
-// @vibesync-context: GDPR 준수 필요 (30일 후 자동 삭제)
-// @vibesync-decision: [2024-10-15] Stripe 사용 (한국 결제 지원)
+// @codesyncer-inference: localStorage 사용 (JWT 토큰 저장용, 일반적 패턴)
+// @codesyncer-context: GDPR 준수 필요 (30일 후 자동 삭제)
+// @codesyncer-decision: [2024-10-15] Stripe 사용 (한국 결제 지원)
 ```
 
 **❌ 나쁜 주석**
 ```tsx
-// @vibesync-inference: 이렇게 했음
-// @vibesync-todo: 나중에
-// @vibesync-decision: 변경함
+// @codesyncer-inference: 이렇게 했음
+// @codesyncer-todo: 나중에
+// @codesyncer-decision: 변경함
 ```
 
 → **구체적인 이유와 근거**를 항상 포함하세요!
@@ -199,7 +199,7 @@ async function deleteUser(id: string) {
    ↓
 5. 코드 생성 (주석 자동 포함)
    ↓
-6. 추론 발생 시 → @vibesync-inference 태그
+6. 추론 발생 시 → @codesyncer-inference 태그
    ↓
 7. 의논 결정 시 → DECISIONS.md 기록
    ↓
@@ -232,7 +232,7 @@ AI가 이 파일을 읽으면 자동으로:
 - **주석 가이드**: `.claude/COMMENT_GUIDE.md` - 주석 작성 상세 가이드
 - **프로젝트 구조**: `.claude/ARCHITECTURE.md` - 폴더 구조, 통계
 - **의논 기록**: `.claude/DECISIONS.md` - 모든 의논 결정 사항
-- **마스터 문서**: `../.vibesync/MASTER_VIBESYNC.md` - 멀티 레포 전환
+- **마스터 문서**: `../.codesyncer/MASTER_CODESYNCER.md` - 멀티 레포 전환
 
 ---
 
@@ -242,26 +242,26 @@ AI가 이 파일을 읽으면 자동으로:
 
 ```bash
 # 모든 추론 찾기
-grep -r "@vibesync-inference" ./
+grep -r "@codesyncer-inference" ./
 
 # TODO 목록
-grep -r "@vibesync-todo" ./
+grep -r "@codesyncer-todo" ./
 
 # 의논 결정 사항
-grep -r "@vibesync-decision" ./
+grep -r "@codesyncer-decision" ./
 
 # 특별 규칙
-grep -r "@vibesync-rule" ./
+grep -r "@codesyncer-rule" ./
 ```
 
 ---
 
-**버전**: 1.0.0 (Powered by VibeSync)
+**버전**: 1.0.0 (Powered by CodeSyncer)
 **생성일**: [TODAY]
 **AI 도구**: 현재 Claude Code 지원 | 향후 확장: Cursor, GitHub Copilot, Continue.dev
 
-**태그 호환성**: `@vibesync-*` (권장) + `@claude-*` (레거시) 모두 지원
+**태그 호환성**: `@codesyncer-*` (권장) + `@claude-*` (레거시) 모두 지원
 
 ---
 
-*이 협업 시스템은 오픈소스입니다. 개선 아이디어는 [VibeSync GitHub](https://github.com/bitjaru/vibesync-cli)에서 제안해주세요!*
+*이 협업 시스템은 오픈소스입니다. 개선 아이디어는 [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer-cli)에서 제안해주세요!*

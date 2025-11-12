@@ -1,8 +1,8 @@
-# Contributing to VibeSync CLI
+# Contributing to CodeSyncer CLI
 
-First off, thank you for considering contributing to VibeSync! 🎉
+First off, thank you for considering contributing to CodeSyncer! 🎉
 
-VibeSync는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니다. 모든 기여를 환영합니다!
+CodeSyncer는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니다. 모든 기여를 환영합니다!
 
 ## 📋 Code of Conduct
 
@@ -12,7 +12,7 @@ VibeSync는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니�
 
 ### 버그 리포트 🐛
 
-버그를 발견하셨나요? [Issue](https://github.com/bitjaru/vibesync-cli/issues)를 열어주세요!
+버그를 발견하셨나요? [Issue](https://github.com/bitjaru/codesyncer-cli/issues)를 열어주세요!
 
 **좋은 버그 리포트에 포함될 내용:**
 - 명확하고 구체적인 제목
@@ -23,7 +23,7 @@ VibeSync는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니�
 
 ### 기능 제안 💡
 
-새로운 기능 아이디어가 있으신가요? [Issue](https://github.com/bitjaru/vibesync-cli/issues)를 열어주세요!
+새로운 기능 아이디어가 있으신가요? [Issue](https://github.com/bitjaru/codesyncer-cli/issues)를 열어주세요!
 
 **좋은 기능 제안에 포함될 내용:**
 - 기능이 해결하는 문제
@@ -36,8 +36,8 @@ VibeSync는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니�
 1. **Fork** 레포지토리
 2. **Clone** 본인의 fork
    ```bash
-   git clone https://github.com/bitjaru/vibesync-cli.git
-   cd vibesync-cli
+   git clone https://github.com/bitjaru/codesyncer-cli.git
+   cd codesyncer-cli
    ```
 3. **Branch** 생성
    ```bash
@@ -58,7 +58,7 @@ VibeSync는 커뮤니티 기여로 성장하는 오픈소스 프로젝트입니�
 6. **테스트**
    ```bash
    npm run build
-   vibesync --version
+   codesyncer --version
    ```
 7. **Commit**
    ```bash
@@ -195,12 +195,12 @@ npm run build
 
 ## 💬 질문이 있으신가요?
 
-- [GitHub Discussions](https://github.com/bitjaru/vibesync-cli/discussions)
-- [Issue 생성](https://github.com/bitjaru/vibesync-cli/issues)
+- [GitHub Discussions](https://github.com/bitjaru/codesyncer-cli/discussions)
+- [Issue 생성](https://github.com/bitjaru/codesyncer-cli/issues)
 
 ## 🙏 감사합니다!
 
-여러분의 기여가 VibeSync를 더 나은 도구로 만듭니다. 🎉
+여러분의 기여가 CodeSyncer를 더 나은 도구로 만듭니다. 🎉
 
 ---
 

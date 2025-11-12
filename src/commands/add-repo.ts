@@ -8,14 +8,14 @@ import { scanForRepositories, hasMasterSetup } from '../utils/scanner';
 import { generateRepoDoc } from '../utils/template-loader';
 
 export async function addRepoCommand(options: AddRepoOptions) {
-  console.log(chalk.bold.cyan('\n➕ VibeSync - Add Repository\n'));
+  console.log(chalk.bold.cyan('\n➕ CodeSyncer - Add Repository\n'));
 
   const currentDir = process.cwd();
 
   // Check if master setup exists
   if (!(await hasMasterSetup(currentDir))) {
-    console.log(chalk.red('✗ No VibeSync master setup found.'));
-    console.log(chalk.gray('Run `vibesync init` first.\n'));
+    console.log(chalk.red('✗ No CodeSyncer master setup found.'));
+    console.log(chalk.gray('Run `codesyncer init` first.\n'));
     return;
   }
 
@@ -24,15 +24,15 @@ export async function addRepoCommand(options: AddRepoOptions) {
   const foundRepos = await scanForRepositories(currentDir);
   spinner.succeed(`Found ${foundRepos.length} repositories`);
 
-  // Filter out repos that already have VibeSync setup
-  const reposWithoutSetup = foundRepos.filter((r) => !r.hasVibeSync);
+  // Filter out repos that already have CodeSyncer setup
+  const reposWithoutSetup = foundRepos.filter((r) => !r.hasCodeSyncer);
 
   if (reposWithoutSetup.length === 0) {
-    console.log(chalk.green('\n✓ All repositories already have VibeSync setup!\n'));
+    console.log(chalk.green('\n✓ All repositories already have CodeSyncer setup!\n'));
     return;
   }
 
-  console.log(chalk.bold('\n📁 Repositories without VibeSync:\n'));
+  console.log(chalk.bold('\n📁 Repositories without CodeSyncer:\n'));
   reposWithoutSetup.forEach((repo) => {
     console.log(`  ${chalk.gray('○')} ${chalk.bold(repo.name)} - ${chalk.gray(repo.type)}`);
   });
@@ -42,7 +42,7 @@ export async function addRepoCommand(options: AddRepoOptions) {
     {
       type: 'list',
       name: 'selectedRepo',
-      message: 'Select repository to add VibeSync:',
+      message: 'Select repository to add CodeSyncer:',
       choices: reposWithoutSetup.map((repo) => ({
         name: `${repo.name} (${repo.type})`,
         value: repo.name,
@@ -116,7 +116,7 @@ export async function addRepoCommand(options: AddRepoOptions) {
     console.log(`    └── DECISIONS.md        ${chalk.gray('(Decision log)')}\n`);
 
     console.log(chalk.bold('📝 Next step:\n'));
-    console.log(`  ${chalk.cyan('Run:')} vibesync update ${chalk.gray('(to update master documentation)')}\n`);
+    console.log(`  ${chalk.cyan('Run:')} codesyncer update ${chalk.gray('(to update master documentation)')}\n`);
   } catch (error) {
     setupSpinner.fail(`Failed to set up ${repo.name}`);
     console.error(chalk.red('\nError:'), error);

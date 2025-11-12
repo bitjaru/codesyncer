@@ -85,7 +85,7 @@
 
 ```tsx
 /**
- * @vibesync-decision: [2024-10-17] Soft Delete 방식
+ * @codesyncer-decision: [2024-10-17] Soft Delete 방식
  * 이유: 30일 복구 가능, GDPR 준수
  */
 async function deleteUser(id: string) {
@@ -93,7 +93,7 @@ async function deleteUser(id: string) {
 }
 ```
 
-**검색**: `grep -r "@vibesync-decision" ./src`
+**검색**: `grep -r "@codesyncer-decision" ./src`
 
 ---
 
@@ -135,7 +135,7 @@ C. 직접 구현
 
 ### 4. 자동 기록
 - DECISIONS.md에 추가
-- 코드에 `@vibesync-decision` 주석
+- 코드에 `@codesyncer-decision` 주석
 - ARCHITECTURE.md 통계 업데이트
 
 ---
@@ -176,7 +176,7 @@ C. 직접 구현
 
 1. **의논 필수 키워드** 감지 후 결정
 2. 사용자가 명시적으로 의논 요청
-3. `@vibesync-decision` 태그 추가 시
+3. `@codesyncer-decision` 태그 추가 시
 
 **수동 추가**: 직접 위 형식으로 작성 가능
 
@@ -199,10 +199,10 @@ grep "2024-10-" .claude/DECISIONS.md
 ### 코드에서 결정 찾기
 ```bash
 # 모든 결정 주석
-grep -r "@vibesync-decision" ./src
+grep -r "@codesyncer-decision" ./src
 
 # 특정 파일의 결정
-grep "@vibesync-decision" src/services/PaymentService.ts
+grep "@codesyncer-decision" src/services/PaymentService.ts
 ```
 
 ---

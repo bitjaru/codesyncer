@@ -26,7 +26,7 @@ export async function scanForRepositories(rootPath: string): Promise<RepositoryI
       if (isRepo) {
         const type = await detectProjectType(folderPath);
         const techStack = await detectTechStack(folderPath, type);
-        const hasVibeSync = await hasVibeSyncSetup(folderPath);
+        const hasCodeSyncer = await hasCodeSyncerSetup(folderPath);
 
         repos.push({
           name: entry.name,
@@ -34,7 +34,7 @@ export async function scanForRepositories(rootPath: string): Promise<RepositoryI
           type,
           description: '', // Will be filled by user input
           techStack, // Auto-detected tech stack
-          hasVibeSync,
+          hasCodeSyncer,
         });
       }
     }
@@ -264,20 +264,20 @@ async function detectTechStack(folderPath: string, type: 'frontend' | 'backend' 
 }
 
 /**
- * Check if VibeSync is already set up in the repository
+ * Check if CodeSyncer is already set up in the repository
  */
-async function hasVibeSyncSetup(folderPath: string): Promise<boolean> {
+async function hasCodeSyncerSetup(folderPath: string): Promise<boolean> {
   const claudePath = path.join(folderPath, '.claude');
-  const vibeSyncPath = path.join(folderPath, '.vibesync');
+  const vibeSyncPath = path.join(folderPath, '.codesyncer');
 
   return (await fs.pathExists(claudePath)) || (await fs.pathExists(vibeSyncPath));
 }
 
 /**
- * Check if master VibeSync setup exists in root
+ * Check if master CodeSyncer setup exists in root
  */
 export async function hasMasterSetup(rootPath: string): Promise<boolean> {
-  const masterPath = path.join(rootPath, '.vibesync');
+  const masterPath = path.join(rootPath, '.codesyncer');
   const legacyMasterPath = path.join(rootPath, '.master');
 
   return (await fs.pathExists(masterPath)) || (await fs.pathExists(legacyMasterPath));

@@ -6,14 +6,14 @@ import { UpdateOptions } from '../types';
 import { scanForRepositories, hasMasterSetup } from '../utils/scanner';
 
 export async function updateCommand(options: UpdateOptions) {
-  console.log(chalk.bold.cyan('\n🔄 VibeSync - Update System\n'));
+  console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update System\n'));
 
   const currentDir = process.cwd();
 
   // Check if master setup exists
   if (!(await hasMasterSetup(currentDir))) {
-    console.log(chalk.red('✗ No VibeSync master setup found.'));
-    console.log(chalk.gray('Run `vibesync init` first.\n'));
+    console.log(chalk.red('✗ No CodeSyncer master setup found.'));
+    console.log(chalk.gray('Run `codesyncer init` first.\n'));
     return;
   }
 
@@ -23,7 +23,7 @@ export async function updateCommand(options: UpdateOptions) {
   const foundRepos = await scanForRepositories(currentDir);
 
   // Read existing master doc to get current config
-  const masterPath = path.join(currentDir, '.vibesync', 'MASTER_VIBESYNC.md');
+  const masterPath = path.join(currentDir, '.codesyncer', 'MASTER_CODESYNCER.md');
   let existingRepos: string[] = [];
 
   try {
@@ -51,7 +51,7 @@ export async function updateCommand(options: UpdateOptions) {
   if (newRepos.length === 0 && removedRepos.length === 0) {
     console.log(chalk.green('\n✓ Everything is up to date!\n'));
     console.log(chalk.gray(`  Total repositories: ${foundRepos.length}`));
-    console.log(chalk.gray(`  With VibeSync setup: ${foundRepos.filter((r) => r.hasVibeSync).length}\n`));
+    console.log(chalk.gray(`  With CodeSyncer setup: ${foundRepos.filter((r) => r.hasCodeSyncer).length}\n`));
     return;
   }
 
@@ -77,7 +77,7 @@ export async function updateCommand(options: UpdateOptions) {
   const updateSpinner = ora('Updating WORKSPACE_MAP.md...').start();
 
   try {
-    const workspaceMapPath = path.join(currentDir, '.vibesync', 'WORKSPACE_MAP.md');
+    const workspaceMapPath = path.join(currentDir, '.codesyncer', 'WORKSPACE_MAP.md');
     const currentDate = new Date().toISOString().split('T')[0];
 
     // Simple update: add a note about the scan
@@ -97,6 +97,6 @@ export async function updateCommand(options: UpdateOptions) {
 
   if (newRepos.length > 0) {
     console.log(chalk.bold('📝 Next steps:\n'));
-    console.log(`  ${chalk.cyan('Run:')} vibesync add-repo ${chalk.gray('(to set up new repositories)')}\n`);
+    console.log(`  ${chalk.cyan('Run:')} codesyncer add-repo ${chalk.gray('(to set up new repositories)')}\n`);
   }
 }

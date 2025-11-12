@@ -39,7 +39,7 @@ export interface RepositoryInfo {
   type: ProjectType;
   description: string;
   techStack?: string[];
-  hasVibeSync: boolean;
+  hasCodeSyncer: boolean;
 }
 
 export interface KeywordCategory {
@@ -83,9 +83,9 @@ export interface RepoSetupConfig {
   keywordCategories: KeywordCategory[];  // For template generation
 }
 
-// Tag compatibility: @vibesync-* is primary, @claude-* for backward compatibility
+// Tag compatibility: @codesyncer-* is primary, @claude-* for backward compatibility
 export const TAG_PREFIXES = {
-  primary: 'vibesync',
+  primary: 'codesyncer',
   legacy: 'claude',  // For backward compatibility with existing codebases
 } as const;
 

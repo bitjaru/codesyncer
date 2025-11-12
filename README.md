@@ -1,25 +1,25 @@
-# VibeSync CLI
+# CodeSyncer CLI
 
 > AI-powered multi-repository collaboration system that works seamlessly with Claude Code, Cursor, GitHub Copilot, and more!
 
-[![npm version](https://img.shields.io/npm/v/vibesync-cli.svg)](https://www.npmjs.com/package/vibesync-cli)
+[![npm version](https://img.shields.io/npm/v/codesyncer.svg)](https://www.npmjs.com/package/codesyncer)
 [![License](https://img.shields.io/badge/License-Commons%20Clause-red.svg)](./LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/bitjaru/vibesync-cli.svg)](https://github.com/bitjaru/vibesync-cli/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/bitjaru/vibesync-cli.svg)](https://github.com/bitjaru/vibesync-cli/issues)
+[![GitHub stars](https://img.shields.io/github/stars/bitjaru/codesyncer.svg)](https://github.com/bitjaru/codesyncer/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/bitjaru/codesyncer.svg)](https://github.com/bitjaru/codesyncer/issues)
 
 [한국어 문서](./README.ko.md) | English
 
 ---
 
-## 🎯 What is VibeSync?
+## 🎯 What is CodeSyncer?
 
-VibeSync is a CLI tool that sets up an intelligent collaboration system between you and AI coding assistants across multiple repositories. It helps AI understand your project structure, coding standards, and business decisions through a structured documentation system.
+CodeSyncer is a CLI tool that sets up an intelligent collaboration system between you and AI coding assistants across multiple repositories. It helps AI understand your project structure, coding standards, and business decisions through a structured documentation system.
 
 ### Key Features
 
 - 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
 - 📁 **Multi-Repository Support**: Seamlessly work across backend, frontend, mobile repos
-- 🏷️ **Comment Tag System**: `@vibesync-*` tags to record decisions and inferences
+- 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
 - 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
 - 🌐 **Multi-Language**: Full Korean and English support
 - ⚡ **Quick Setup**: One-command installation for your entire workspace
@@ -29,7 +29,7 @@ VibeSync is a CLI tool that sets up an intelligent collaboration system between 
 ## 📦 Installation
 
 ```bash
-npm install -g vibesync-cli
+npm install -g codesyncer
 ```
 
 ---
@@ -53,7 +53,7 @@ workspace/
 ### 2. Run initialization
 
 ```bash
-vibesync init
+codesyncer init
 ```
 
 ### 3. Choose setup mode
@@ -74,9 +74,9 @@ Choose between Korean (한글) or English
 
 ### 5. That's it!
 
-VibeSync will:
+CodeSyncer will:
 - Scan and detect your repositories (Java, Python, Node.js, React, etc.)
-- Create master document at workspace root (`.vibesync/MASTER_VIBESYNC.md`)
+- Create master document at workspace root (`.codesyncer/MASTER_CODESYNCER.md`)
 - Generate collaboration files in each repo (`.claude/` folder)
   - `CLAUDE.md` - Coding guidelines
   - `COMMENT_GUIDE.md` - Comment tag usage guide
@@ -89,51 +89,51 @@ VibeSync will:
 
 ### Initialize collaboration system
 ```bash
-vibesync init
+codesyncer init
 ```
 
 ### Update project structure
 ```bash
-vibesync update
+codesyncer update
 ```
 
 ### Add new repository to workspace
 ```bash
-vibesync add-repo
+codesyncer add-repo
 ```
 
 ---
 
 ## 🏷️ Comment Tag System
 
-VibeSync uses a structured comment tag system to permanently record all AI inferences and decisions in your code.
+CodeSyncer uses a structured comment tag system to permanently record all AI inferences and decisions in your code.
 
 ### Available Tags
 
 | Tag | Purpose | Example |
 |-----|---------|---------|
-| `@vibesync-rule` | Special rules for non-standard implementations | `// @vibesync-rule: Use any type here (external lib has no types)` |
-| `@vibesync-inference` | AI inferred something with rationale | `// @vibesync-inference: Page size 20 (standard UX)` |
-| `@vibesync-decision` | Post-discussion decision | `// @vibesync-decision: [2024-10-15] Using Stripe (intl payment)` |
-| `@vibesync-todo` | Needs user confirmation | `// @vibesync-todo: Confirm API endpoint URL` |
-| `@vibesync-context` | Business context explanation | `// @vibesync-context: GDPR compliance (30-day retention)` |
+| `@codesyncer-rule` | Special rules for non-standard implementations | `// @codesyncer-rule: Use any type here (external lib has no types)` |
+| `@codesyncer-inference` | AI inferred something with rationale | `// @codesyncer-inference: Page size 20 (standard UX)` |
+| `@codesyncer-decision` | Post-discussion decision | `// @codesyncer-decision: [2024-10-15] Using Stripe (intl payment)` |
+| `@codesyncer-todo` | Needs user confirmation | `// @codesyncer-todo: Confirm API endpoint URL` |
+| `@codesyncer-context` | Business context explanation | `// @codesyncer-context: GDPR compliance (30-day retention)` |
 
 ### Legacy Compatibility
 
 Existing `@claude-*` tags are fully compatible:
 ```typescript
-@claude-rule        = @vibesync-rule
-@claude-inference   = @vibesync-inference
-@claude-decision    = @vibesync-decision
-@claude-todo        = @vibesync-todo
-@claude-context     = @vibesync-context
+@claude-rule        = @codesyncer-rule
+@claude-inference   = @codesyncer-inference
+@claude-decision    = @codesyncer-decision
+@claude-todo        = @codesyncer-todo
+@claude-context     = @codesyncer-context
 ```
 
 ---
 
 ## 🤝 Auto-Discussion System
 
-VibeSync automatically pauses AI work when critical keywords are detected, preventing costly mistakes.
+CodeSyncer automatically pauses AI work when critical keywords are detected, preventing costly mistakes.
 
 ### Critical Keywords (Auto-Enabled)
 
@@ -155,7 +155,7 @@ VibeSync automatically pauses AI work when critical keywords are detected, preve
 
 ## 🌍 Multi-Language Support
 
-VibeSync fully supports both Korean and English:
+CodeSyncer fully supports both Korean and English:
 - Installation prompts
 - Generated documentation
 - Comment guidelines
@@ -167,7 +167,7 @@ Switch language anytime during setup or use language-specific commands.
 
 ## 🔧 Tech Stack Auto-Detection
 
-VibeSync automatically detects your project type and tech stack:
+CodeSyncer automatically detects your project type and tech stack:
 
 **Supported:**
 - ☕ Java (Spring Boot)
@@ -208,8 +208,8 @@ AI: ✅ Recording decision...
     Creating:
     - backend/src/services/PaymentService.ts
       /**
-       * @vibesync-decision: [2024-11-12] Using Stripe (international support)
-       * @vibesync-context: Support USD, EUR, KRW
+       * @codesyncer-decision: [2024-11-12] Using Stripe (international support)
+       * @codesyncer-context: Support USD, EUR, KRW
        */
 
     - frontend/src/components/PaymentForm.tsx
@@ -220,15 +220,15 @@ AI: ✅ Recording decision...
 
 ---
 
-## 🎯 Why VibeSync?
+## 🎯 Why CodeSyncer?
 
-### Before VibeSync ❌
+### Before CodeSyncer ❌
 - AI makes assumptions about critical business logic
 - No record of why decisions were made
 - Lost context switching between repos
 - Inconsistent coding patterns across team
 
-### After VibeSync ✅
+### After CodeSyncer ✅
 - AI pauses for important decisions
 - All decisions permanently recorded
 - Seamless multi-repo workflows
@@ -248,18 +248,18 @@ AI: ✅ Recording decision...
 - Continue.dev
 - Codeium
 
-Want to add support for your favorite AI tool? [Contribute here!](https://github.com/bitjaru/vibesync-cli/issues)
+Want to add support for your favorite AI tool? [Contribute here!](https://github.com/bitjaru/codesyncer/issues)
 
 ---
 
 ## 📁 Project Structure
 
-After running `vibesync init`, your workspace will look like:
+After running `codesyncer init`, your workspace will look like:
 
 ```
 workspace/
-├── .vibesync/
-│   └── MASTER_VIBESYNC.md         # Multi-repo auto-switching guide
+├── .codesyncer/
+│   └── MASTER_CODESYNCER.md         # Multi-repo auto-switching guide
 ├── backend/
 │   └── .claude/
 │       ├── CLAUDE.md              # Coding guidelines
@@ -283,7 +283,7 @@ workspace/
 In Expert setup mode, you can add custom keywords:
 
 ```bash
-vibesync init --mode expert
+codesyncer init --mode expert
 ```
 
 Then select "Add custom keywords" and specify:
@@ -293,7 +293,7 @@ Then select "Add custom keywords" and specify:
 
 ### Updating Existing Projects
 
-Run `vibesync update` to:
+Run `codesyncer update` to:
 - Refresh project structure in `ARCHITECTURE.md`
 - Update comment tag statistics
 - Rescan file structure
@@ -306,25 +306,25 @@ Find all tagged comments in your codebase:
 
 ```bash
 # All inferences
-grep -r "@vibesync-inference" ./src
+grep -r "@codesyncer-inference" ./src
 
 # All TODOs
-grep -r "@vibesync-todo" ./src
+grep -r "@codesyncer-todo" ./src
 
 # All decisions
-grep -r "@vibesync-decision" ./src
+grep -r "@codesyncer-decision" ./src
 ```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! VibeSync is open source and community-driven.
+We welcome contributions! CodeSyncer is open source and community-driven.
 
 ### 🚀 Quick Start for Contributors
 
 1. **Fork** this repository
-2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/vibesync-cli.git`
+2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/codesyncer.git`
 3. **Create a branch**: `git checkout -b feature/amazing-feature`
 4. **Make changes** and commit: `git commit -m "feat: Add amazing feature"`
 5. **Push** to your fork: `git push origin feature/amazing-feature`
@@ -344,8 +344,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines.
 
 ### 💬 Questions?
 
-- 📝 Open an [Issue](https://github.com/bitjaru/vibesync-cli/issues)
-- 💡 Start a [Discussion](https://github.com/bitjaru/vibesync-cli/discussions)
+- 📝 Open an [Issue](https://github.com/bitjaru/codesyncer/issues)
+- 💡 Start a [Discussion](https://github.com/bitjaru/codesyncer/discussions)
 
 ---
 
@@ -361,7 +361,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines.
 See [LICENSE](./LICENSE) file for full details.
 
 **Why Commons Clause?**
-We want VibeSync to remain free and accessible to all developers while preventing commercial exploitation. If you need a commercial license, please contact us.
+We want CodeSyncer to remain free and accessible to all developers while preventing commercial exploitation. If you need a commercial license, please contact us.
 
 ---
 
@@ -371,22 +371,22 @@ We want VibeSync to remain free and accessible to all developers while preventin
 A: Currently, yes. But we're building support for Cursor, GitHub Copilot, and other tools. Contributions welcome!
 
 **Q: Can I use this on a single repository?**
-A: Yes! Just run `vibesync init` in any repository. The multi-repo features are optional.
+A: Yes! Just run `codesyncer init` in any repository. The multi-repo features are optional.
 
 **Q: Will this slow down AI responses?**
-A: No. VibeSync only adds documentation files that AI reads once per session. It actually makes AI more efficient by providing context upfront.
+A: No. CodeSyncer only adds documentation files that AI reads once per session. It actually makes AI more efficient by providing context upfront.
 
 **Q: Can I customize the keyword detection?**
 A: Yes, use Expert setup mode to fully customize which keywords trigger discussions.
 
 **Q: Is my code/data sent anywhere?**
-A: No. VibeSync is a purely local CLI tool that generates documentation files in your repos. Nothing is sent to external servers.
+A: No. CodeSyncer is a purely local CLI tool that generates documentation files in your repos. Nothing is sent to external servers.
 
 ---
 
 ## 🌟 Show Your Support
 
-If VibeSync helps your team, please:
+If CodeSyncer helps your team, please:
 - ⭐ Star this repo
 - 🐦 Share on Twitter
 - 📝 Write about your experience
@@ -394,24 +394,24 @@ If VibeSync helps your team, please:
 
 ### 💰 Support Development
 
-If you'd like to support the development of VibeSync, you can donate via cryptocurrency:
+If you'd like to support the development of CodeSyncer, you can donate via cryptocurrency:
 
 **Ethereum (ETH) / ERC-20 Tokens:**
 ```
 0x0a12177c448778a37Fa4EeA57d33D06713F200De
 ```
 
-Your support helps maintain and improve VibeSync! 🙏
+Your support helps maintain and improve CodeSyncer! 🙏
 
 ---
 
 ## 📮 Contact
 
-- **Issues**: [GitHub Issues](https://github.com/bitjaru/vibesync-cli/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/bitjaru/vibesync-cli/discussions)
+- **Issues**: [GitHub Issues](https://github.com/bitjaru/codesyncer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/bitjaru/codesyncer/discussions)
 
 ---
 
-**Built with ❤️ by the VibeSync community**
+**Built with ❤️ by the CodeSyncer community**
 
 *Making AI collaboration seamless, one repo at a time.*

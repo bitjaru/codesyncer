@@ -179,17 +179,17 @@ function getJavaGuidelines(lang: Language): string {
 /**
  * 사용자 서비스
  *
- * @vibesync-context 사용자 관리 비즈니스 로직
- * @vibesync-rule 트랜잭션 관리 필수
+ * @codesyncer-context 사용자 관리 비즈니스 로직
+ * @codesyncer-rule 트랜잭션 관리 필수
  */
 @Service
 public class UserService {
-    // @vibesync-inference: BCrypt 사용 (보안 표준)
+    // @codesyncer-inference: BCrypt 사용 (보안 표준)
     private final PasswordEncoder passwordEncoder;
 
-    // @vibesync-todo: 이메일 중복 체크 추가 필요
+    // @codesyncer-todo: 이메일 중복 체크 추가 필요
     public User createUser(UserDto dto) {
-        // @vibesync-decision: [날짜] Soft Delete 방식 채택
+        // @codesyncer-decision: [날짜] Soft Delete 방식 채택
         return userRepository.save(user);
     }
 }
@@ -197,9 +197,9 @@ public class UserService {
 
 **기본 원칙:**
 - 모든 public 메서드에 JavaDoc 작성
-- 추론한 내용은 \`@vibesync-inference\` 태그로 명시
-- 비즈니스 결정은 \`@vibesync-decision\` 태그로 기록
-- 확인 필요한 부분은 \`@vibesync-todo\` 태그 추가`;
+- 추론한 내용은 \`@codesyncer-inference\` 태그로 명시
+- 비즈니스 결정은 \`@codesyncer-decision\` 태그로 기록
+- 확인 필요한 부분은 \`@codesyncer-todo\` 태그 추가`;
   } else {
     return `### ☕ Java Project Guidelines
 
@@ -208,17 +208,17 @@ public class UserService {
 /**
  * User service
  *
- * @vibesync-context User management business logic
- * @vibesync-rule Transaction management required
+ * @codesyncer-context User management business logic
+ * @codesyncer-rule Transaction management required
  */
 @Service
 public class UserService {
-    // @vibesync-inference: Using BCrypt (security standard)
+    // @codesyncer-inference: Using BCrypt (security standard)
     private final PasswordEncoder passwordEncoder;
 
-    // @vibesync-todo: Add email duplicate check
+    // @codesyncer-todo: Add email duplicate check
     public User createUser(UserDto dto) {
-        // @vibesync-decision: [DATE] Adopted soft delete pattern
+        // @codesyncer-decision: [DATE] Adopted soft delete pattern
         return userRepository.save(user);
     }
 }
@@ -226,9 +226,9 @@ public class UserService {
 
 **Basic Principles:**
 - Write JavaDoc for all public methods
-- Mark inferences with \`@vibesync-inference\` tag
-- Record decisions with \`@vibesync-decision\` tag
-- Use \`@vibesync-todo\` for items needing confirmation`;
+- Mark inferences with \`@codesyncer-inference\` tag
+- Record decisions with \`@codesyncer-decision\` tag
+- Use \`@codesyncer-todo\` for items needing confirmation`;
   }
 }
 
@@ -244,12 +244,12 @@ function getPythonGuidelines(lang: Language): string {
 """
 사용자 서비스
 
-@vibesync-context 사용자 관리 비즈니스 로직
-@vibesync-rule 모든 DB 작업은 async/await 사용
+@codesyncer-context 사용자 관리 비즈니스 로직
+@codesyncer-rule 모든 DB 작업은 async/await 사용
 """
 
 class UserService:
-    # @vibesync-inference: bcrypt 사용 (보안 표준)
+    # @codesyncer-inference: bcrypt 사용 (보안 표준)
     def __init__(self, pwd_context: CryptContext):
         self.pwd_context = pwd_context
 
@@ -257,17 +257,17 @@ class UserService:
         """
         사용자 생성
 
-        @vibesync-todo: 이메일 중복 체크 추가
-        @vibesync-decision: [날짜] Soft delete 패턴 채택
+        @codesyncer-todo: 이메일 중복 체크 추가
+        @codesyncer-decision: [날짜] Soft delete 패턴 채택
         """
         return await self.db.save(user)
 \`\`\`
 
 **기본 원칙:**
 - 모든 함수/클래스에 docstring 작성
-- 추론한 내용은 \`@vibesync-inference\` 태그로 명시
-- 비즈니스 결정은 \`@vibesync-decision\` 태그로 기록
-- 확인 필요한 부분은 \`@vibesync-todo\` 태그 추가`;
+- 추론한 내용은 \`@codesyncer-inference\` 태그로 명시
+- 비즈니스 결정은 \`@codesyncer-decision\` 태그로 기록
+- 확인 필요한 부분은 \`@codesyncer-todo\` 태그 추가`;
   } else {
     return `### 🐍 Python Project Guidelines
 
@@ -276,12 +276,12 @@ class UserService:
 """
 User service
 
-@vibesync-context User management business logic
-@vibesync-rule All DB operations use async/await
+@codesyncer-context User management business logic
+@codesyncer-rule All DB operations use async/await
 """
 
 class UserService:
-    # @vibesync-inference: Using bcrypt (security standard)
+    # @codesyncer-inference: Using bcrypt (security standard)
     def __init__(self, pwd_context: CryptContext):
         self.pwd_context = pwd_context
 
@@ -289,17 +289,17 @@ class UserService:
         """
         Create user
 
-        @vibesync-todo: Add email duplicate check
-        @vibesync-decision: [DATE] Adopted soft delete pattern
+        @codesyncer-todo: Add email duplicate check
+        @codesyncer-decision: [DATE] Adopted soft delete pattern
         """
         return await self.db.save(user)
 \`\`\`
 
 **Basic Principles:**
 - Write docstrings for all functions/classes
-- Mark inferences with \`@vibesync-inference\` tag
-- Record decisions with \`@vibesync-decision\` tag
-- Use \`@vibesync-todo\` for items needing confirmation`;
+- Mark inferences with \`@codesyncer-inference\` tag
+- Record decisions with \`@codesyncer-decision\` tag
+- Use \`@codesyncer-todo\` for items needing confirmation`;
   }
 }
 
@@ -315,26 +315,26 @@ function getReactGuidelines(lang: Language): string {
 /**
  * 사용자 목록 컴포넌트
  *
- * @vibesync-context 사용자 관리 페이지
- * @vibesync-inference React Query 사용 (데이터 페칭 표준)
+ * @codesyncer-context 사용자 관리 페이지
+ * @codesyncer-inference React Query 사용 (데이터 페칭 표준)
  */
 export default function UserList() {
-  // @vibesync-inference: 페이지 크기 20 (일반적인 UX)
+  // @codesyncer-inference: 페이지 크기 20 (일반적인 UX)
   const [page, setPage] = useState(1);
 
-  // @vibesync-todo: 필터링 기능 추가 필요
+  // @codesyncer-todo: 필터링 기능 추가 필요
   const { data } = useQuery(['users', page], fetchUsers);
 
-  // @vibesync-decision: [날짜] 테이블 레이아웃 채택 (UX팀 결정)
+  // @codesyncer-decision: [날짜] 테이블 레이아웃 채택 (UX팀 결정)
   return <UserTable data={data} />;
 }
 \`\`\`
 
 **기본 원칙:**
 - 모든 컴포넌트에 JSDoc 작성
-- 추론한 내용은 \`@vibesync-inference\` 태그로 명시
-- 비즈니스 결정은 \`@vibesync-decision\` 태그로 기록
-- 확인 필요한 부분은 \`@vibesync-todo\` 태그 추가`;
+- 추론한 내용은 \`@codesyncer-inference\` 태그로 명시
+- 비즈니스 결정은 \`@codesyncer-decision\` 태그로 기록
+- 확인 필요한 부분은 \`@codesyncer-todo\` 태그 추가`;
   } else {
     return `### ⚛️ React Project Guidelines
 
@@ -343,26 +343,26 @@ export default function UserList() {
 /**
  * User list component
  *
- * @vibesync-context User management page
- * @vibesync-inference Using React Query (data fetching standard)
+ * @codesyncer-context User management page
+ * @codesyncer-inference Using React Query (data fetching standard)
  */
 export default function UserList() {
-  // @vibesync-inference: Page size 20 (common UX)
+  // @codesyncer-inference: Page size 20 (common UX)
   const [page, setPage] = useState(1);
 
-  // @vibesync-todo: Need to add filtering feature
+  // @codesyncer-todo: Need to add filtering feature
   const { data } = useQuery(['users', page], fetchUsers);
 
-  // @vibesync-decision: [DATE] Adopted table layout (UX team decision)
+  // @codesyncer-decision: [DATE] Adopted table layout (UX team decision)
   return <UserTable data={data} />;
 }
 \`\`\`
 
 **Basic Principles:**
 - Write JSDoc for all components
-- Mark inferences with \`@vibesync-inference\` tag
-- Record decisions with \`@vibesync-decision\` tag
-- Use \`@vibesync-todo\` for items needing confirmation`;
+- Mark inferences with \`@codesyncer-inference\` tag
+- Record decisions with \`@codesyncer-decision\` tag
+- Use \`@codesyncer-todo\` for items needing confirmation`;
   }
 }
 
@@ -378,16 +378,16 @@ function getTypeScriptGuidelines(lang: Language): string {
 /**
  * 사용자 서비스
  *
- * @vibesync-context 사용자 관리 비즈니스 로직
- * @vibesync-rule 모든 함수는 명시적 타입 정의
+ * @codesyncer-context 사용자 관리 비즈니스 로직
+ * @codesyncer-rule 모든 함수는 명시적 타입 정의
  */
 export class UserService {
-  // @vibesync-inference: 싱글톤 패턴 사용 (리소스 관리)
+  // @codesyncer-inference: 싱글톤 패턴 사용 (리소스 관리)
   private static instance: UserService;
 
-  // @vibesync-todo: 에러 핸들링 개선 필요
+  // @codesyncer-todo: 에러 핸들링 개선 필요
   async createUser(data: CreateUserDto): Promise<User> {
-    // @vibesync-decision: [날짜] Prisma ORM 채택
+    // @codesyncer-decision: [날짜] Prisma ORM 채택
     return await prisma.user.create({ data });
   }
 }
@@ -395,9 +395,9 @@ export class UserService {
 
 **기본 원칙:**
 - 모든 함수에 타입 정의 및 JSDoc 작성
-- 추론한 내용은 \`@vibesync-inference\` 태그로 명시
-- 비즈니스 결정은 \`@vibesync-decision\` 태그로 기록
-- 확인 필요한 부분은 \`@vibesync-todo\` 태그 추가`;
+- 추론한 내용은 \`@codesyncer-inference\` 태그로 명시
+- 비즈니스 결정은 \`@codesyncer-decision\` 태그로 기록
+- 확인 필요한 부분은 \`@codesyncer-todo\` 태그 추가`;
   } else {
     return `### 📘 TypeScript Project Guidelines
 
@@ -406,16 +406,16 @@ export class UserService {
 /**
  * User service
  *
- * @vibesync-context User management business logic
- * @vibesync-rule All functions must have explicit types
+ * @codesyncer-context User management business logic
+ * @codesyncer-rule All functions must have explicit types
  */
 export class UserService {
-  // @vibesync-inference: Using singleton pattern (resource management)
+  // @codesyncer-inference: Using singleton pattern (resource management)
   private static instance: UserService;
 
-  // @vibesync-todo: Need to improve error handling
+  // @codesyncer-todo: Need to improve error handling
   async createUser(data: CreateUserDto): Promise<User> {
-    // @vibesync-decision: [DATE] Adopted Prisma ORM
+    // @codesyncer-decision: [DATE] Adopted Prisma ORM
     return await prisma.user.create({ data });
   }
 }
@@ -423,9 +423,9 @@ export class UserService {
 
 **Basic Principles:**
 - Write type definitions and JSDoc for all functions
-- Mark inferences with \`@vibesync-inference\` tag
-- Record decisions with \`@vibesync-decision\` tag
-- Use \`@vibesync-todo\` for items needing confirmation`;
+- Mark inferences with \`@codesyncer-inference\` tag
+- Record decisions with \`@codesyncer-decision\` tag
+- Use \`@codesyncer-todo\` for items needing confirmation`;
   }
 }
 
@@ -441,20 +441,20 @@ function getGenericGuidelines(lang: Language): string {
 /**
  * 함수/클래스 설명
  *
- * @vibesync-context 비즈니스 맥락 설명
- * @vibesync-rule 특별한 규칙이 있다면 명시
+ * @codesyncer-context 비즈니스 맥락 설명
+ * @codesyncer-rule 특별한 규칙이 있다면 명시
  */
 
-// @vibesync-inference: 추론한 내용 (근거 포함)
-// @vibesync-decision: [날짜] 결정 사항 (이유 포함)
-// @vibesync-todo: 확인 필요한 내용
+// @codesyncer-inference: 추론한 내용 (근거 포함)
+// @codesyncer-decision: [날짜] 결정 사항 (이유 포함)
+// @codesyncer-todo: 확인 필요한 내용
 \`\`\`
 
 **기본 원칙:**
 - 모든 함수/클래스에 설명 주석 작성
-- 추론한 내용은 \`@vibesync-inference\` 태그로 명시
-- 비즈니스 결정은 \`@vibesync-decision\` 태그로 기록
-- 확인 필요한 부분은 \`@vibesync-todo\` 태그 추가`;
+- 추론한 내용은 \`@codesyncer-inference\` 태그로 명시
+- 비즈니스 결정은 \`@codesyncer-decision\` 태그로 기록
+- 확인 필요한 부분은 \`@codesyncer-todo\` 태그 추가`;
   } else {
     return `### 📝 Coding Guidelines
 
@@ -463,19 +463,19 @@ function getGenericGuidelines(lang: Language): string {
 /**
  * Function/Class description
  *
- * @vibesync-context Business context explanation
- * @vibesync-rule Specify special rules if any
+ * @codesyncer-context Business context explanation
+ * @codesyncer-rule Specify special rules if any
  */
 
-// @vibesync-inference: Inferred content (with rationale)
-// @vibesync-decision: [DATE] Decision made (with reason)
-// @vibesync-todo: Items needing confirmation
+// @codesyncer-inference: Inferred content (with rationale)
+// @codesyncer-decision: [DATE] Decision made (with reason)
+// @codesyncer-todo: Items needing confirmation
 \`\`\`
 
 **Basic Principles:**
 - Write descriptive comments for all functions/classes
-- Mark inferences with \`@vibesync-inference\` tag
-- Record decisions with \`@vibesync-decision\` tag
-- Use \`@vibesync-todo\` for items needing confirmation`;
+- Mark inferences with \`@codesyncer-inference\` tag
+- Record decisions with \`@codesyncer-decision\` tag
+- Use \`@codesyncer-todo\` for items needing confirmation`;
   }
 }

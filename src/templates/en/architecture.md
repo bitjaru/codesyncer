@@ -38,11 +38,11 @@
 
 ## 🔍 Comment Tag Statistics
 
-- `@vibesync-inference`: 0
-- `@vibesync-decision`: 0
-- `@vibesync-todo`: 0
-- `@vibesync-rule`: 0
-- `@vibesync-context`: 0
+- `@codesyncer-inference`: 0
+- `@codesyncer-decision`: 0
+- `@codesyncer-todo`: 0
+- `@codesyncer-rule`: 0
+- `@codesyncer-context`: 0
 
 **Legacy tags (`@claude-*`)**: 0
 
@@ -56,7 +56,7 @@
 
 No TODOs currently.
 
-**Search**: `grep -r "@vibesync-todo" ./src`
+**Search**: `grep -r "@codesyncer-todo" ./src`
 
 ---
 
@@ -144,4 +144,4 @@ No API endpoints discovered.
 
 ---
 
-*This document is auto-generated and managed by VibeSync.*
+*This document is auto-generated and managed by CodeSyncer.*

@@ -1,6 +1,6 @@
 # 주석 작성 가이드
 
-> **VibeSync 주석 시스템** - 모든 추론과 결정을 영구 기록
+> **CodeSyncer 주석 시스템** - 모든 추론과 결정을 영구 기록
 
 ---
 
@@ -10,21 +10,21 @@
 
 | 태그 | 용도 | 사용 시점 | 중요도 |
 |------|------|-----------|--------|
-| `@vibesync-rule` | 특별 규칙 | 일반적이지 않은 구현 방식 | ⭐⭐⭐ |
-| `@vibesync-inference` | 추론 내용 | AI가 추론한 내용과 근거 | ⭐⭐⭐⭐⭐ |
-| `@vibesync-decision` | 결정 사항 | 의논 후 결정된 내용 | ⭐⭐⭐⭐⭐ |
-| `@vibesync-todo` | TODO | 사용자 확인 필요 | ⭐⭐⭐⭐ |
-| `@vibesync-context` | 비즈니스 맥락 | 도메인 지식, 배경 설명 | ⭐⭐⭐ |
+| `@codesyncer-rule` | 특별 규칙 | 일반적이지 않은 구현 방식 | ⭐⭐⭐ |
+| `@codesyncer-inference` | 추론 내용 | AI가 추론한 내용과 근거 | ⭐⭐⭐⭐⭐ |
+| `@codesyncer-decision` | 결정 사항 | 의논 후 결정된 내용 | ⭐⭐⭐⭐⭐ |
+| `@codesyncer-todo` | TODO | 사용자 확인 필요 | ⭐⭐⭐⭐ |
+| `@codesyncer-context` | 비즈니스 맥락 | 도메인 지식, 배경 설명 | ⭐⭐⭐ |
 
 ### 레거시 호환
 
 기존 `@claude-*` 태그도 완전히 호환됩니다:
 ```typescript
-@claude-rule        = @vibesync-rule
-@claude-inference   = @vibesync-inference
-@claude-decision    = @vibesync-decision
-@claude-todo        = @vibesync-todo
-@claude-context     = @vibesync-context
+@claude-rule        = @codesyncer-rule
+@claude-inference   = @codesyncer-inference
+@claude-decision    = @codesyncer-decision
+@claude-todo        = @codesyncer-todo
+@claude-context     = @codesyncer-context
 ```
 
 ---
@@ -39,9 +39,9 @@
 /**
  * User authentication service
  *
- * @vibesync-context JWT 기반 인증 시스템
- * @vibesync-rule 토큰은 httpOnly 쿠키에 저장 (XSS 방지)
- * @author VibeSync
+ * @codesyncer-context JWT 기반 인증 시스템
+ * @codesyncer-rule 토큰은 httpOnly 쿠키에 저장 (XSS 방지)
+ * @author CodeSyncer
  * @date 2024-10-17
  */
 ```
@@ -54,9 +54,9 @@
 /**
  * 주문 생성 폼
  *
- * @vibesync-context 6단계 주문 프로세스
- * @vibesync-inference 각 단계마다 자동 저장 (일반적인 UX 패턴)
- * @vibesync-decision [2024-10-15] Zustand로 상태 관리 (복잡한 폼 상태)
+ * @codesyncer-context 6단계 주문 프로세스
+ * @codesyncer-inference 각 단계마다 자동 저장 (일반적인 UX 패턴)
+ * @codesyncer-decision [2024-10-15] Zustand로 상태 관리 (복잡한 폼 상태)
  */
 export default function OrderForm() {
   // ...
@@ -68,19 +68,19 @@ export default function OrderForm() {
 **언제**: 코드 라인 위 또는 옆
 
 ```typescript
-// @vibesync-inference: 페이지 크기 20 (일반적인 테이블 UX)
+// @codesyncer-inference: 페이지 크기 20 (일반적인 테이블 UX)
 const PAGE_SIZE = 20;
 
-// @vibesync-todo: mainApi 엔드포인트 URL 확인 필요
+// @codesyncer-todo: mainApi 엔드포인트 URL 확인 필요
 const API_URL = '/api/temp';
 
-// @vibesync-decision: [2024-10-17] Soft Delete (30일 복구 가능)
+// @codesyncer-decision: [2024-10-17] Soft Delete (30일 복구 가능)
 async function deleteUser(id: string) {
-  // @vibesync-inference: deleted_at 플래그 사용 (복구 기능용)
+  // @codesyncer-inference: deleted_at 플래그 사용 (복구 기능용)
   return db.update(id, { deleted_at: new Date() });
 }
 
-const maxRetry = 3; // @vibesync-inference: 3회 재시도 (안정성)
+const maxRetry = 3; // @codesyncer-inference: 3회 재시도 (안정성)
 ```
 
 ---
@@ -93,22 +93,22 @@ const maxRetry = 3; // @vibesync-inference: 3회 재시도 (안정성)
 /**
  * 배송비 계산 함수
  *
- * @vibesync-context 배송비 정책
+ * @codesyncer-context 배송비 정책
  * - 3만원 이상: 무료 배송
  * - 3만원 미만: 3,000원
  * - 제주/도서산간: +3,000원
  *
- * @vibesync-decision [2024-10-10] 정책 확정 (마케팅팀 협의)
- * @vibesync-rule 정책 변경 시 반드시 마케팅팀 승인 필요
+ * @codesyncer-decision [2024-10-10] 정책 확정 (마케팅팀 협의)
+ * @codesyncer-rule 정책 변경 시 반드시 마케팅팀 승인 필요
  */
 function calculateShippingFee(orderAmount: number, region: string): number {
-  // @vibesync-inference: 3만원 기준 (업계 표준)
+  // @codesyncer-inference: 3만원 기준 (업계 표준)
   const FREE_SHIPPING_THRESHOLD = 30000;
 
-  // @vibesync-decision: [2024-10-10] 기본 배송비 3,000원
+  // @codesyncer-decision: [2024-10-10] 기본 배송비 3,000원
   const BASIC_FEE = 3000;
 
-  // @vibesync-todo: 제주/도서산간 지역 목록 확인 필요
+  // @codesyncer-todo: 제주/도서산간 지역 목록 확인 필요
   const EXTRA_FEE_REGIONS = ['제주', '울릉도'];
 
   if (orderAmount >= FREE_SHIPPING_THRESHOLD) {
@@ -128,20 +128,20 @@ function calculateShippingFee(orderAmount: number, region: string): number {
 /**
  * 사용자 인터페이스
  *
- * @vibesync-context GDPR 준수 필요
- * @vibesync-rule 개인정보는 암호화 저장
+ * @codesyncer-context GDPR 준수 필요
+ * @codesyncer-rule 개인정보는 암호화 저장
  */
 interface User {
   id: string;
 
-  // @vibesync-inference: email을 username으로 사용 (일반적 패턴)
+  // @codesyncer-inference: email을 username으로 사용 (일반적 패턴)
   email: string;
 
-  // @vibesync-decision: [2024-10-12] bcrypt 해싱 (보안팀 권고)
+  // @codesyncer-decision: [2024-10-12] bcrypt 해싱 (보안팀 권고)
   passwordHash: string;
 
-  // @vibesync-context: Soft Delete용
-  // @vibesync-decision: [2024-10-15] 30일 후 완전 삭제 (GDPR)
+  // @codesyncer-context: Soft Delete용
+  // @codesyncer-decision: [2024-10-15] 30일 후 완전 삭제 (GDPR)
   deletedAt?: Date;
 
   createdAt: Date;
@@ -155,19 +155,19 @@ interface User {
 /**
  * 주문 목록 테이블 컴포넌트
  *
- * @vibesync-context 고객용 주문 내역 조회
- * @vibesync-inference 페이지네이션 필요 (대량 데이터)
- * @vibesync-decision [2024-10-16] TanStack Table 사용 (성능)
+ * @codesyncer-context 고객용 주문 내역 조회
+ * @codesyncer-inference 페이지네이션 필요 (대량 데이터)
+ * @codesyncer-decision [2024-10-16] TanStack Table 사용 (성능)
  */
 export function OrderListTable({ orders }: OrderListTableProps) {
-  // @vibesync-inference: 페이지당 20개 (UX 표준)
+  // @codesyncer-inference: 페이지당 20개 (UX 표준)
   const [pageSize, setPageSize] = useState(20);
 
-  // @vibesync-todo: 정렬 옵션 추가 (날짜, 금액, 상태)
+  // @codesyncer-todo: 정렬 옵션 추가 (날짜, 금액, 상태)
 
   return (
     <Table>
-      {/* @vibesync-rule: 모바일에서는 카드 레이아웃으로 변경 */}
+      {/* @codesyncer-rule: 모바일에서는 카드 레이아웃으로 변경 */}
       {/* ... */}
     </Table>
   );
@@ -182,19 +182,19 @@ export function OrderListTable({ orders }: OrderListTableProps) {
 
 ```tsx
 // ❌ 너무 모호함
-// @vibesync-inference: 이렇게 했음
+// @codesyncer-inference: 이렇게 했음
 const value = 10;
 
 // ❌ 근거 없음
-// @vibesync-decision: 변경함
+// @codesyncer-decision: 변경함
 const API_URL = '/api/new';
 
 // ❌ 의미 없음
-// @vibesync-todo: 나중에
+// @codesyncer-todo: 나중에
 function doSomething() {}
 
 // ❌ 맥락 부족
-// @vibesync-context: 중요함
+// @codesyncer-context: 중요함
 const IMPORTANT_VALUE = 42;
 ```
 
@@ -202,19 +202,19 @@ const IMPORTANT_VALUE = 42;
 
 ```tsx
 // ✅ 구체적인 근거
-// @vibesync-inference: 기본값 10 (일반적인 재시도 대기 시간)
+// @codesyncer-inference: 기본값 10 (일반적인 재시도 대기 시간)
 const RETRY_DELAY = 10;
 
 // ✅ 명확한 이유와 날짜
-// @vibesync-decision: [2024-10-17] /api/v2로 변경 (API 버전업)
+// @codesyncer-decision: [2024-10-17] /api/v2로 변경 (API 버전업)
 const API_URL = '/api/v2';
 
 // ✅ 구체적인 TODO
-// @vibesync-todo: 에러 케이스 핸들링 추가 (네트워크 오류, 타임아웃)
+// @codesyncer-todo: 에러 케이스 핸들링 추가 (네트워크 오류, 타임아웃)
 function fetchData() {}
 
 // ✅ 비즈니스 맥락 설명
-// @vibesync-context: VAT 세율 (2024년 기준 10%)
+// @codesyncer-context: VAT 세율 (2024년 기준 10%)
 const TAX_RATE = 0.1;
 ```
 
@@ -226,25 +226,25 @@ const TAX_RATE = 0.1;
 
 ```bash
 # 모든 추론 내용 찾기
-grep -r "@vibesync-inference" ./src
+grep -r "@codesyncer-inference" ./src
 
 # TODO 목록 확인
-grep -r "@vibesync-todo" ./src
+grep -r "@codesyncer-todo" ./src
 
 # 의논 결정 사항
-grep -r "@vibesync-decision" ./src
+grep -r "@codesyncer-decision" ./src
 
 # 특별 규칙
-grep -r "@vibesync-rule" ./src
+grep -r "@codesyncer-rule" ./src
 
 # 비즈니스 맥락
-grep -r "@vibesync-context" ./src
+grep -r "@codesyncer-context" ./src
 ```
 
 ### VS Code 검색
 
 1. `Cmd/Ctrl + Shift + F` (전체 검색)
-2. 검색어 입력: `@vibesync-todo`
+2. 검색어 입력: `@codesyncer-todo`
 3. 파일 필터: `src/**/*.{ts,tsx,js,jsx}`
 
 ---
@@ -255,11 +255,11 @@ ARCHITECTURE.md에서 자동으로 통계를 제공합니다:
 
 ```markdown
 ## 주석 태그 통계
-- @vibesync-inference: 45개
-- @vibesync-decision: 12개
-- @vibesync-todo: 8개
-- @vibesync-rule: 5개
-- @vibesync-context: 15개
+- @codesyncer-inference: 45개
+- @codesyncer-decision: 12개
+- @codesyncer-todo: 8개
+- @codesyncer-rule: 5개
+- @codesyncer-context: 15개
 ```
 
 "통계 업데이트" 명령으로 수동 갱신 가능
@@ -271,36 +271,36 @@ ARCHITECTURE.md에서 자동으로 통계를 제공합니다:
 ### 1. 추론은 항상 근거와 함께
 
 ```tsx
-// ❌ @vibesync-inference: useState 사용
-// ✅ @vibesync-inference: useState 사용 (간단한 로컬 상태, Zustand 불필요)
+// ❌ @codesyncer-inference: useState 사용
+// ✅ @codesyncer-inference: useState 사용 (간단한 로컬 상태, Zustand 불필요)
 ```
 
 ### 2. 결정은 날짜와 이유
 
 ```tsx
-// ❌ @vibesync-decision: Stripe 사용
-// ✅ @vibesync-decision: [2024-10-15] Stripe 사용 (해외 결제 지원 필요)
+// ❌ @codesyncer-decision: Stripe 사용
+// ✅ @codesyncer-decision: [2024-10-15] Stripe 사용 (해외 결제 지원 필요)
 ```
 
 ### 3. TODO는 구체적으로
 
 ```tsx
-// ❌ @vibesync-todo: 수정 필요
-// ✅ @vibesync-todo: 에러 바운더리 추가 (API 실패 시 폴백 UI)
+// ❌ @codesyncer-todo: 수정 필요
+// ✅ @codesyncer-todo: 에러 바운더리 추가 (API 실패 시 폴백 UI)
 ```
 
 ### 4. 맥락은 "왜"에 집중
 
 ```tsx
-// ❌ @vibesync-context: 인증
-// ✅ @vibesync-context: OAuth 2.0 인증 (Google, Kakao 로그인 지원)
+// ❌ @codesyncer-context: 인증
+// ✅ @codesyncer-context: OAuth 2.0 인증 (Google, Kakao 로그인 지원)
 ```
 
 ### 5. 규칙은 예외적인 경우만
 
 ```tsx
-// ❌ @vibesync-rule: TypeScript 사용 (이건 당연함)
-// ✅ @vibesync-rule: 이 파일만 any 타입 허용 (외부 라이브러리 타입 없음)
+// ❌ @codesyncer-rule: TypeScript 사용 (이건 당연함)
+// ✅ @codesyncer-rule: 이 파일만 any 타입 허용 (외부 라이브러리 타입 없음)
 ```
 
 ---
@@ -309,11 +309,11 @@ ARCHITECTURE.md에서 자동으로 통계를 제공합니다:
 
 코드 작성 후 확인:
 
-- [ ] 추론한 내용에 `@vibesync-inference` 추가했나?
-- [ ] 의논 결정은 `@vibesync-decision`으로 기록했나?
-- [ ] 확인 필요한 부분은 `@vibesync-todo`로 표시했나?
-- [ ] 비즈니스 로직에 `@vibesync-context` 설명했나?
-- [ ] 특별한 규칙은 `@vibesync-rule`로 명시했나?
+- [ ] 추론한 내용에 `@codesyncer-inference` 추가했나?
+- [ ] 의논 결정은 `@codesyncer-decision`으로 기록했나?
+- [ ] 확인 필요한 부분은 `@codesyncer-todo`로 표시했나?
+- [ ] 비즈니스 로직에 `@codesyncer-context` 설명했나?
+- [ ] 특별한 규칙은 `@codesyncer-rule`로 명시했나?
 - [ ] 모든 주석에 구체적인 근거를 포함했나?
 
 ---
