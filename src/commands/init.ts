@@ -96,11 +96,7 @@ export async function initCommand(options: InitOptions) {
   // Display found repositories
   console.log(chalk.bold(`\n${lang === 'ko' ? '📁 발견된 레포지토리:' : '📁 Discovered Repositories:'}\n`));
   foundRepos.forEach((repo) => {
-    const typeLabel = lang === 'ko'
-      ? { frontend: '프론트엔드', backend: '백엔드', mobile: '모바일', fullstack: '풀스택' }[repo.type]
-      : repo.type;
-
-    console.log(`  ${chalk.cyan('●')} ${chalk.bold(repo.name)} ${chalk.gray(`(${typeLabel})`)}`);
+    console.log(`  ${chalk.cyan('●')} ${chalk.bold(repo.name)}`);
   });
   console.log();
 
@@ -113,12 +109,8 @@ export async function initCommand(options: InitOptions) {
         ? '포함할 레포지토리를 선택하세요:'
         : 'Select repositories to include:',
       choices: foundRepos.map(repo => {
-        const typeLabel = lang === 'ko'
-          ? { frontend: '프론트엔드', backend: '백엔드', mobile: '모바일', fullstack: '풀스택' }[repo.type]
-          : repo.type;
-
         return {
-          name: `${repo.name} (${typeLabel})`,
+          name: repo.name,
           value: repo.name,
           checked: true, // 기본적으로 모두 선택
         };
@@ -149,13 +141,10 @@ export async function initCommand(options: InitOptions) {
 
   // Generate repository list for SETUP_GUIDE (only selected repos)
   const repoListText = includedRepos.map(repo => {
-    const typeLabel = lang === 'ko'
-      ? { frontend: '프론트엔드', backend: '백엔드', mobile: '모바일', fullstack: '풀스택' }[repo.type]
-      : repo.type;
-
-    return `- **${repo.name}** (${typeLabel})
+    return `- **${repo.name}**
   - Path: \`./${repo.name}\`
   - ${lang === 'ko' ? 'AI가 분석할 내용' : 'To be analyzed by AI'}:
+    - ${lang === 'ko' ? '프로젝트 유형 (프론트엔드/백엔드/모바일/풀스택)' : 'Project type (frontend/backend/mobile/fullstack)'}
     - ${lang === 'ko' ? '기술 스택' : 'Tech stack'}
     - ${lang === 'ko' ? '프로젝트 설명' : 'Project description'}
     - ${lang === 'ko' ? '주요 기능' : 'Main features'}`;

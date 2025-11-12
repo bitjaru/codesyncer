@@ -36,7 +36,7 @@ export interface ProjectConfig {
 export interface RepositoryInfo {
   name: string;
   path: string;
-  type: ProjectType;
+  type?: ProjectType;    // AI will analyze during setup
   description?: string;  // AI will analyze during setup
   techStack?: string[];   // AI will analyze during setup
   hasCodeSyncer: boolean;
