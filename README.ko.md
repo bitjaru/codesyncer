@@ -34,6 +34,27 @@ npm install -g codesyncer
 
 ---
 
+## 🔄 업데이트
+
+### 현재 버전 확인
+```bash
+codesyncer --version
+```
+
+### 최신 버전 확인
+```bash
+npm view codesyncer version
+```
+
+### 최신 버전으로 업데이트
+```bash
+npm update -g codesyncer
+# 또는
+npm install -g codesyncer@latest
+```
+
+---
+
 ## 🚀 빠른 시작
 
 ### 1. 워크스페이스 루트로 이동

@@ -34,6 +34,27 @@ npm install -g codesyncer
 
 ---
 
+## 🔄 Updating
+
+### Check your current version
+```bash
+codesyncer --version
+```
+
+### Check latest version
+```bash
+npm view codesyncer version
+```
+
+### Update to latest
+```bash
+npm update -g codesyncer
+# or
+npm install -g codesyncer@latest
+```
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Navigate to your workspace root
