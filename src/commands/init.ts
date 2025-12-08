@@ -4,7 +4,7 @@ import ora from 'ora';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { InitOptions, Language } from '../types';
-import { scanForRepositories, hasMasterSetup } from '../utils/scanner';
+import { scanForRepositories, hasMasterSetup, isCurrentDirRepository, hasSingleRepoSetup } from '../utils/scanner';
 import { msg } from '../utils/messages';
 
 export async function initCommand(options: InitOptions) {
@@ -68,8 +68,119 @@ export async function initCommand(options: InitOptions) {
 
   console.log();
 
-  // STEP 3: Scan repositories
+  // STEP 3: Check if current directory is a repository FIRST (single-repo mode takes priority)
   const spinner = ora(lang === 'ko' ? '레포지토리 스캔 중...' : 'Scanning repositories...').start();
+
+  // Check current directory first - if it's a repo, use single-repo mode
+  const isCurrentDirRepo = await isCurrentDirRepository(currentDir);
+
+  // === SINGLE-REPO MODE === (current directory IS a repository)
+  if (isCurrentDirRepo) {
+    spinner.succeed(
+      lang === 'ko'
+        ? '단일 레포지토리 감지됨'
+        : 'Single repository detected'
+    );
+
+    console.log(chalk.bold.yellow(`\n${lang === 'ko' ? '📦 단일 레포지토리 모드' : '📦 Single Repository Mode'}\n`));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? `현재 디렉토리 "${path.basename(currentDir)}"를 단일 레포지토리로 설정합니다.`
+        : `Setting up "${path.basename(currentDir)}" as a single repository.`
+    ));
+    console.log();
+
+    // Check if single-repo setup already exists
+    if (await hasSingleRepoSetup(currentDir)) {
+      console.log(chalk.yellow(
+        lang === 'ko'
+          ? '⚠️  이 레포지토리에는 이미 .claude/ 설정이 있습니다.'
+          : '⚠️  This repository already has .claude/ setup.'
+      ));
+      const { overwriteSingle } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'overwriteSingle',
+          message: lang === 'ko' ? '기존 설정을 덮어쓰시겠습니까?' : 'Overwrite existing setup?',
+          default: false,
+        },
+      ]);
+
+      if (!overwriteSingle) {
+        console.log(chalk.gray(lang === 'ko' ? '\n설정이 취소되었습니다.\n' : '\nSetup cancelled.\n'));
+        return;
+      }
+    }
+
+    // Generate single-repo SETUP_GUIDE.md
+    console.log(chalk.bold.cyan(lang === 'ko' ? '\n📝 설정 가이드 생성 중...\n' : '\n📝 Generating setup guide...\n'));
+
+    const claudeDir = path.join(currentDir, '.claude');
+    await fs.ensureDir(claudeDir);
+
+    // Load single-repo SETUP_GUIDE template
+    const setupGuideTemplate = await fs.readFile(
+      path.join(__dirname, '..', 'templates', lang, 'setup_guide_single.md'),
+      'utf-8'
+    );
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const setupGuide = setupGuideTemplate
+      .replace(/\[PROJECT_NAME\]/g, projectName)
+      .replace(/\[GITHUB_USERNAME\]/g, githubUsername)
+      .replace(/\[TODAY\]/g, today);
+
+    await fs.writeFile(
+      path.join(claudeDir, 'SETUP_GUIDE.md'),
+      setupGuide,
+      'utf-8'
+    );
+
+    console.log(chalk.green('✓') + ' .claude/SETUP_GUIDE.md');
+
+    // Success message for single-repo mode
+    console.log(chalk.bold.green(`\n✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (단일 레포 모드)' : 'CodeSyncer initialized! (Single Repo Mode)'}\n`));
+
+    console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
+    console.log(`  ${chalk.cyan('.claude/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
+
+    console.log(chalk.bold(lang === 'ko' ? '🚀 다음 단계:' : '🚀 Next steps:'));
+    console.log();
+    console.log(chalk.cyan('1.') + ' ' + (lang === 'ko' ? 'AI 코딩 어시스턴트 실행 (Claude Code 권장)' : 'Launch your AI coding assistant (Claude Code recommended)'));
+    console.log();
+    console.log(chalk.cyan('2.') + ' ' + (lang === 'ko' ? 'AI에게 다음과 같이 요청:' : 'Ask your AI assistant:'));
+    console.log();
+    if (lang === 'ko') {
+      console.log(chalk.yellow('   ".claude/SETUP_GUIDE.md 파일을 읽고 지시사항대로 설정해줘"'));
+    } else {
+      console.log(chalk.yellow('   "Read .claude/SETUP_GUIDE.md and follow the instructions to set up"'));
+    }
+    console.log();
+    console.log(chalk.cyan('3.') + ' ' + (lang === 'ko' ? 'AI가 레포지토리를 분석하고 문서를 생성합니다' : 'AI will analyze the repository and generate documentation'));
+    console.log();
+
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log();
+    console.log(chalk.bold(lang === 'ko' ? '💡 단일 레포 모드 정보' : '💡 Single Repo Mode Info'));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? '• 모든 설정 파일이 .claude/ 폴더에 생성됩니다'
+        : '• All config files will be created in .claude/ folder'
+    ));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? '• 멀티 레포가 필요하면 상위 폴더에서 init을 실행하세요'
+        : '• For multi-repo, run init in a parent workspace folder'
+    ));
+    console.log();
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log();
+
+    return;
+  }
+
+  // === MULTI-REPO MODE === (current directory is NOT a repository, scan subdirectories)
   const foundRepos = await scanForRepositories(currentDir);
 
   if (foundRepos.length === 0) {

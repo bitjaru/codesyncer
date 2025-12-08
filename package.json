@@ -1,6 +1,6 @@
 {
   "name": "codesyncer",
-  "version": "2.2.3",
+  "version": "2.3.1",
   "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
   "keywords": [
     "ai-collaboration",

@@ -68,7 +68,7 @@ CodeSyncer는 문서가 **어디에, 어떻게** 만들어져야 하는지 정�
 ### 주요 기능
 
 - 🤖 **AI 도구 독립적**: Claude Code, Cursor, GitHub Copilot 등 모두 지원
-- 📁 **멀티 레포 지원**: 백엔드, 프론트엔드, 모바일 레포를 자유롭게 넘나들며 작업
+- 📁 **단일 & 멀티 레포 지원**: 개별 레포지토리 또는 전체 워크스페이스 모두 지원
 - 🏷️ **주석 태그 시스템**: `@codesyncer-*` 태그로 결정과 추론을 영구 기록
 - 🤝 **자동 의논 시스템**: 중요한 결정(결제, 보안 등)에서 자동으로 일시 정지
 - 🌐 **다국어 지원**: 한글/영문 완벽 지원
@@ -190,13 +190,23 @@ AI 코딩 어시스턴트를 실행하세요:
 
 반드시 **활성화되어 실행 중**이어야 합니다.
 
-### 3단계: 워크스페이스로 이동
+### 3단계: 프로젝트로 이동
 
 ```bash
-cd /path/to/your/workspace
+cd /path/to/your/project
 ```
 
-워크스페이스는 여러 레포 폴더를 포함해야 합니다:
+CodeSyncer는 **단일 레포지토리**와 **멀티 레포 워크스페이스** 모두 지원합니다:
+
+**단일 레포지토리** (자동 감지):
+```
+my-project/
+├── package.json
+├── src/
+└── ...
+```
+
+**멀티 레포 워크스페이스**:
 ```
 workspace/
 ├── backend/
@@ -216,9 +226,11 @@ codesyncer init
 - GitHub 사용자명
 
 **실행 과정:**
-1. CodeSyncer가 레포지토리 스캔
-2. 기술 스택과 프로젝트 타입 자동 감지
-3. 발견한 레포 정보와 함께 `.codesyncer/SETUP_GUIDE.md` 생성
+
+| 모드 | 감지 조건 | 생성 결과 |
+|------|-----------|-----------|
+| **단일 레포** | 현재 폴더에 `package.json`, `.git` 등 존재 | `.claude/SETUP_GUIDE.md` 생성 |
+| **멀티 레포** | 하위 폴더에 레포지토리들 존재 | `.codesyncer/SETUP_GUIDE.md` 생성 |
 
 **CodeSyncer는 여기까지만 합니다!** 프레임워크와 규칙만 제공하고, 이제 AI가 직접 설정합니다.
 
@@ -230,6 +242,12 @@ codesyncer init
 
 **Claude Code 실행** (또는 선호하는 AI 어시스턴트)하고 다음과 같이 말하세요:
 
+**단일 레포지토리의 경우:**
+```
+".claude/SETUP_GUIDE.md 파일을 읽고 지시사항대로 설정해줘"
+```
+
+**멀티 레포 워크스페이스의 경우:**
 ```
 ".codesyncer/SETUP_GUIDE.md 파일을 읽고 지시사항대로 설정해줘"
 ```
@@ -443,10 +461,25 @@ AI: ✅ 결정 사항 기록 중...
 
 ## 📁 프로젝트 구조
 
-`codesyncer init` 실행 후 워크스페이스 구조:
+`codesyncer init` 실행 후 프로젝트 구조:
+
+### 단일 레포지토리 모드
+
+```
+my-project/
+├── CLAUDE.md                      # Claude가 먼저 읽는 파일
+└── .claude/
+    ├── CLAUDE.md                  # 코딩 가이드라인
+    ├── COMMENT_GUIDE.md           # 태그 사용 가이드
+    ├── ARCHITECTURE.md            # 프로젝트 구조
+    └── DECISIONS.md               # 의사결정 기록
+```
+
+### 멀티 레포지토리 모드
 
 ```
 workspace/
+├── CLAUDE.md                        # Claude가 먼저 읽는 파일
 ├── .codesyncer/
 │   └── MASTER_CODESYNCER.md         # 멀티 레포 자동 전환 가이드
 ├── backend/
@@ -560,7 +593,7 @@ CodeSyncer가 모든 개발자에게 무료로 제공되면서도 상업적 착�
 A: 현재는 그렇습니다. 하지만 Cursor, GitHub Copilot 등 다른 도구 지원을 개발 중입니다. 기여 환영!
 
 **Q: 단일 레포에서도 사용할 수 있나요?**
-A: 네! 아무 레포에서나 `codesyncer init`을 실행하면 됩니다. 멀티 레포 기능은 선택사항입니다.
+A: 네! CodeSyncer는 자동으로 단일 레포인지 감지합니다 (`package.json`, `.git` 등 존재 여부 확인). 단일 레포에서는 `.claude/SETUP_GUIDE.md`가 생성되고, 멀티 레포 구조 대신 간단한 구조로 설정됩니다.
 
 **Q: AI 응답 속도가 느려지나요?**
 A: 아니요. CodeSyncer는 AI가 세션당 한 번만 읽는 문서 파일만 추가합니다. 오히려 사전에 컨텍스트를 제공하여 AI를 더 효율적으로 만듭니다.

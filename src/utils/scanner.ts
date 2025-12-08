@@ -3,44 +3,10 @@ import * as path from 'path';
 import { RepositoryInfo } from '../types';
 
 /**
- * Scan current directory for potential repository folders
- * Looks for folders that contain package.json, git repos, or common project structures
+ * Check if current directory itself is a repository (for single-repo mode)
  */
-export async function scanForRepositories(rootPath: string): Promise<RepositoryInfo[]> {
-  const repos: RepositoryInfo[] = [];
-
-  try {
-    const entries = await fs.readdir(rootPath, { withFileTypes: true });
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-
-      // Skip node_modules, .git, dist, build folders
-      if (['node_modules', '.git', 'dist', 'build', '.next', 'coverage'].includes(entry.name)) {
-        continue;
-      }
-
-      const folderPath = path.join(rootPath, entry.name);
-      const isRepo = await isValidRepository(folderPath);
-
-      if (isRepo) {
-        const hasCodeSyncer = await hasCodeSyncerSetup(folderPath);
-
-        repos.push({
-          name: entry.name,
-          path: folderPath,
-          type: undefined, // AI will analyze
-          description: undefined, // AI will analyze
-          techStack: undefined, // AI will analyze
-          hasCodeSyncer,
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Error scanning directories:', error);
-  }
-
-  return repos;
+export async function isCurrentDirRepository(dirPath: string): Promise<boolean> {
+  return isValidRepository(dirPath);
 }
 
 /**
@@ -82,6 +48,47 @@ async function isValidRepository(folderPath: string): Promise<boolean> {
   }
 }
 
+/**
+ * Scan current directory for potential repository folders
+ * Looks for folders that contain package.json, git repos, or common project structures
+ */
+export async function scanForRepositories(rootPath: string): Promise<RepositoryInfo[]> {
+  const repos: RepositoryInfo[] = [];
+
+  try {
+    const entries = await fs.readdir(rootPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+
+      // Skip node_modules, .git, dist, build folders
+      if (['node_modules', '.git', 'dist', 'build', '.next', 'coverage'].includes(entry.name)) {
+        continue;
+      }
+
+      const folderPath = path.join(rootPath, entry.name);
+      const isRepo = await isValidRepository(folderPath);
+
+      if (isRepo) {
+        const hasCodeSyncer = await hasCodeSyncerSetup(folderPath);
+
+        repos.push({
+          name: entry.name,
+          path: folderPath,
+          type: undefined, // AI will analyze
+          description: undefined, // AI will analyze
+          techStack: undefined, // AI will analyze
+          hasCodeSyncer,
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error scanning directories:', error);
+  }
+
+  return repos;
+}
+
 // All project analysis removed - AI will analyze during setup phase
 // - Project type (frontend/backend/mobile/fullstack)
 // - Tech stack
@@ -98,11 +105,19 @@ async function hasCodeSyncerSetup(folderPath: string): Promise<boolean> {
 }
 
 /**
- * Check if master CodeSyncer setup exists in root
+ * Check if master CodeSyncer setup exists in root (multi-repo mode)
  */
 export async function hasMasterSetup(rootPath: string): Promise<boolean> {
   const masterPath = path.join(rootPath, '.codesyncer');
   const legacyMasterPath = path.join(rootPath, '.master');
 
   return (await fs.pathExists(masterPath)) || (await fs.pathExists(legacyMasterPath));
+}
+
+/**
+ * Check if single-repo CodeSyncer setup exists (single-repo mode)
+ */
+export async function hasSingleRepoSetup(rootPath: string): Promise<boolean> {
+  const claudePath = path.join(rootPath, '.claude');
+  return fs.pathExists(claudePath);
 }

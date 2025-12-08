@@ -68,7 +68,7 @@ CodeSyncer defines **WHERE** and **HOW** documentation should be created. Your A
 ### Key Features
 
 - 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
-- 📁 **Multi-Repository Support**: Seamlessly work across backend, frontend, mobile repos
+- 📁 **Single & Multi-Repository Support**: Works with individual repos or entire workspaces
 - 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
 - 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
 - 🌐 **Multi-Language**: Full Korean and English support
@@ -190,13 +190,23 @@ Open your AI coding assistant:
 
 Make sure it's **active and running**.
 
-### Step 3: Navigate to your workspace
+### Step 3: Navigate to your project
 
 ```bash
-cd /path/to/your/workspace
+cd /path/to/your/project
 ```
 
-Your workspace should contain multiple repository folders:
+CodeSyncer works with both **single repositories** and **multi-repo workspaces**:
+
+**Single Repository** (auto-detected):
+```
+my-project/
+├── package.json
+├── src/
+└── ...
+```
+
+**Multi-Repository Workspace**:
 ```
 workspace/
 ├── backend/
@@ -216,9 +226,11 @@ You'll be asked:
 - GitHub username
 
 **What happens:**
-1. CodeSyncer scans your repositories
-2. Detects tech stacks and project types
-3. Creates `.codesyncer/SETUP_GUIDE.md` with discovered repository information
+
+| Mode | Detection | Output |
+|------|-----------|--------|
+| **Single Repo** | Current folder has `package.json`, `.git`, etc. | Creates `.claude/SETUP_GUIDE.md` |
+| **Multi-Repo** | Subfolders contain repositories | Creates `.codesyncer/SETUP_GUIDE.md` |
 
 **That's all CodeSyncer does!** It provides the framework and rules. Now your AI takes over.
 
@@ -230,6 +242,12 @@ You'll be asked:
 
 **Launch Claude Code** (or your preferred AI assistant) and say:
 
+**For Single Repository:**
+```
+"Read .claude/SETUP_GUIDE.md and follow the instructions to set up"
+```
+
+**For Multi-Repository Workspace:**
 ```
 "Read .codesyncer/SETUP_GUIDE.md and follow the instructions to set up"
 ```
@@ -443,10 +461,25 @@ Want to add support for your favorite AI tool? [Contribute here!](https://github
 
 ## 📁 Project Structure
 
-After running `codesyncer init`, your workspace will look like:
+After running `codesyncer init`, your project will look like:
+
+### Single Repository Mode
+
+```
+my-project/
+├── CLAUDE.md                      # Claude reads this first
+└── .claude/
+    ├── CLAUDE.md                  # Coding guidelines
+    ├── COMMENT_GUIDE.md           # Tag usage guide
+    ├── ARCHITECTURE.md            # Project structure
+    └── DECISIONS.md               # Decision log
+```
+
+### Multi-Repository Mode
 
 ```
 workspace/
+├── CLAUDE.md                        # Claude reads this first
 ├── .codesyncer/
 │   └── MASTER_CODESYNCER.md         # Multi-repo auto-switching guide
 ├── backend/
@@ -560,7 +593,7 @@ We want CodeSyncer to remain free and accessible to all developers while prevent
 A: Currently, yes. But we're building support for Cursor, GitHub Copilot, and other tools. Contributions welcome!
 
 **Q: Can I use this on a single repository?**
-A: Yes! Just run `codesyncer init` in any repository. The multi-repo features are optional.
+A: Yes! CodeSyncer automatically detects if you're in a single repo (has `package.json`, `.git`, etc.) and creates `.claude/SETUP_GUIDE.md` instead of the multi-repo structure.
 
 **Q: Will this slow down AI responses?**
 A: No. CodeSyncer only adds documentation files that AI reads once per session. It actually makes AI more efficient by providing context upfront.
