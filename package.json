@@ -1,6 +1,6 @@
 {
   "name": "codesyncer",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
   "keywords": [
     "ai-collaboration",
@@ -8,6 +8,11 @@
     "cursor",
     "github-copilot",
     "multi-repo",
+    "monorepo",
+    "turborepo",
+    "pnpm",
+    "nx",
+    "lerna",
     "developer-tools",
     "cli",
     "ai-assistant",
@@ -51,21 +56,23 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
     "inquirer": "^8.2.6",
-    "ora": "^5.4.1",
-    "fs-extra": "^11.2.0"
+    "js-yaml": "^4.1.1",
+    "ora": "^5.4.1"
   },
   "devDependencies": {
-    "@types/inquirer": "^9.0.7",
-    "@types/node": "^20.10.0",
     "@types/fs-extra": "^11.0.4",
-    "typescript": "^5.3.2",
+    "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.11",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.1",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0"
+    "typescript": "^5.3.2"
   },
   "engines": {
     "node": ">=14.0.0"

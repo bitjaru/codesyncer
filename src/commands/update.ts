@@ -3,8 +3,8 @@ import ora from 'ora';
 import inquirer from 'inquirer';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { UpdateOptions, Language } from '../types';
-import { scanForRepositories, hasMasterSetup } from '../utils/scanner';
+import { UpdateOptions, Language, RepositoryInfo } from '../types';
+import { scanForRepositories, hasMasterSetup, detectMonorepo, scanMonorepoPackages } from '../utils/scanner';
 
 export async function updateCommand(options: UpdateOptions) {
   console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update\n'));
@@ -93,8 +93,28 @@ export async function updateCommand(options: UpdateOptions) {
 
   const spinner = ora('Scanning...').start();
 
-  // Scan for repositories
-  const foundRepos = await scanForRepositories(currentDir);
+  // Check if it's a monorepo first
+  const monorepoInfo = await detectMonorepo(currentDir);
+  let foundRepos: RepositoryInfo[];
+
+  if (monorepoInfo) {
+    // Monorepo mode: scan packages
+    foundRepos = await scanMonorepoPackages(currentDir, monorepoInfo);
+    spinner.succeed(
+      lang === 'ko'
+        ? `모노레포 감지됨 (${foundRepos.length}개 패키지)`
+        : `Monorepo detected (${foundRepos.length} packages)`
+    );
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? `  도구: ${getMonorepoToolName(monorepoInfo.tool)}`
+        : `  Tool: ${getMonorepoToolName(monorepoInfo.tool)}`
+    ));
+  } else {
+    // Multi-repo mode: scan subdirectories
+    foundRepos = await scanForRepositories(currentDir);
+    spinner.succeed('Scan complete');
+  }
 
   // Check each repository for missing .claude files
   const requiredFiles = ['CLAUDE.md', 'ARCHITECTURE.md', 'COMMENT_GUIDE.md', 'DECISIONS.md'];
@@ -733,4 +753,21 @@ rm .codesyncer/UPDATE_GUIDE.md
   }
 
   console.log(chalk.bold.green('\n✅ Update complete!\n'));
+}
+
+/**
+ * Get human-readable name for monorepo tool
+ */
+function getMonorepoToolName(tool: string): string {
+  const names: Record<string, string> = {
+    'npm-workspaces': 'npm Workspaces',
+    'yarn-workspaces': 'Yarn Workspaces',
+    'pnpm': 'pnpm',
+    'lerna': 'Lerna',
+    'nx': 'Nx',
+    'turbo': 'Turborepo',
+    'rush': 'Rush',
+    'unknown': 'Unknown',
+  };
+  return names[tool] || tool;
 }

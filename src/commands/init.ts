@@ -3,8 +3,8 @@ import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { InitOptions, Language } from '../types';
-import { scanForRepositories, hasMasterSetup, isCurrentDirRepository, hasSingleRepoSetup } from '../utils/scanner';
+import { InitOptions, Language, MonorepoInfo } from '../types';
+import { scanForRepositories, hasMasterSetup, isCurrentDirRepository, hasSingleRepoSetup, detectMonorepo, scanMonorepoPackages } from '../utils/scanner';
 import { msg } from '../utils/messages';
 
 export async function initCommand(options: InitOptions) {
@@ -68,10 +68,192 @@ export async function initCommand(options: InitOptions) {
 
   console.log();
 
-  // STEP 3: Check if current directory is a repository FIRST (single-repo mode takes priority)
-  const spinner = ora(lang === 'ko' ? '레포지토리 스캔 중...' : 'Scanning repositories...').start();
+  // STEP 3: Check workspace type (monorepo, multi-repo, or single-repo)
+  const spinner = ora(lang === 'ko' ? '워크스페이스 스캔 중...' : 'Scanning workspace...').start();
 
-  // Check current directory first - if it's a repo, use single-repo mode
+  // First, check if it's a monorepo
+  const monorepoInfo = await detectMonorepo(currentDir);
+
+  // === MONOREPO MODE ===
+  if (monorepoInfo) {
+    spinner.succeed(
+      lang === 'ko'
+        ? `모노레포 감지됨 (${getMonorepoToolName(monorepoInfo.tool)})`
+        : `Monorepo detected (${getMonorepoToolName(monorepoInfo.tool)})`
+    );
+
+    console.log(chalk.bold.magenta(`\n${lang === 'ko' ? '📦 모노레포 모드' : '📦 Monorepo Mode'}\n`));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? `도구: ${getMonorepoToolName(monorepoInfo.tool)} | 설정 파일: ${monorepoInfo.configFile}`
+        : `Tool: ${getMonorepoToolName(monorepoInfo.tool)} | Config: ${monorepoInfo.configFile}`
+    ));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? `패턴: ${monorepoInfo.patterns.join(', ')}`
+        : `Patterns: ${monorepoInfo.patterns.join(', ')}`
+    ));
+    console.log();
+
+    // Scan for packages in monorepo
+    const scanSpinner = ora(lang === 'ko' ? '패키지 스캔 중...' : 'Scanning packages...').start();
+    const foundPackages = await scanMonorepoPackages(currentDir, monorepoInfo);
+    scanSpinner.succeed(
+      lang === 'ko'
+        ? `${foundPackages.length}개의 패키지 발견`
+        : `Found ${foundPackages.length} packages`
+    );
+
+    if (foundPackages.length === 0) {
+      console.log(chalk.yellow(
+        lang === 'ko'
+          ? '\n워크스페이스 패턴에 해당하는 패키지를 찾을 수 없습니다.'
+          : '\nNo packages found matching workspace patterns.'
+      ));
+      console.log(chalk.gray(
+        lang === 'ko'
+          ? `패턴: ${monorepoInfo.patterns.join(', ')}\n`
+          : `Patterns: ${monorepoInfo.patterns.join(', ')}\n`
+      ));
+      return;
+    }
+
+    // Display found packages
+    console.log(chalk.bold(`\n${lang === 'ko' ? '📁 발견된 패키지:' : '📁 Discovered Packages:'}\n`));
+    foundPackages.forEach((pkg) => {
+      const status = pkg.hasCodeSyncer
+        ? chalk.green('✓')
+        : chalk.gray('○');
+      console.log(`  ${status} ${chalk.bold(pkg.name)} ${chalk.gray(`(${pkg.relativePath})`)}`);
+    });
+    console.log();
+
+    // Select packages to include
+    const { selectedPackages } = await inquirer.prompt([
+      {
+        type: 'checkbox',
+        name: 'selectedPackages',
+        message: lang === 'ko'
+          ? '포함할 패키지를 선택하세요:'
+          : 'Select packages to include:',
+        choices: foundPackages.map(pkg => ({
+          name: `${pkg.name} (${pkg.relativePath})`,
+          value: pkg.name,
+          checked: true,
+        })),
+        validate: (input) => {
+          if (input.length === 0) {
+            return lang === 'ko'
+              ? '최소 하나의 패키지를 선택하세요'
+              : 'Please select at least one package';
+          }
+          return true;
+        },
+      },
+    ]);
+
+    const includedPackages = foundPackages.filter(pkg => selectedPackages.includes(pkg.name));
+
+    console.log();
+    console.log(chalk.green(`✓ ${includedPackages.length}${lang === 'ko' ? '개 패키지 선택됨' : ' packages selected'}`));
+    console.log();
+
+    // Generate SETUP_GUIDE.md for monorepo
+    console.log(chalk.bold.cyan(lang === 'ko' ? '📝 설정 가이드 생성 중...\n' : '📝 Generating setup guide...\n'));
+
+    const codeSyncerDir = path.join(currentDir, '.codesyncer');
+    await fs.ensureDir(codeSyncerDir);
+
+    // Generate package list for SETUP_GUIDE
+    const packageListText = includedPackages.map(pkg => {
+      return `- **${pkg.name}** (\`${pkg.relativePath}\`)
+  - ${lang === 'ko' ? 'AI가 분석할 내용' : 'To be analyzed by AI'}:
+    - ${lang === 'ko' ? '프로젝트 유형 (프론트엔드/백엔드/모바일/풀스택/라이브러리)' : 'Project type (frontend/backend/mobile/fullstack/library)'}
+    - ${lang === 'ko' ? '기술 스택' : 'Tech stack'}
+    - ${lang === 'ko' ? '패키지 설명' : 'Package description'}
+    - ${lang === 'ko' ? '내부 의존성' : 'Internal dependencies'}`;
+    }).join('\n\n');
+
+    // Load monorepo SETUP_GUIDE template (use setup_guide.md as base, we'll create monorepo-specific one)
+    let setupGuideTemplate: string;
+    try {
+      setupGuideTemplate = await fs.readFile(
+        path.join(__dirname, '..', 'templates', lang, 'setup_guide_monorepo.md'),
+        'utf-8'
+      );
+    } catch {
+      // Fallback to regular setup_guide.md if monorepo template doesn't exist
+      setupGuideTemplate = await fs.readFile(
+        path.join(__dirname, '..', 'templates', lang, 'setup_guide.md'),
+        'utf-8'
+      );
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const setupGuide = setupGuideTemplate
+      .replace(/\[PROJECT_NAME\]/g, projectName)
+      .replace(/\[GITHUB_USERNAME\]/g, githubUsername)
+      .replace(/\[TODAY\]/g, today)
+      .replace(/\[REPO_LIST\]/g, packageListText)
+      .replace(/\[MONOREPO_TOOL\]/g, getMonorepoToolName(monorepoInfo.tool))
+      .replace(/\[WORKSPACE_PATTERNS\]/g, monorepoInfo.patterns.join(', '));
+
+    await fs.writeFile(
+      path.join(codeSyncerDir, 'SETUP_GUIDE.md'),
+      setupGuide,
+      'utf-8'
+    );
+
+    console.log(chalk.green('✓') + ' .codesyncer/SETUP_GUIDE.md');
+
+    // Success message for monorepo mode
+    console.log(chalk.bold.green(`\n✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (모노레포 모드)' : 'CodeSyncer initialized! (Monorepo Mode)'}\n`));
+
+    console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
+    console.log(`  ${chalk.cyan('.codesyncer/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
+
+    console.log(chalk.bold(lang === 'ko' ? '🚀 다음 단계:' : '🚀 Next steps:'));
+    console.log();
+    console.log(chalk.cyan('1.') + ' ' + (lang === 'ko' ? 'AI 코딩 어시스턴트 실행 (Claude Code 권장)' : 'Launch your AI coding assistant (Claude Code recommended)'));
+    console.log();
+    console.log(chalk.cyan('2.') + ' ' + (lang === 'ko' ? 'AI에게 다음과 같이 요청:' : 'Ask your AI assistant:'));
+    console.log();
+    if (lang === 'ko') {
+      console.log(chalk.yellow('   ".codesyncer/SETUP_GUIDE.md 파일을 읽고 지시사항대로 설정해줘"'));
+    } else {
+      console.log(chalk.yellow('   "Read .codesyncer/SETUP_GUIDE.md and follow the instructions to set up"'));
+    }
+    console.log();
+    console.log(chalk.cyan('3.') + ' ' + (lang === 'ko' ? 'AI가 각 패키지를 분석하고 문서를 생성합니다' : 'AI will analyze each package and generate documentation'));
+    console.log();
+
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log();
+    console.log(chalk.bold(lang === 'ko' ? '💡 모노레포 모드 정보' : '💡 Monorepo Mode Info'));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? `• 모노레포 도구: ${getMonorepoToolName(monorepoInfo.tool)}`
+        : `• Monorepo tool: ${getMonorepoToolName(monorepoInfo.tool)}`
+    ));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? '• 각 패키지에 .claude/ 폴더가 생성됩니다'
+        : '• Each package will have its own .claude/ folder'
+    ));
+    console.log(chalk.gray(
+      lang === 'ko'
+        ? '• 패키지 간 의존성이 문서화됩니다'
+        : '• Inter-package dependencies will be documented'
+    ));
+    console.log();
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log();
+
+    return;
+  }
+
+  // Check current directory - if it's a repo (not monorepo), use single-repo mode
   const isCurrentDirRepo = await isCurrentDirRepository(currentDir);
 
   // === SINGLE-REPO MODE === (current directory IS a repository)
@@ -321,4 +503,21 @@ export async function initCommand(options: InitOptions) {
   console.log();
   console.log(chalk.gray('─'.repeat(60)));
   console.log();
+}
+
+/**
+ * Get human-readable name for monorepo tool
+ */
+function getMonorepoToolName(tool: string): string {
+  const names: Record<string, string> = {
+    'npm-workspaces': 'npm Workspaces',
+    'yarn-workspaces': 'Yarn Workspaces',
+    'pnpm': 'pnpm',
+    'lerna': 'Lerna',
+    'nx': 'Nx',
+    'turbo': 'Turborepo',
+    'rush': 'Rush',
+    'unknown': 'Unknown',
+  };
+  return names[tool] || tool;
 }

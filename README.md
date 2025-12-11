@@ -69,6 +69,7 @@ CodeSyncer defines **WHERE** and **HOW** documentation should be created. Your A
 
 - 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
 - 📁 **Single & Multi-Repository Support**: Works with individual repos or entire workspaces
+- 📦 **Monorepo Support**: Auto-detects Turborepo, pnpm, Nx, Lerna, Yarn/npm workspaces
 - 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
 - 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
 - 🌐 **Multi-Language**: Full Korean and English support
@@ -196,7 +197,7 @@ Make sure it's **active and running**.
 cd /path/to/your/project
 ```
 
-CodeSyncer works with both **single repositories** and **multi-repo workspaces**:
+CodeSyncer works with **single repositories**, **multi-repo workspaces**, and **monorepos**:
 
 **Single Repository** (auto-detected):
 ```
@@ -212,6 +213,19 @@ workspace/
 ├── backend/
 ├── frontend/
 └── mobile/
+```
+
+**Monorepo** (auto-detected via Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces):
+```
+monorepo/
+├── package.json        # workspaces: ["packages/*", "apps/*"]
+├── turbo.json          # or pnpm-workspace.yaml, nx.json, lerna.json
+├── packages/
+│   ├── shared/
+│   └── ui/
+└── apps/
+    ├── web/
+    └── api/
 ```
 
 ### Step 4: Initialize CodeSyncer
@@ -230,7 +244,8 @@ You'll be asked:
 | Mode | Detection | Output |
 |------|-----------|--------|
 | **Single Repo** | Current folder has `package.json`, `.git`, etc. | Creates `.claude/SETUP_GUIDE.md` |
-| **Multi-Repo** | Subfolders contain repositories | Creates `.codesyncer/SETUP_GUIDE.md` |
+| **Monorepo** | Has `turbo.json`, `pnpm-workspace.yaml`, `nx.json`, `lerna.json`, or `workspaces` in package.json | Creates `.codesyncer/SETUP_GUIDE.md` with package-aware setup |
+| **Multi-Repo** | Subfolders contain separate repositories | Creates `.codesyncer/SETUP_GUIDE.md` |
 
 **That's all CodeSyncer does!** It provides the framework and rules. Now your AI takes over.
 
@@ -496,6 +511,37 @@ workspace/
         └── (same files)
 ```
 
+### Monorepo Mode (NEW in v2.4.0)
+
+```
+monorepo/
+├── CLAUDE.md                        # Claude reads this first
+├── .codesyncer/
+│   └── MASTER_CODESYNCER.md         # Package navigation guide
+├── packages/
+│   ├── shared/
+│   │   └── .claude/
+│   │       └── (same files)
+│   └── ui/
+│       └── .claude/
+│           └── (same files)
+└── apps/
+    ├── web/
+    │   └── .claude/
+    │       └── (same files)
+    └── api/
+        └── .claude/
+            └── (same files)
+```
+
+**Supported Monorepo Tools:**
+- ✅ Turborepo (`turbo.json`)
+- ✅ pnpm (`pnpm-workspace.yaml`)
+- ✅ Nx (`nx.json`)
+- ✅ Lerna (`lerna.json`)
+- ✅ npm/Yarn workspaces (`package.json` with `workspaces` field)
+- ✅ Rush (`rush.json`)
+
 ---
 
 ## 🛠️ Advanced Usage
@@ -594,6 +640,9 @@ A: Currently, yes. But we're building support for Cursor, GitHub Copilot, and ot
 
 **Q: Can I use this on a single repository?**
 A: Yes! CodeSyncer automatically detects if you're in a single repo (has `package.json`, `.git`, etc.) and creates `.claude/SETUP_GUIDE.md` instead of the multi-repo structure.
+
+**Q: Does this work with monorepos (Turborepo, pnpm, Nx, Lerna)?**
+A: Yes! As of v2.4.0, CodeSyncer automatically detects monorepo configurations (`turbo.json`, `pnpm-workspace.yaml`, `nx.json`, `lerna.json`, or `package.json` with workspaces) and scans all packages in your workspace patterns.
 
 **Q: Will this slow down AI responses?**
 A: No. CodeSyncer only adds documentation files that AI reads once per session. It actually makes AI more efficient by providing context upfront.

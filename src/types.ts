@@ -6,6 +6,19 @@ export type ProjectType = 'frontend' | 'backend' | 'mobile' | 'fullstack';
 
 export type SetupMode = 'quick' | 'expert';
 
+// Workspace mode: single repo, multi-repo (separate git repos), or monorepo (one git, multiple packages)
+export type WorkspaceMode = 'single' | 'multi-repo' | 'monorepo';
+
+// Monorepo tool types
+export type MonorepoTool = 'npm-workspaces' | 'yarn-workspaces' | 'pnpm' | 'lerna' | 'nx' | 'turbo' | 'rush' | 'unknown';
+
+// Monorepo detection result
+export interface MonorepoInfo {
+  tool: MonorepoTool;
+  patterns: string[];  // e.g., ["packages/*", "apps/*"]
+  configFile?: string;  // e.g., "pnpm-workspace.yaml"
+}
+
 export type KeywordSeverity = 'CRITICAL' | 'IMPORTANT' | 'MINOR';
 
 export interface InitOptions {
@@ -41,6 +54,8 @@ export interface RepositoryInfo {
   description?: string;  // AI will analyze during setup
   techStack?: string[];   // AI will analyze during setup
   hasCodeSyncer: boolean;
+  isMonorepoPackage?: boolean;  // true if this is a package within a monorepo
+  relativePath?: string;  // path relative to workspace root (e.g., "packages/api")
 }
 
 export interface KeywordCategory {
