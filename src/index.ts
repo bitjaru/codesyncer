@@ -7,20 +7,43 @@ import { updateCommand } from './commands/update';
 import { addRepoCommand } from './commands/add-repo';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 // Read version from package.json
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 const version = packageJson.version;
 
+/**
+ * Format version output with system info
+ */
+function formatVersionOutput(): string {
+  const nodeVersion = process.version;
+  const platform = `${os.platform()} ${os.arch()}`;
+
+  const lines = [
+    `${chalk.bold.cyan('CodeSyncer')} ${chalk.green(`v${version}`)}`,
+    '',
+    chalk.gray(`Node.js:  ${nodeVersion}`),
+    chalk.gray(`Platform: ${platform}`),
+    '',
+    chalk.bold('Supported AI Tools:'),
+    `  ${chalk.green('✓')} Claude Code`,
+    `  ${chalk.gray('○')} Cursor ${chalk.gray('(coming soon)')}`,
+    `  ${chalk.gray('○')} GitHub Copilot ${chalk.gray('(coming soon)')}`,
+    '',
+    chalk.gray('Contributions welcome: https://github.com/bitjaru/codesyncer'),
+  ];
+
+  return lines.join('\n');
+}
+
 const program = new Command();
 
 program
   .name('codesyncer')
   .description('AI-powered multi-repository collaboration system')
-  .version(`${version} (Currently supports: Claude Code only)\n\n` +
-    chalk.gray('Want to add support for Cursor, GitHub Copilot, or other AI tools?\n') +
-    chalk.gray('We welcome contributions! https://github.com/bitjaru/codesyncer'))
+  .version(formatVersionOutput(), '-v, --version', 'Display version info')
   .addHelpText('after', `
 ${chalk.bold('Currently Supported AI Tools:')}
   ${chalk.green('✓')} Claude Code
@@ -49,6 +72,7 @@ program
   .description('Update project structure and documentation')
   .option('-a, --ai <tool>', 'AI tool (currently: claude only)', 'claude')
   .option('--hard', 'Deep scan and update all existing files (not just missing files)')
+  .option('--dry-run', 'Show what would be done without making changes')
   .action(updateCommand);
 
 program

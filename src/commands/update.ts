@@ -5,9 +5,17 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { UpdateOptions, Language, RepositoryInfo } from '../types';
 import { scanForRepositories, hasMasterSetup, detectMonorepo, scanMonorepoPackages } from '../utils/scanner';
+import { getMonorepoToolName } from '../utils/monorepo-helpers';
 
 export async function updateCommand(options: UpdateOptions) {
-  console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update\n'));
+  const isDryRun = options.dryRun || false;
+
+  if (isDryRun) {
+    console.log(chalk.bold.yellow('\n🔍 CodeSyncer - Update (DRY RUN)\n'));
+    console.log(chalk.gray('No files will be modified. This is a preview of changes.\n'));
+  } else {
+    console.log(chalk.bold.cyan('\n🔄 CodeSyncer - Update\n'));
+  }
 
   const currentDir = process.cwd();
 
@@ -223,45 +231,50 @@ export async function updateCommand(options: UpdateOptions) {
     ]);
 
     if (createRootClaude) {
-      const spinner = ora('Creating...').start();
-
-      try {
-        // Read template
-        const templatePath = path.join(__dirname, '..', 'templates', lang, 'root_claude.md');
-        let template = await fs.readFile(templatePath, 'utf-8');
-
-        // Extract project info from existing MASTER_CODESYNCER.md
-        const masterPath = path.join(currentDir, '.codesyncer', 'MASTER_CODESYNCER.md');
-        let projectName = path.basename(currentDir);
-        let githubUsername = 'your-username';
+      if (isDryRun) {
+        // Dry run: just show what would be created
+        console.log(chalk.yellow(`  [DRY RUN] Would create: ${rootClaudePath}`));
+        console.log(chalk.gray('  Content: Root CLAUDE.md with project context\n'));
+      } else {
+        const spinner = ora('Creating...').start();
 
         try {
-          const masterContent = await fs.readFile(masterPath, 'utf-8');
-          const nameMatch = masterContent.match(/프로젝트[:\s]*([^\n]+)|Project[:\s]*([^\n]+)/i);
-          const githubMatch = masterContent.match(/github\.com\/([^/\s]+)/i);
+          // Read template
+          const templatePath = path.join(__dirname, '..', 'templates', lang, 'root_claude.md');
+          let template = await fs.readFile(templatePath, 'utf-8');
 
-          if (nameMatch) projectName = (nameMatch[1] || nameMatch[2]).trim();
-          if (githubMatch) githubUsername = githubMatch[1];
-        } catch {
-          // Use defaults
-        }
+          // Extract project info from existing MASTER_CODESYNCER.md
+          const masterPath = path.join(currentDir, '.codesyncer', 'MASTER_CODESYNCER.md');
+          let projectName = path.basename(currentDir);
+          let githubUsername = 'your-username';
 
-        const repoCount = foundRepos.length;
-        const today = new Date().toISOString().split('T')[0];
+          try {
+            const masterContent = await fs.readFile(masterPath, 'utf-8');
+            const nameMatch = masterContent.match(/프로젝트[:\s]*([^\n]+)|Project[:\s]*([^\n]+)/i);
+            const githubMatch = masterContent.match(/github\.com\/([^/\s]+)/i);
 
-        // Replace placeholders
-        template = template
-          .replace(/\[PROJECT_NAME\]/g, projectName)
-          .replace(/\[GITHUB_USERNAME\]/g, githubUsername)
-          .replace(/\[TODAY\]/g, today)
-          .replace(/\[REPO_COUNT\]/g, String(repoCount));
+            if (nameMatch) projectName = (nameMatch[1] || nameMatch[2]).trim();
+            if (githubMatch) githubUsername = githubMatch[1];
+          } catch {
+            // Use defaults
+          }
 
-        // Write root CLAUDE.md
-        await fs.writeFile(rootClaudePath, template, 'utf-8');
+          const repoCount = foundRepos.length;
+          const today = new Date().toISOString().split('T')[0];
 
-        spinner.succeed('Root CLAUDE.md created!');
-        console.log(chalk.green(`  ✓ ${rootClaudePath}\n`));
-        console.log(chalk.cyan('💡 AI will auto-load context at session start!\n'));
+          // Replace placeholders
+          template = template
+            .replace(/\[PROJECT_NAME\]/g, projectName)
+            .replace(/\[GITHUB_USERNAME\]/g, githubUsername)
+            .replace(/\[TODAY\]/g, today)
+            .replace(/\[REPO_COUNT\]/g, String(repoCount));
+
+          // Write root CLAUDE.md
+          await fs.writeFile(rootClaudePath, template, 'utf-8');
+
+          spinner.succeed('Root CLAUDE.md created!');
+          console.log(chalk.green(`  ✓ ${rootClaudePath}\n`));
+          console.log(chalk.cyan('💡 AI will auto-load context at session start!\n'));
 
         // Show next steps for AI
         console.log(chalk.bold('\n🤖 Next Steps:'));
@@ -275,9 +288,10 @@ export async function updateCommand(options: UpdateOptions) {
         console.log();
         console.log(chalk.gray('─'.repeat(50)));
         console.log();
-      } catch (error) {
-        spinner.fail('Failed to create root CLAUDE.md');
-        console.error(chalk.red(`Error: ${error}\n`));
+        } catch (error) {
+          spinner.fail('Failed to create root CLAUDE.md');
+          console.error(chalk.red(`Error: ${error}\n`));
+        }
       }
     }
   }
@@ -304,11 +318,21 @@ export async function updateCommand(options: UpdateOptions) {
     ]);
 
     if (generateUpdateGuide) {
-      const spinner = ora('Creating UPDATE_GUIDE...').start();
+      const updateGuidePath = path.join(currentDir, '.codesyncer', 'UPDATE_GUIDE.md');
 
-      try {
-        const updateGuidePath = path.join(currentDir, '.codesyncer', 'UPDATE_GUIDE.md');
-        const today = new Date().toISOString().split('T')[0];
+      if (isDryRun) {
+        // Dry run: just show what would be created
+        console.log(chalk.yellow(`  [DRY RUN] Would create: ${updateGuidePath}`));
+        console.log(chalk.gray(`  Content: UPDATE_GUIDE.md with ${reposNeedingSetup.length} repos to update`));
+        if (isHardUpdate) {
+          console.log(chalk.gray('  Mode: Hard update (review all files)'));
+        }
+        console.log();
+      } else {
+        const spinner = ora('Creating UPDATE_GUIDE...').start();
+
+        try {
+          const today = new Date().toISOString().split('T')[0];
 
         // Extract project info
         let projectName = path.basename(currentDir);
@@ -745,29 +769,18 @@ rm .codesyncer/UPDATE_GUIDE.md
         console.log();
         console.log(chalk.gray('─'.repeat(50)));
         console.log();
-      } catch (error) {
-        spinner.fail('Failed to create UPDATE_GUIDE.md');
-        console.error(chalk.red(`Error: ${error}\n`));
+        } catch (error) {
+          spinner.fail('Failed to create UPDATE_GUIDE.md');
+          console.error(chalk.red(`Error: ${error}\n`));
+        }
       }
     }
   }
 
-  console.log(chalk.bold.green('\n✅ Update complete!\n'));
-}
-
-/**
- * Get human-readable name for monorepo tool
- */
-function getMonorepoToolName(tool: string): string {
-  const names: Record<string, string> = {
-    'npm-workspaces': 'npm Workspaces',
-    'yarn-workspaces': 'Yarn Workspaces',
-    'pnpm': 'pnpm',
-    'lerna': 'Lerna',
-    'nx': 'Nx',
-    'turbo': 'Turborepo',
-    'rush': 'Rush',
-    'unknown': 'Unknown',
-  };
-  return names[tool] || tool;
+  if (isDryRun) {
+    console.log(chalk.bold.yellow('\n✅ Dry run complete! No files were modified.\n'));
+    console.log(chalk.gray('Run without --dry-run to apply changes.\n'));
+  } else {
+    console.log(chalk.bold.green('\n✅ Update complete!\n'));
+  }
 }

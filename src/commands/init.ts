@@ -6,12 +6,42 @@ import * as path from 'path';
 import { InitOptions, Language, MonorepoInfo } from '../types';
 import { scanForRepositories, hasMasterSetup, isCurrentDirRepository, hasSingleRepoSetup, detectMonorepo, scanMonorepoPackages } from '../utils/scanner';
 import { msg } from '../utils/messages';
+import { getMonorepoToolName } from '../utils/monorepo-helpers';
+import { getGitHubInfo } from '../utils/git-helpers';
+import { displayProgress } from '../utils/progress';
+import { saveSetupState, loadSetupState, clearSetupState, SetupState } from '../utils/setup-state';
 
 export async function initCommand(options: InitOptions) {
   console.log(chalk.bold.cyan('\n🤖 CodeSyncer v2.0 - AI-Powered Collaboration System\n'));
   console.log(chalk.gray('Framework provider for AI coding assistants\n'));
 
   const currentDir = process.cwd();
+
+  // Check for recoverable state from previous interrupted setup
+  const previousState = await loadSetupState(currentDir);
+  let resumeFromState = false;
+
+  if (previousState) {
+    console.log(chalk.yellow(`\n⚠️  Previous setup was interrupted (${previousState.timestamp})\n`));
+    console.log(chalk.gray(`  Project: ${previousState.projectName}`));
+    console.log(chalk.gray(`  Mode: ${previousState.workspaceMode}`));
+    console.log();
+
+    const { resume } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'resume',
+        message: 'Resume previous setup?',
+        default: true,
+      },
+    ]);
+
+    resumeFromState = resume;
+
+    if (!resume) {
+      await clearSetupState(currentDir);
+    }
+  }
 
   // Check if master setup already exists
   if (await hasMasterSetup(currentDir)) {
@@ -32,6 +62,8 @@ export async function initCommand(options: InitOptions) {
   }
 
   // STEP 1: Language selection
+  displayProgress(0, resumeFromState && previousState ? previousState.lang : 'en');
+
   const { language } = await inquirer.prompt([
     {
       type: 'list',
@@ -41,38 +73,63 @@ export async function initCommand(options: InitOptions) {
         { name: '🇰🇷 한국어', value: 'ko' },
         { name: '🇺🇸 English', value: 'en' },
       ],
-      default: options.lang || 'en',
+      default: resumeFromState && previousState ? previousState.lang : (options.lang || 'en'),
     },
   ]);
 
   const lang = language as Language;
 
   // STEP 2: Basic project information
+  displayProgress(1, lang);
+
+  // Auto-detect GitHub info from .git/config
+  const gitInfo = await getGitHubInfo(currentDir);
+  const detectedUsername = gitInfo.username;
+  const detectedRepoName = gitInfo.repoName;
+
+  if (detectedUsername) {
+    console.log(chalk.green('✓') + chalk.gray(` Git remote detected: ${detectedUsername}/${detectedRepoName || '...'}`));
+  }
+
   const answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'projectName',
       message: lang === 'ko' ? '프로젝트 이름:' : 'Project name:',
-      default: path.basename(currentDir),
+      default: (resumeFromState && previousState?.projectName) || detectedRepoName || path.basename(currentDir),
       validate: (input) => input.trim() ? true : (lang === 'ko' ? '프로젝트 이름을 입력하세요' : 'Please enter project name'),
     },
     {
       type: 'input',
       name: 'githubUsername',
       message: lang === 'ko' ? 'GitHub 사용자명:' : 'GitHub username:',
+      default: (resumeFromState && previousState?.githubUsername) || detectedUsername,
       validate: (input) => input.trim() ? true : (lang === 'ko' ? 'GitHub 사용자명을 입력하세요' : 'Please enter GitHub username'),
     },
   ]);
 
   const { projectName, githubUsername } = answers;
 
-  console.log();
-
   // STEP 3: Check workspace type (monorepo, multi-repo, or single-repo)
+  displayProgress(2, lang);
+
   const spinner = ora(lang === 'ko' ? '워크스페이스 스캔 중...' : 'Scanning workspace...').start();
 
   // First, check if it's a monorepo
   const monorepoInfo = await detectMonorepo(currentDir);
+
+  // Determine workspace mode and save state for recovery
+  const workspaceMode = monorepoInfo ? 'monorepo' : (await isCurrentDirRepository(currentDir) ? 'single' : 'multi-repo');
+
+  // Save state for potential recovery
+  await saveSetupState(currentDir, {
+    step: 2,
+    lang,
+    projectName,
+    githubUsername,
+    workspaceMode,
+    timestamp: new Date().toISOString(),
+  });
 
   // === MONOREPO MODE ===
   if (monorepoInfo) {
@@ -126,7 +183,9 @@ export async function initCommand(options: InitOptions) {
         : chalk.gray('○');
       console.log(`  ${status} ${chalk.bold(pkg.name)} ${chalk.gray(`(${pkg.relativePath})`)}`);
     });
-    console.log();
+
+    // STEP 4: Select packages
+    displayProgress(3, lang);
 
     // Select packages to include
     const { selectedPackages } = await inquirer.prompt([
@@ -156,7 +215,9 @@ export async function initCommand(options: InitOptions) {
 
     console.log();
     console.log(chalk.green(`✓ ${includedPackages.length}${lang === 'ko' ? '개 패키지 선택됨' : ' packages selected'}`));
-    console.log();
+
+    // STEP 5: Generate files
+    displayProgress(4, lang);
 
     // Generate SETUP_GUIDE.md for monorepo
     console.log(chalk.bold.cyan(lang === 'ko' ? '📝 설정 가이드 생성 중...\n' : '📝 Generating setup guide...\n'));
@@ -207,8 +268,12 @@ export async function initCommand(options: InitOptions) {
 
     console.log(chalk.green('✓') + ' .codesyncer/SETUP_GUIDE.md');
 
+    // Complete! Clear recovery state
+    await clearSetupState(currentDir);
+    displayProgress(5, lang);
+
     // Success message for monorepo mode
-    console.log(chalk.bold.green(`\n✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (모노레포 모드)' : 'CodeSyncer initialized! (Monorepo Mode)'}\n`));
+    console.log(chalk.bold.green(`✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (모노레포 모드)' : 'CodeSyncer initialized! (Monorepo Mode)'}\n`));
 
     console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
     console.log(`  ${chalk.cyan('.codesyncer/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
@@ -294,8 +359,11 @@ export async function initCommand(options: InitOptions) {
       }
     }
 
+    // Single-repo: skip select step, go directly to generate
+    displayProgress(4, lang);
+
     // Generate single-repo SETUP_GUIDE.md
-    console.log(chalk.bold.cyan(lang === 'ko' ? '\n📝 설정 가이드 생성 중...\n' : '\n📝 Generating setup guide...\n'));
+    console.log(chalk.bold.cyan(lang === 'ko' ? '📝 설정 가이드 생성 중...\n' : '📝 Generating setup guide...\n'));
 
     const claudeDir = path.join(currentDir, '.claude');
     await fs.ensureDir(claudeDir);
@@ -321,8 +389,12 @@ export async function initCommand(options: InitOptions) {
 
     console.log(chalk.green('✓') + ' .claude/SETUP_GUIDE.md');
 
+    // Complete! Clear recovery state
+    await clearSetupState(currentDir);
+    displayProgress(5, lang);
+
     // Success message for single-repo mode
-    console.log(chalk.bold.green(`\n✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (단일 레포 모드)' : 'CodeSyncer initialized! (Single Repo Mode)'}\n`));
+    console.log(chalk.bold.green(`✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (단일 레포 모드)' : 'CodeSyncer initialized! (Single Repo Mode)'}\n`));
 
     console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
     console.log(`  ${chalk.cyan('.claude/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
@@ -391,9 +463,11 @@ export async function initCommand(options: InitOptions) {
   foundRepos.forEach((repo) => {
     console.log(`  ${chalk.cyan('●')} ${chalk.bold(repo.name)}`);
   });
-  console.log();
 
-  // STEP 3.5: Select repositories to include
+  // STEP 4: Select repositories
+  displayProgress(3, lang);
+
+  // Select repositories to include
   const { selectedRepos } = await inquirer.prompt([
     {
       type: 'checkbox',
@@ -424,9 +498,11 @@ export async function initCommand(options: InitOptions) {
 
   console.log();
   console.log(chalk.green(`✓ ${includedRepos.length}${lang === 'ko' ? '개 레포지토리 선택됨' : ' repositories selected'}`));
-  console.log();
 
-  // STEP 4: Generate SETUP_GUIDE.md
+  // STEP 5: Generate files
+  displayProgress(4, lang);
+
+  // Generate SETUP_GUIDE.md
   console.log(chalk.bold.cyan(lang === 'ko' ? '📝 설정 가이드 생성 중...\n' : '📝 Generating setup guide...\n'));
 
   const codeSyncerDir = path.join(currentDir, '.codesyncer');
@@ -465,8 +541,12 @@ export async function initCommand(options: InitOptions) {
 
   console.log(chalk.green('✓') + ' .codesyncer/SETUP_GUIDE.md');
 
-  // STEP 5: Success message
-  console.log(chalk.bold.green(`\n✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료!' : 'CodeSyncer initialized successfully!'}\n`));
+  // Complete! Clear recovery state
+  await clearSetupState(currentDir);
+  displayProgress(5, lang);
+
+  // Success message
+  console.log(chalk.bold.green(`✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료!' : 'CodeSyncer initialized successfully!'}\n`));
 
   console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
   console.log(`  ${chalk.cyan('.codesyncer/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
@@ -505,19 +585,3 @@ export async function initCommand(options: InitOptions) {
   console.log();
 }
 
-/**
- * Get human-readable name for monorepo tool
- */
-function getMonorepoToolName(tool: string): string {
-  const names: Record<string, string> = {
-    'npm-workspaces': 'npm Workspaces',
-    'yarn-workspaces': 'Yarn Workspaces',
-    'pnpm': 'pnpm',
-    'lerna': 'Lerna',
-    'nx': 'Nx',
-    'turbo': 'Turborepo',
-    'rush': 'Rush',
-    'unknown': 'Unknown',
-  };
-  return names[tool] || tool;
-}

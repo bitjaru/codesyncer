@@ -30,6 +30,7 @@ export interface InitOptions {
 export interface UpdateOptions {
   ai: AITool;
   hard?: boolean;  // Deep scan and update all existing files
+  dryRun?: boolean;  // Show what would be done without making changes
 }
 
 export interface AddRepoOptions {
