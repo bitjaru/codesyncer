@@ -70,6 +70,7 @@ CodeSyncer는 문서가 **어디에, 어떻게** 만들어져야 하는지 정�
 - 🤖 **AI 도구 독립적**: Claude Code, Cursor, GitHub Copilot 등 모두 지원
 - 📁 **단일 & 멀티 레포 지원**: 개별 레포지토리 또는 전체 워크스페이스 모두 지원
 - 📦 **모노레포 지원**: Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces 자동 감지
+- 🔄 **Watch 모드**: 실시간 파일 모니터링 및 태그 자동 동기화 (v2.6.0 신규)
 - 🏷️ **주석 태그 시스템**: `@codesyncer-*` 태그로 결정과 추론을 영구 기록
 - 🤝 **자동 의논 시스템**: 중요한 결정(결제, 보안 등)에서 자동으로 일시 정지
 - 🌐 **다국어 지원**: 한글/영문 완벽 지원
@@ -317,6 +318,25 @@ codesyncer init
 ### 프로젝트 구조 업데이트
 ```bash
 codesyncer update
+```
+
+### Watch 모드 (v2.6.0 신규)
+```bash
+codesyncer watch         # 실시간 모니터링 시작
+codesyncer watch --log   # 파일 로깅 포함
+```
+
+**기능:**
+- 파일 변경 실시간 감지
+- `@codesyncer-*` 태그 자동으로 `DECISIONS.md`에 동기화
+- 예쁜 콘솔 출력과 세션 통계
+
+**출력 예시:**
+```
+[14:32:10] ✨ 변경됨: src/utils/api.ts
+           └── 🎯 발견: @codesyncer-decision
+               "SWR 대신 React Query 사용"
+           └── ✅ DECISIONS.md에 추가됨
 ```
 
 ### 워크스페이스에 새 레포 추가

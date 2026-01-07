@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { addRepoCommand } from './commands/add-repo';
+import { watchCommand } from './commands/watch';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -57,6 +58,7 @@ ${chalk.bold('Coming Soon (Community Contributions Welcome!):')}
 ${chalk.bold('Examples:')}
   $ codesyncer init              ${chalk.gray('# Initialize collaboration system')}
   $ codesyncer update            ${chalk.gray('# Update project structure')}
+  $ codesyncer watch             ${chalk.gray('# Real-time file monitoring')}
   $ codesyncer add-repo          ${chalk.gray('# Add new repository to workspace')}
   `);
 
@@ -81,5 +83,11 @@ program
   .option('-l, --lang <language>', 'Language (en/ko)', 'en')
   .option('-a, --ai <tool>', 'AI tool (currently: claude only)', 'claude')
   .action(addRepoCommand);
+
+program
+  .command('watch')
+  .description('Watch for file changes and sync @codesyncer-* tags to documentation')
+  .option('--log', 'Save logs to .codesyncer/watch-{date}.log')
+  .action(watchCommand);
 
 program.parse(process.argv);

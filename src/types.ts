@@ -38,6 +38,10 @@ export interface AddRepoOptions {
   ai: AITool;
 }
 
+export interface WatchOptions {
+  log?: boolean;  // Enable file logging
+}
+
 export interface ProjectConfig {
   projectName: string;
   githubUsername: string;

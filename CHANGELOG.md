@@ -2,6 +2,41 @@
 
 All notable changes to CodeSyncer will be documented in this file.
 
+## [2.6.0] - 2026-01-06
+
+### Added
+
+#### Watch Mode (Major Feature)
+- **Real-time file monitoring**: `codesyncer watch` command for live code tracking
+  ```bash
+  codesyncer watch        # Start watching
+  codesyncer watch --log  # With file logging
+  ```
+
+- **Auto tag synchronization**: Automatically syncs `@codesyncer-*` tags to `DECISIONS.md`
+  - Supports: `@codesyncer-decision`, `@codesyncer-rule`, `@codesyncer-todo`, `@codesyncer-inference`, `@codesyncer-context`
+  - Legacy support: `@claude-*` tags also work
+
+- **Beautiful UX**:
+  - First-time welcome message with usage tips
+  - Color-coded real-time change logs
+  - Session summary on exit (duration, files watched, tags synced)
+  - Korean/English auto-detection
+
+- **Optional file logging**: `--log` flag saves session to `.codesyncer/watch-{date}.log`
+
+#### Technical
+- New utilities:
+  - `src/utils/tag-parser.ts` - Parse @codesyncer-* tags from source files
+  - `src/utils/watch-logger.ts` - Beautiful console output and file logging
+  - `src/utils/watcher.ts` - Chokidar-based file watcher with debouncing
+  - `src/commands/watch.ts` - Watch command handler
+
+### Dependencies
+- Added `chokidar@^3.6.0` for cross-platform file watching
+
+---
+
 ## [2.5.0] - 2025-12-15
 
 ### Added

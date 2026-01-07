@@ -1,6 +1,6 @@
 {
   "name": "codesyncer",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
   "keywords": [
     "ai-collaboration",
@@ -55,6 +55,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "chalk": "^4.1.2",
+    "chokidar": "^3.6.0",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^8.2.6",

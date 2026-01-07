@@ -70,6 +70,7 @@ CodeSyncer defines **WHERE** and **HOW** documentation should be created. Your A
 - 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
 - 📁 **Single & Multi-Repository Support**: Works with individual repos or entire workspaces
 - 📦 **Monorepo Support**: Auto-detects Turborepo, pnpm, Nx, Lerna, Yarn/npm workspaces
+- 🔄 **Watch Mode**: Real-time file monitoring with auto tag sync (NEW in v2.6.0)
 - 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
 - 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
 - 🌐 **Multi-Language**: Full Korean and English support
@@ -317,6 +318,25 @@ codesyncer init
 ### Update project structure
 ```bash
 codesyncer update
+```
+
+### Watch Mode (NEW in v2.6.0)
+```bash
+codesyncer watch         # Start real-time monitoring
+codesyncer watch --log   # With file logging
+```
+
+**What it does:**
+- Monitors file changes in real-time
+- Auto-syncs `@codesyncer-*` tags to `DECISIONS.md`
+- Beautiful console output with session statistics
+
+**Example output:**
+```
+[14:32:10] ✨ Changed: src/utils/api.ts
+           └── 🎯 Found: @codesyncer-decision
+               "Use React Query instead of SWR"
+           └── ✅ Added to DECISIONS.md
 ```
 
 ### Add new repository to workspace
