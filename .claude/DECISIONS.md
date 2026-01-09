@@ -48,14 +48,31 @@
 ---
 
 ---
+### 2026-01-09 - 배포 체크리스트
+**카테고리**: IMPORTANT
+**결정**: npm 배포 시 반드시 GitHub Release도 함께 생성
+**체크리스트**:
+1. 버전 업 (`package.json`)
+2. 빌드 & 테스트 (`npm run build && npm test`)
+3. npm 배포 (`npm publish`)
+4. Git commit & push
+5. **GitHub Release 생성** (`gh release create vX.X.X --title "vX.X.X - Title" --notes "Release notes"`)
+**이유**:
+- npm만 배포하고 GitHub Release 누락 방지
+- 사용자들이 변경사항 확인 가능
+- 릴리즈 히스토리 관리
+**결정자**: bitjaru
+---
+
+---
 
 ## 📊 카테고리별 통계
 
 - **CRITICAL**: 0건
-- **IMPORTANT**: 3건
+- **IMPORTANT**: 4건
 - **MINOR**: 0건
 
-**총 결정**: 3건
+**총 결정**: 4건
 
 ---
 
