@@ -10,7 +10,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Language } from '../types';
 import { detectLanguage } from '../utils/language';
-import { hasMasterSetup, detectMonorepo, scanMonorepoPackages, scanForRepositories } from '../utils/scanner';
+import { hasMasterSetup, hasSingleRepoSetup, detectMonorepo, scanMonorepoPackages, scanForRepositories } from '../utils/scanner';
 
 export interface ValidateOptions {
   verbose?: boolean;
@@ -76,9 +76,12 @@ export async function validateCommand(options: ValidateOptions = {}): Promise<vo
   // Check if CodeSyncer is set up
   const spinner = ora(isKo ? '설정 검증 중...' : 'Validating setup...').start();
 
-  // 1. Check master setup
+  // 1. Detect setup mode (single-repo vs multi-repo)
   const hasMaster = await hasMasterSetup(currentDir);
-  if (!hasMaster) {
+  const hasSingleRepo = await hasSingleRepoSetup(currentDir);
+  const isSingleRepoMode = !hasMaster && hasSingleRepo;
+
+  if (!hasMaster && !hasSingleRepo) {
     result.valid = false;
     result.errors.push({
       code: 'NO_SETUP',
@@ -90,63 +93,133 @@ export async function validateCommand(options: ValidateOptions = {}): Promise<vo
     return;
   }
 
-  // 2. Check .codesyncer directory
-  const codesyncerDir = path.join(currentDir, '.codesyncer');
-  if (!(await fs.pathExists(codesyncerDir))) {
-    result.warnings.push({
-      code: 'NO_CODESYNCER_DIR',
-      message: isKo ? '.codesyncer 폴더가 없습니다' : 'No .codesyncer directory',
-      suggestion: isKo ? '.codesyncer 폴더를 생성하세요' : 'Create .codesyncer directory',
-    });
-  }
+  // Add mode info
+  result.info.push({
+    label: isKo ? '모드' : 'Mode',
+    value: isSingleRepoMode
+      ? (isKo ? '단일 레포지토리' : 'Single Repository')
+      : (isKo ? '멀티 레포지토리' : 'Multi Repository'),
+  });
 
-  // 3. Check MASTER_CODESYNCER.md
-  const masterPath = path.join(codesyncerDir, 'MASTER_CODESYNCER.md');
-  if (await fs.pathExists(masterPath)) {
-    result.info.push({
-      label: 'MASTER_CODESYNCER.md',
-      value: '✓',
-    });
+  // 2. Mode-specific validation
+  if (isSingleRepoMode) {
+    // === SINGLE-REPO MODE VALIDATION ===
+    const claudeDir = path.join(currentDir, '.claude');
 
-    // Validate master file content
-    try {
-      const masterContent = await fs.readFile(masterPath, 'utf-8');
-      if (masterContent.includes('[PROJECT_NAME]') || masterContent.includes('[GITHUB_USERNAME]')) {
+    // Check .claude directory exists
+    if (await fs.pathExists(claudeDir)) {
+      result.info.push({
+        label: '.claude/',
+        value: '✓',
+      });
+
+      // Check required files in .claude
+      for (const file of REQUIRED_FILES) {
+        const filePath = path.join(claudeDir, file);
+        if (await fs.pathExists(filePath)) {
+          // Check for unfilled placeholders
+          try {
+            const content = await fs.readFile(filePath, 'utf-8');
+            const placeholders = content.match(/\[([A-Z_]+)\]/g);
+            if (placeholders && placeholders.length > 0) {
+              result.warnings.push({
+                code: 'UNFILLED_PLACEHOLDER',
+                message: isKo
+                  ? `.claude/${file}: 미완성 플레이스홀더 (${placeholders.slice(0, 3).join(', ')})`
+                  : `.claude/${file}: Unfilled placeholders (${placeholders.slice(0, 3).join(', ')})`,
+                path: filePath,
+              });
+            }
+          } catch {
+            // Ignore read errors
+          }
+        } else {
+          result.warnings.push({
+            code: 'MISSING_FILE',
+            message: isKo ? `.claude/${file} 누락` : `Missing .claude/${file}`,
+            path: filePath,
+            suggestion: 'codesyncer update',
+          });
+        }
+      }
+    }
+
+    // Check root CLAUDE.md for single-repo
+    const rootClaudePath = path.join(currentDir, 'CLAUDE.md');
+    if (await fs.pathExists(rootClaudePath)) {
+      result.info.push({
+        label: 'Root CLAUDE.md',
+        value: '✓',
+      });
+    } else {
+      result.warnings.push({
+        code: 'NO_ROOT_CLAUDE',
+        message: isKo ? '루트 CLAUDE.md가 없습니다 (AI 자동 로드 불가)' : 'No root CLAUDE.md (AI auto-load disabled)',
+        suggestion: 'codesyncer update',
+      });
+    }
+
+  } else {
+    // === MULTI-REPO MODE VALIDATION ===
+
+    // 2. Check .codesyncer directory
+    const codesyncerDir = path.join(currentDir, '.codesyncer');
+    if (!(await fs.pathExists(codesyncerDir))) {
+      result.warnings.push({
+        code: 'NO_CODESYNCER_DIR',
+        message: isKo ? '.codesyncer 폴더가 없습니다' : 'No .codesyncer directory',
+        suggestion: isKo ? '.codesyncer 폴더를 생성하세요' : 'Create .codesyncer directory',
+      });
+    }
+
+    // 3. Check MASTER_CODESYNCER.md
+    const masterPath = path.join(codesyncerDir, 'MASTER_CODESYNCER.md');
+    if (await fs.pathExists(masterPath)) {
+      result.info.push({
+        label: 'MASTER_CODESYNCER.md',
+        value: '✓',
+      });
+
+      // Validate master file content
+      try {
+        const masterContent = await fs.readFile(masterPath, 'utf-8');
+        if (masterContent.includes('[PROJECT_NAME]') || masterContent.includes('[GITHUB_USERNAME]')) {
+          result.warnings.push({
+            code: 'UNFILLED_PLACEHOLDER',
+            message: isKo ? 'MASTER_CODESYNCER.md에 미완성 플레이스홀더가 있습니다' : 'MASTER_CODESYNCER.md has unfilled placeholders',
+            path: masterPath,
+          });
+        }
+      } catch {
         result.warnings.push({
-          code: 'UNFILLED_PLACEHOLDER',
-          message: isKo ? 'MASTER_CODESYNCER.md에 미완성 플레이스홀더가 있습니다' : 'MASTER_CODESYNCER.md has unfilled placeholders',
+          code: 'READ_ERROR',
+          message: isKo ? 'MASTER_CODESYNCER.md를 읽을 수 없습니다' : 'Cannot read MASTER_CODESYNCER.md',
           path: masterPath,
         });
       }
-    } catch {
-      result.warnings.push({
-        code: 'READ_ERROR',
-        message: isKo ? 'MASTER_CODESYNCER.md를 읽을 수 없습니다' : 'Cannot read MASTER_CODESYNCER.md',
+    } else {
+      result.errors.push({
+        code: 'NO_MASTER',
+        message: isKo ? 'MASTER_CODESYNCER.md 파일이 없습니다' : 'No MASTER_CODESYNCER.md file',
         path: masterPath,
       });
+      result.valid = false;
     }
-  } else {
-    result.errors.push({
-      code: 'NO_MASTER',
-      message: isKo ? 'MASTER_CODESYNCER.md 파일이 없습니다' : 'No MASTER_CODESYNCER.md file',
-      path: masterPath,
-    });
-    result.valid = false;
-  }
 
-  // 4. Check root CLAUDE.md
-  const rootClaudePath = path.join(currentDir, 'CLAUDE.md');
-  if (await fs.pathExists(rootClaudePath)) {
-    result.info.push({
-      label: 'Root CLAUDE.md',
-      value: '✓',
-    });
-  } else {
-    result.warnings.push({
-      code: 'NO_ROOT_CLAUDE',
-      message: isKo ? '루트 CLAUDE.md가 없습니다 (AI 자동 로드 불가)' : 'No root CLAUDE.md (AI auto-load disabled)',
-      suggestion: 'codesyncer update',
-    });
+    // 4. Check root CLAUDE.md
+    const rootClaudePath = path.join(currentDir, 'CLAUDE.md');
+    if (await fs.pathExists(rootClaudePath)) {
+      result.info.push({
+        label: 'Root CLAUDE.md',
+        value: '✓',
+      });
+    } else {
+      result.warnings.push({
+        code: 'NO_ROOT_CLAUDE',
+        message: isKo ? '루트 CLAUDE.md가 없습니다 (AI 자동 로드 불가)' : 'No root CLAUDE.md (AI auto-load disabled)',
+        suggestion: 'codesyncer update',
+      });
+    }
   }
 
   // 5. Scan repositories
