@@ -13,7 +13,7 @@
 
 ## 🎬 Demo
 
-![CodeSyncer Demo](./demo.gif)
+![CodeSyncer Demo](https://raw.githubusercontent.com/bitjaru/codesyncer/main/demo.gif)
 
 ---
 
