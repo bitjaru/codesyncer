@@ -126,14 +126,14 @@ When you update CodeSyncer to a new version, first validate your setup, then syn
 ```bash
 cd /path/to/your/multi-repo-workspace
 
-# Step 1: Check your setup (NEW in v3.0.0)
+# Step 1: Check your setup (NEW in v2.7.0)
 codesyncer validate
 
 # Step 2: Fix any issues
 codesyncer update
 ```
 
-#### New in v3.0.0: `codesyncer validate`
+#### New in v2.7.0: `codesyncer validate`
 
 The `validate` command checks your CodeSyncer setup and reports issues:
 

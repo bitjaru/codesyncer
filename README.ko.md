@@ -126,14 +126,14 @@ CodeSyncer를 새 버전으로 업데이트한 후, 먼저 설정을 검증하�
 ```bash
 cd /path/to/your/multi-repo-workspace
 
-# 1단계: 설정 검증 (v3.0.0 신규)
+# 1단계: 설정 검증 (v2.7.0 신규)
 codesyncer validate
 
 # 2단계: 문제 수정
 codesyncer update
 ```
 
-#### v3.0.0 신규: `codesyncer validate`
+#### v2.7.0 신규: `codesyncer validate`
 
 `validate` 명령어는 CodeSyncer 설정을 검사하고 문제를 보고합니다:
 
