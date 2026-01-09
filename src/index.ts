@@ -7,14 +7,8 @@ import { updateCommand } from './commands/update';
 import { addRepoCommand } from './commands/add-repo';
 import { watchCommand } from './commands/watch';
 import { validateCommand } from './commands/validate';
-import * as path from 'path';
-import * as fs from 'fs';
+import { VERSION } from './utils/version';
 import * as os from 'os';
-
-// Read version from package.json
-const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-const version = packageJson.version;
 
 /**
  * Format version output with system info
@@ -24,7 +18,7 @@ function formatVersionOutput(): string {
   const platform = `${os.platform()} ${os.arch()}`;
 
   const lines = [
-    `${chalk.bold.cyan('CodeSyncer')} ${chalk.green(`v${version}`)}`,
+    `${chalk.bold.cyan('CodeSyncer')} ${chalk.green(`v${VERSION}`)}`,
     '',
     chalk.gray(`Node.js:  ${nodeVersion}`),
     chalk.gray(`Platform: ${platform}`),

@@ -10,9 +10,10 @@ import { getMonorepoToolName } from '../utils/monorepo-helpers';
 import { getGitHubInfo } from '../utils/git-helpers';
 import { displayProgress } from '../utils/progress';
 import { saveSetupState, loadSetupState, clearSetupState, SetupState } from '../utils/setup-state';
+import { VERSION } from '../utils/version';
 
 export async function initCommand(options: InitOptions) {
-  console.log(chalk.bold.cyan('\n🤖 CodeSyncer v2.0 - AI-Powered Collaboration System\n'));
+  console.log(chalk.bold.cyan(`\n🤖 CodeSyncer v${VERSION} - AI-Powered Collaboration System\n`));
   console.log(chalk.gray('Framework provider for AI coding assistants\n'));
 
   const currentDir = process.cwd();
