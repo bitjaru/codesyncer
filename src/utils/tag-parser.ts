@@ -131,6 +131,7 @@ export function formatTagForDecisions(tag: ParsedTag, relativeFile: string): str
 
 /**
  * Check if a tag already exists in DECISIONS.md
+ * Uses word boundary matching to avoid partial matches (e.g., "mysql" shouldn't match "mysql5")
  */
 export async function isTagInDecisions(decisionsPath: string, tag: ParsedTag): Promise<boolean> {
   try {
@@ -139,19 +140,29 @@ export async function isTagInDecisions(decisionsPath: string, tag: ParsedTag): P
     }
 
     const content = await fs.readFile(decisionsPath, 'utf-8');
-
-    // Check by content similarity (not exact match, to handle formatting differences)
     const normalizedContent = tag.content.toLowerCase().trim();
-    const normalizedFile = content.toLowerCase();
 
-    // Check if the exact content exists
-    if (normalizedFile.includes(normalizedContent)) {
+    // Check if source location exists (exact match - file:line)
+    const sourcePattern = `${path.basename(tag.file)}:${tag.line}`;
+    if (content.includes(sourcePattern)) {
       return true;
     }
 
-    // Check if source location exists
-    const sourcePattern = `${path.basename(tag.file)}:${tag.line}`;
-    if (content.includes(sourcePattern)) {
+    // Check by exact content match with word boundaries
+    // This prevents "mysql" from matching "mysql5" or "mysql-server"
+    const escapedContent = escapeRegExp(normalizedContent);
+    const wordBoundaryPattern = new RegExp(
+      `(^|[\\s\\n\\r"'\`#*_\\-\\[\\](){}:,;.])${escapedContent}([\\s\\n\\r"'\`#*_\\-\\[\\](){}:,;.]|$)`,
+      'i'
+    );
+
+    if (wordBoundaryPattern.test(content)) {
+      return true;
+    }
+
+    // Check for heading match (### Content)
+    const headingPattern = new RegExp(`###\\s*${escapedContent}\\s*$`, 'mi');
+    if (headingPattern.test(content)) {
       return true;
     }
 
@@ -159,6 +170,13 @@ export async function isTagInDecisions(decisionsPath: string, tag: ParsedTag): P
   } catch {
     return false;
   }
+}
+
+/**
+ * Escape special regex characters in a string
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

@@ -6,6 +6,7 @@ import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { addRepoCommand } from './commands/add-repo';
 import { watchCommand } from './commands/watch';
+import { validateCommand } from './commands/validate';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -59,6 +60,7 @@ ${chalk.bold('Examples:')}
   $ codesyncer init              ${chalk.gray('# Initialize collaboration system')}
   $ codesyncer update            ${chalk.gray('# Update project structure')}
   $ codesyncer watch             ${chalk.gray('# Real-time file monitoring')}
+  $ codesyncer validate          ${chalk.gray('# Validate setup and report issues')}
   $ codesyncer add-repo          ${chalk.gray('# Add new repository to workspace')}
   `);
 
@@ -89,5 +91,11 @@ program
   .description('Watch for file changes and sync @codesyncer-* tags to documentation')
   .option('--log', 'Save logs to .codesyncer/watch-{date}.log')
   .action(watchCommand);
+
+program
+  .command('validate')
+  .description('Validate CodeSyncer setup and report issues')
+  .option('--verbose', 'Show detailed output including file paths')
+  .action(validateCommand);
 
 program.parse(process.argv);

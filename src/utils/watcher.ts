@@ -241,8 +241,8 @@ export class CodeSyncerWatcher {
       for (const tag of tags) {
         this.logger.logTagFound(tag);
 
-        // Try to sync to DECISIONS.md
-        const decisionsPath = await this.findDecisionsPath();
+        // Try to sync to DECISIONS.md (pass full path for monorepo support)
+        const decisionsPath = await this.findDecisionsPath(fullPath);
         if (decisionsPath) {
           const added = await appendTagToDecisions(decisionsPath, tag, rootPath);
           if (added) {
@@ -284,11 +284,21 @@ export class CodeSyncerWatcher {
   }
 
   /**
-   * Find DECISIONS.md path
+   * Find DECISIONS.md path for a given file
+   * For monorepos, finds the closest .claude/DECISIONS.md relative to the changed file
    */
-  private async findDecisionsPath(): Promise<string | null> {
+  private async findDecisionsPath(changedFilePath?: string): Promise<string | null> {
     const { rootPath } = this.options;
 
+    // If a changed file is provided, try to find DECISIONS.md closest to it
+    if (changedFilePath) {
+      const decisionsPath = await this.findClosestDecisions(changedFilePath);
+      if (decisionsPath) {
+        return decisionsPath;
+      }
+    }
+
+    // Fallback to root paths
     // Check .claude/DECISIONS.md first
     const claudeDecisions = path.join(rootPath, '.claude', 'DECISIONS.md');
     if (await fs.pathExists(claudeDecisions)) {
@@ -309,6 +319,37 @@ export class CodeSyncerWatcher {
 
     // Create in root
     return rootDecisions;
+  }
+
+  /**
+   * Find the closest DECISIONS.md by walking up from the changed file
+   * This supports monorepo structures where each package may have its own .claude folder
+   */
+  private async findClosestDecisions(filePath: string): Promise<string | null> {
+    const { rootPath } = this.options;
+    let currentDir = path.dirname(filePath);
+
+    // Walk up the directory tree until we hit rootPath
+    while (currentDir.startsWith(rootPath) && currentDir !== path.dirname(rootPath)) {
+      // Check for .claude/DECISIONS.md in current directory
+      const claudeDecisions = path.join(currentDir, '.claude', 'DECISIONS.md');
+      if (await fs.pathExists(claudeDecisions)) {
+        return claudeDecisions;
+      }
+
+      // Check for DECISIONS.md in current directory
+      const localDecisions = path.join(currentDir, 'DECISIONS.md');
+      if (await fs.pathExists(localDecisions)) {
+        return localDecisions;
+      }
+
+      // Move up one directory
+      const parentDir = path.dirname(currentDir);
+      if (parentDir === currentDir) break; // Reached filesystem root
+      currentDir = parentDir;
+    }
+
+    return null;
   }
 
   /**

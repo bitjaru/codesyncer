@@ -70,11 +70,13 @@ CodeSyncer defines **WHERE** and **HOW** documentation should be created. Your A
 - 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
 - 📁 **Single & Multi-Repository Support**: Works with individual repos or entire workspaces
 - 📦 **Monorepo Support**: Auto-detects Turborepo, pnpm, Nx, Lerna, Yarn/npm workspaces
-- 🔄 **Watch Mode**: Real-time file monitoring with auto tag sync (NEW in v2.6.0)
+- 🔄 **Watch Mode**: Real-time file monitoring with auto tag sync
+- ✅ **Validate Command**: Check your setup and get fix suggestions (NEW in v2.7.0)
 - 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
 - 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
 - 🌐 **Multi-Language**: Full Korean and English support
 - ⚡ **Quick Setup**: One-command installation for your entire workspace
+- 🔒 **Security**: Path traversal protection and input validation (v2.7.0)
 
 ---
 
@@ -117,14 +119,61 @@ npm view codesyncer version
 npm install -g codesyncer@latest
 ```
 
-### After updating, sync your project
+### After updating, validate and sync your project
 
-When you update CodeSyncer to a new version, run the `update` command to sync your project with the latest templates and features:
+When you update CodeSyncer to a new version, first validate your setup, then sync:
 
 ```bash
 cd /path/to/your/multi-repo-workspace
+
+# Step 1: Check your setup (NEW in v3.0.0)
+codesyncer validate
+
+# Step 2: Fix any issues
 codesyncer update
 ```
+
+#### New in v3.0.0: `codesyncer validate`
+
+The `validate` command checks your CodeSyncer setup and reports issues:
+
+```bash
+codesyncer validate           # Basic validation
+codesyncer validate --verbose # Show file paths
+```
+
+**What it checks:**
+- ✅ Master setup exists (`.codesyncer/MASTER_CODESYNCER.md`)
+- ✅ Root `CLAUDE.md` for AI auto-loading
+- ✅ All repositories have required `.claude/` files
+- ✅ No unfilled placeholders in generated files
+- ✅ Language configuration
+
+**Example output:**
+```
+🔍 CodeSyncer - Validate
+
+📊 Info
+────────────────────────────────────────
+  Repository Count: 3
+  Configured Repos: 2/3
+  Language: en (config.json)
+
+⚠️  Warnings
+────────────────────────────────────────
+  • mobile-app: Missing ARCHITECTURE.md
+  • No root CLAUDE.md (AI auto-load disabled)
+
+────────────────────────────────────────
+⚠️  Validation passed with 2 warning(s)
+
+💡 To fix issues:
+   codesyncer update
+```
+
+#### `codesyncer update`
+
+Sync your project with the latest templates and features:
 
 **What happens:**
 1. ✅ Scans for new repositories added to your workspace

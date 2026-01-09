@@ -2,6 +2,88 @@
 
 All notable changes to CodeSyncer will be documented in this file.
 
+## [2.7.0] - 2026-01-09
+
+### Added
+
+#### New Commands
+- **`codesyncer validate`**: Validate CodeSyncer setup and report issues
+  ```bash
+  codesyncer validate         # Basic validation
+  codesyncer validate -v      # Verbose output with file paths
+  ```
+  - Checks master setup existence
+  - Validates all repository configurations
+  - Detects unfilled placeholders
+  - Reports missing files with fix suggestions
+  - Bilingual output (Korean/English)
+
+#### Improved Security
+- **Path traversal protection**: Validates all file paths to prevent directory escape attacks
+- **Input sanitization**: Sanitizes repository names and user inputs
+- **Safe file operations**: New `safeReadFile` and `safeWriteFile` utilities with proper error handling
+
+#### Comprehensive Error Handling
+- **Custom error types**: `CodeSyncerError` with error codes for better debugging
+- **User-friendly messages**: Bilingual error messages (Korean/English)
+- **Proper Node.js error handling**: Handles ENOENT, EACCES, EPERM, EISDIR errors
+
+#### Improved Language Detection
+- **Multi-source detection**: Checks config.json, SETUP_GUIDE.md content, and system locale
+- **Confidence scoring**: Returns detection confidence level
+- **Hangul character detection**: Counts Korean Unicode characters for better accuracy
+- **Config persistence**: Saves language preference to `.codesyncer/config.json`
+
+#### Test Suite
+- **71 unit tests** covering all new utilities
+- **Jest configuration** with TypeScript support
+- **Coverage reporting**: `npm run test:coverage`
+- Test files:
+  - `tag-parser.test.ts` - Tag parsing and deduplication
+  - `security.test.ts` - Path validation and sanitization
+  - `language.test.ts` - Language detection
+  - `errors.test.ts` - Error handling utilities
+
+### Fixed
+
+#### Critical Bug Fixes
+- **Tag duplicate detection**: Fixed substring matching bug where "mysql" would incorrectly match "mysql5"
+  - Now uses word boundary matching for accurate detection
+- **Watch mode monorepo support**: Fixed DECISIONS.md path resolution
+  - Now finds the closest DECISIONS.md relative to the changed file
+  - Walks up directory tree for proper monorepo support
+
+#### Error Handling
+- Template loading failures now have proper fallback handling
+- File write operations report errors instead of failing silently
+- Watch mode reports errors instead of ignoring them
+
+### Changed
+- **Test script**: Now runs Jest (`npm test`) instead of placeholder
+- **Prepublish**: Runs tests before building (`npm run prepublishOnly`)
+- **Error messages**: All error messages now available in Korean and English
+
+### Technical
+
+#### New Utilities
+- `src/utils/errors.ts` - Error handling with CodeSyncerError class
+- `src/utils/security.ts` - Path validation and sanitization
+- `src/utils/language.ts` - Improved language detection
+
+#### New Scripts
+```json
+{
+  "test": "jest",
+  "test:watch": "jest --watch",
+  "test:coverage": "jest --coverage"
+}
+```
+
+### Breaking Changes
+- None - fully backward compatible
+
+---
+
 ## [2.6.0] - 2026-01-06
 
 ### Added

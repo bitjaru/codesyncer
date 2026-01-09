@@ -1,6 +1,6 @@
 {
   "name": "codesyncer",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
   "keywords": [
     "ai-collaboration",
@@ -27,8 +27,10 @@
     "build": "tsc && npm run copy-templates",
     "copy-templates": "mkdir -p dist/templates && cp -r src/templates/* dist/templates/",
     "dev": "tsc --watch",
-    "prepublishOnly": "npm run build",
-    "test": "echo \"No tests yet\" && exit 0",
+    "prepublishOnly": "npm run test && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts"
   },
   "files": [

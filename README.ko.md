@@ -70,11 +70,13 @@ CodeSyncer는 문서가 **어디에, 어떻게** 만들어져야 하는지 정�
 - 🤖 **AI 도구 독립적**: Claude Code, Cursor, GitHub Copilot 등 모두 지원
 - 📁 **단일 & 멀티 레포 지원**: 개별 레포지토리 또는 전체 워크스페이스 모두 지원
 - 📦 **모노레포 지원**: Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces 자동 감지
-- 🔄 **Watch 모드**: 실시간 파일 모니터링 및 태그 자동 동기화 (v2.6.0 신규)
+- 🔄 **Watch 모드**: 실시간 파일 모니터링 및 태그 자동 동기화
+- ✅ **Validate 명령어**: 설정 검사 및 수정 제안 (v2.7.0 신규)
 - 🏷️ **주석 태그 시스템**: `@codesyncer-*` 태그로 결정과 추론을 영구 기록
 - 🤝 **자동 의논 시스템**: 중요한 결정(결제, 보안 등)에서 자동으로 일시 정지
 - 🌐 **다국어 지원**: 한글/영문 완벽 지원
 - ⚡ **빠른 설치**: 한 번의 명령으로 전체 워크스페이스 설정
+- 🔒 **보안 강화**: 경로 탐색 공격 방지 및 입력 검증 (v2.7.0)
 
 ---
 
@@ -117,14 +119,61 @@ npm view codesyncer version
 npm install -g codesyncer@latest
 ```
 
-### 업데이트 후, 프로젝트 동기화
+### 업데이트 후, 검증 및 프로젝트 동기화
 
-CodeSyncer를 새 버전으로 업데이트한 후, `update` 명령어를 실행하여 프로젝트를 최신 템플릿 및 기능과 동기화하세요:
+CodeSyncer를 새 버전으로 업데이트한 후, 먼저 설정을 검증하고 동기화하세요:
 
 ```bash
 cd /path/to/your/multi-repo-workspace
+
+# 1단계: 설정 검증 (v3.0.0 신규)
+codesyncer validate
+
+# 2단계: 문제 수정
 codesyncer update
 ```
+
+#### v3.0.0 신규: `codesyncer validate`
+
+`validate` 명령어는 CodeSyncer 설정을 검사하고 문제를 보고합니다:
+
+```bash
+codesyncer validate           # 기본 검증
+codesyncer validate --verbose # 파일 경로 표시
+```
+
+**검사 항목:**
+- ✅ 마스터 설정 존재 여부 (`.codesyncer/MASTER_CODESYNCER.md`)
+- ✅ AI 자동 로드용 루트 `CLAUDE.md`
+- ✅ 모든 레포지토리의 필수 `.claude/` 파일
+- ✅ 생성된 파일의 미완성 플레이스홀더
+- ✅ 언어 설정
+
+**출력 예시:**
+```
+🔍 CodeSyncer - Validate
+
+📊 정보
+────────────────────────────────────────
+  레포지토리 수: 3
+  설정 완료된 레포: 2/3
+  언어: ko (config.json)
+
+⚠️  경고
+────────────────────────────────────────
+  • mobile-app: ARCHITECTURE.md 누락
+  • 루트 CLAUDE.md 없음 (AI 자동 로드 불가)
+
+────────────────────────────────────────
+⚠️  검증 완료 (경고 2개)
+
+💡 수정하려면:
+   codesyncer update
+```
+
+#### `codesyncer update`
+
+프로젝트를 최신 템플릿 및 기능과 동기화:
 
 **수행 작업:**
 1. ✅ 워크스페이스에 추가된 새 레포지토리 스캔
