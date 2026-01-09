@@ -1,5 +1,7 @@
 # CLAUDE.md - [PROJECT_NAME] Multi-Repo Project
 
+[![Powered by CodeSyncer](https://img.shields.io/badge/🔄_Powered_by-CodeSyncer-blue?style=flat-square)](https://github.com/bitjaru/codesyncer)
+
 > **🎯 This is a Multi-Repository Workspace**
 >
 > Each repository is an independent project, working together collaboratively.

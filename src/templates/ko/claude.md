@@ -1,5 +1,7 @@
 # CLAUDE.md - [PROJECT_NAME] 코딩 가이드 v3.0
 
+[![Powered by CodeSyncer](https://img.shields.io/badge/🔄_Powered_by-CodeSyncer-blue?style=flat-square)](https://github.com/bitjaru/codesyncer)
+
 > **Powered by CodeSyncer** - AI 협업 시스템
 
 ## 🚀 빠른 시작

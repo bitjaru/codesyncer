@@ -1,5 +1,7 @@
 # CLAUDE.md - [PROJECT_NAME] 멀티레포 프로젝트
 
+[![Powered by CodeSyncer](https://img.shields.io/badge/🔄_Powered_by-CodeSyncer-blue?style=flat-square)](https://github.com/bitjaru/codesyncer)
+
 > **🎯 이것은 멀티레포 워크스페이스입니다**
 >
 > 각 레포지토리는 독립적인 프로젝트이며, 함께 협업합니다.
