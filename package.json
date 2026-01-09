@@ -1,7 +1,7 @@
 {
   "name": "codesyncer",
-  "version": "2.7.5",
-  "description": "AI-powered multi-repository collaboration system - Works with Claude Code, Cursor, GitHub Copilot, and more",
+  "version": "2.7.6",
+  "description": "Is your AI coding dumb? Make it smarter - Persistent project context, controlled inference, and live architecture sync for Claude Code",
   "keywords": [
     "ai-collaboration",
     "claude-code",

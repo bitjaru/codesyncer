@@ -1,6 +1,6 @@
 # CodeSyncer CLI
 
-> AI-powered multi-repository collaboration system that works seamlessly with Claude Code, Cursor, GitHub Copilot, and more!
+> Is your AI coding dumb? Make it smarter - Persistent project context, controlled inference, and live architecture sync for Claude Code
 
 [![npm version](https://img.shields.io/npm/v/codesyncer.svg)](https://www.npmjs.com/package/codesyncer)
 [![License](https://img.shields.io/badge/License-Commons%20Clause-red.svg)](./LICENSE)

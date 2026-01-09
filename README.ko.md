@@ -1,6 +1,6 @@
 # CodeSyncer CLI
 
-> Claude Code, Cursor, GitHub Copilot 등 모든 AI 코딩 어시스턴트와 함께 사용하는 멀티 레포지토리 협업 시스템!
+> AI 코딩이 멍청해? 똑똑하게 만들어줌 - 영구 컨텍스트, 추론 통제, 실시간 아키텍처 동기화 for Claude Code
 
 [![npm version](https://img.shields.io/npm/v/codesyncer.svg)](https://www.npmjs.com/package/codesyncer)
 [![License](https://img.shields.io/badge/License-Commons%20Clause-red.svg)](./LICENSE)

@@ -175,5 +175,5 @@ Both formats work identically, so use whichever you prefer!
 
 ---
 
-*CodeSyncer - AI-powered multi-repository collaboration system*
+*CodeSyncer - Persistent context, controlled inference, live architecture sync for Claude Code*
 *Currently Supported: Claude Code | Coming Soon: Cursor, GitHub Copilot, Continue.dev*

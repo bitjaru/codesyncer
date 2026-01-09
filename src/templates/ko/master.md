@@ -175,5 +175,5 @@ CodeSyncer는 두 가지 태그 형식을 모두 지원합니다:
 
 ---
 
-*CodeSyncer - AI-powered multi-repository collaboration system*
+*CodeSyncer - 영구 컨텍스트, 추론 통제, 실시간 아키텍처 동기화 for Claude Code*
 *현재 지원: Claude Code | 향후 지원 예정: Cursor, GitHub Copilot, Continue.dev*
