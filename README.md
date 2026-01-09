@@ -11,6 +11,12 @@
 
 ---
 
+## 🎬 Demo
+
+![CodeSyncer Demo](./demo.gif)
+
+---
+
 ## 🤔 The Problem
 
 Working with AI on real projects? You face these issues:
