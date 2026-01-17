@@ -13,7 +13,7 @@ import {
   getCurrentVersion,
 } from '../utils/template-version';
 import {
-  upgradeTemplates,
+  upgradeTemplatesWithSmartMerge,
   getTemplateVarsFromContext,
   formatUpgradeSummary,
   UpgradeResult,
@@ -934,7 +934,8 @@ async function checkAndOfferTemplateUpgrade(
 
   for (const { claudeDir, templates } of allOutdated) {
     const vars = await getTemplateVarsFromContext(claudeDir, lang);
-    const results = await upgradeTemplates(templates, { lang, vars, dryRun: isDryRun });
+    // Use smart merge to preserve user content outside marked sections
+    const results = await upgradeTemplatesWithSmartMerge(templates, { lang, vars, dryRun: isDryRun });
     allResults.push(...results);
   }
 

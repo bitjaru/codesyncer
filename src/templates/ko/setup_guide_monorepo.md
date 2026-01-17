@@ -331,4 +331,4 @@ CodeSyncer 사용 준비 완료!
 
 *이 설정 가이드는 CodeSyncer CLI에 의해 생성됩니다. 문제나 개선사항은 https://github.com/bitjaru/codesyncer 방문*
 
-<!-- codesyncer-version: 3.1.0 -->
+<!-- codesyncer-version: 3.1.1 -->

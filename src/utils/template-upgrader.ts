@@ -9,7 +9,27 @@ import { TemplateStatus, TEMPLATE_FILE_MAP } from './template-version';
  *
  * @codesyncer-context Handles backing up existing templates and applying new versions
  * @codesyncer-decision [2026-01-17] Always backup before upgrading (user data safety)
+ * @codesyncer-decision [2026-01-17] Smart merge - only update section-marked content
  */
+
+/**
+ * Parsed section from template content
+ */
+export interface ParsedSection {
+  name: string;
+  content: string;
+  startIndex: number;
+  endIndex: number;
+}
+
+/**
+ * Result of parsing template into sections and user content
+ */
+export interface ParsedTemplate {
+  sections: ParsedSection[];
+  userContent: Array<{ content: string; afterSection: string | null }>;
+  rawContent: string;
+}
 
 /**
  * Result of a template upgrade operation
@@ -270,4 +290,182 @@ export function formatUpgradeSummary(results: UpgradeResult[], lang: Language): 
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Extract marked sections from template content
+ *
+ * @codesyncer-context Sections are marked with <!-- codesyncer-section-start:name --> and <!-- codesyncer-section-end:name -->
+ * @param content - Template content to parse
+ * @returns Array of parsed sections
+ */
+export function extractSections(content: string): ParsedSection[] {
+  const sections: ParsedSection[] = [];
+  const sectionRegex = /<!--\s*codesyncer-section-start:(\w+)\s*-->([\s\S]*?)<!--\s*codesyncer-section-end:\1\s*-->/g;
+
+  let match;
+  while ((match = sectionRegex.exec(content)) !== null) {
+    sections.push({
+      name: match[1],
+      content: match[0], // Full content including markers
+      startIndex: match.index,
+      endIndex: match.index + match[0].length,
+    });
+  }
+
+  return sections;
+}
+
+/**
+ * Check if a template supports smart merge (has section markers)
+ *
+ * @param content - Template content to check
+ * @returns True if template has at least one section marker
+ */
+export function supportsSmartMerge(content: string): boolean {
+  return /<!--\s*codesyncer-section-start:\w+\s*-->/.test(content);
+}
+
+/**
+ * Smart merge: Update only CodeSyncer-managed sections while preserving user content
+ *
+ * @codesyncer-decision [2026-01-17] Preserve all user content outside marked sections
+ * @param existingContent - Current file content (may have user modifications)
+ * @param newTemplateContent - New template content with updated sections
+ * @returns Merged content with updated sections and preserved user content
+ */
+export function smartMergeContent(existingContent: string, newTemplateContent: string): string {
+  // Extract sections from both contents
+  const existingSections = extractSections(existingContent);
+  const newSections = extractSections(newTemplateContent);
+
+  // If either doesn't have sections, can't do smart merge
+  if (existingSections.length === 0 || newSections.length === 0) {
+    return newTemplateContent;
+  }
+
+  // Create a map of new sections by name
+  const newSectionMap = new Map<string, ParsedSection>();
+  for (const section of newSections) {
+    newSectionMap.set(section.name, section);
+  }
+
+  // Replace each existing section with the new version
+  let result = existingContent;
+  let offset = 0;
+
+  for (const existingSection of existingSections) {
+    const newSection = newSectionMap.get(existingSection.name);
+
+    if (newSection) {
+      // Calculate adjusted positions based on accumulated offset
+      const adjustedStart = existingSection.startIndex + offset;
+      const adjustedEnd = existingSection.endIndex + offset;
+
+      // Replace the section
+      result =
+        result.substring(0, adjustedStart) +
+        newSection.content +
+        result.substring(adjustedEnd);
+
+      // Update offset for next replacement
+      offset += newSection.content.length - (existingSection.endIndex - existingSection.startIndex);
+    }
+  }
+
+  // Update the version comment at the end
+  const versionRegex = /<!--\s*codesyncer-version:\s*[\d.]+\s*-->/g;
+  const newVersionMatch = newTemplateContent.match(versionRegex);
+  if (newVersionMatch) {
+    result = result.replace(versionRegex, newVersionMatch[newVersionMatch.length - 1]);
+  }
+
+  return result;
+}
+
+/**
+ * Upgrade a template using smart merge to preserve user content
+ *
+ * @param templateStatus - Template status from version check
+ * @param options - Upgrade options
+ * @returns Promise resolving to UpgradeResult
+ */
+export async function upgradeTemplateWithSmartMerge(
+  templateStatus: TemplateStatus,
+  options: UpgradeOptions
+): Promise<UpgradeResult> {
+  const { file, templateName } = templateStatus;
+  const { lang, vars, dryRun } = options;
+
+  try {
+    // Skip if dry run
+    if (dryRun) {
+      return {
+        success: true,
+        file,
+        backupPath: `${file}.backup.${new Date().toISOString().split('T')[0]} (dry run)`,
+      };
+    }
+
+    // Check if file exists
+    if (!(await fs.pathExists(file))) {
+      // No existing file, just use regular upgrade
+      return upgradeTemplate(templateStatus, options);
+    }
+
+    // Read existing content
+    const existingContent = await fs.readFile(file, 'utf-8');
+
+    // Check if existing content supports smart merge
+    if (!supportsSmartMerge(existingContent)) {
+      // Fall back to regular upgrade (full replacement with backup)
+      return upgradeTemplate(templateStatus, options);
+    }
+
+    // Create backup
+    const backupPath = await backupFile(file);
+
+    // Load and render new template
+    const template = await loadTemplate(templateName, lang);
+    const newContent = replaceTemplateVars(template, vars);
+
+    // Perform smart merge
+    const mergedContent = smartMergeContent(existingContent, newContent);
+
+    // Write the merged content
+    await fs.writeFile(file, mergedContent, 'utf-8');
+
+    return {
+      success: true,
+      file,
+      backupPath,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      file,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * Upgrade multiple templates using smart merge
+ *
+ * @param templates - Array of template statuses to upgrade
+ * @param options - Upgrade options
+ * @returns Promise resolving to array of UpgradeResults
+ */
+export async function upgradeTemplatesWithSmartMerge(
+  templates: TemplateStatus[],
+  options: UpgradeOptions
+): Promise<UpgradeResult[]> {
+  const results: UpgradeResult[] = [];
+
+  for (const template of templates) {
+    const result = await upgradeTemplateWithSmartMerge(template, options);
+    results.push(result);
+  }
+
+  return results;
 }

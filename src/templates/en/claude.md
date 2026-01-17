@@ -1,3 +1,4 @@
+<!-- codesyncer-section-start:header -->
 # CLAUDE.md - [PROJECT_NAME] Coding Guide v3.0
 
 > **Powered by CodeSyncer** - AI Collaboration System
@@ -39,6 +40,7 @@ CodeSyncer helps maintain context between AI sessions through @codesyncer-* tags
 ```
 
 ---
+<!-- codesyncer-section-end:header -->
 
 ## 🏗️ Project Information
 - **Project Name**: [PROJECT_NAME]
@@ -88,6 +90,7 @@ See `.claude/ARCHITECTURE.md` for detailed structure
 
 ---
 
+<!-- codesyncer-section-start:comment-rules -->
 ## 📝 Comment Writing Rules
 
 ### Comment Tags (Both formats supported)
@@ -190,6 +193,7 @@ async function deleteUser(id: string) {
 "Add template"        → Convert repeated pattern to template
 "Update stats"        → Refresh comment tag statistics
 ```
+<!-- codesyncer-section-end:comment-rules -->
 
 ---
 
@@ -199,6 +203,7 @@ async function deleteUser(id: string) {
 
 ---
 
+<!-- codesyncer-section-start:work-process -->
 ## 🔄 Work Process
 
 ### Typical Work Flow
@@ -227,9 +232,11 @@ async function deleteUser(id: string) {
 - ✅ Auto-generate comments
 - ✅ Add error handling
 - ✅ Record inferences with tags
+<!-- codesyncer-section-end:work-process -->
 
 ---
 
+<!-- codesyncer-section-start:session-checklist -->
 ## 💡 Session Start Checklist
 
 When AI reads this file, it automatically:
@@ -238,18 +245,22 @@ When AI reads this file, it automatically:
 2. ✅ **Understand project structure** - Check ARCHITECTURE.md
 3. ✅ **Check recent discussions** - Review DECISIONS.md
 4. ✅ **Ready message** - "Ready to work!"
+<!-- codesyncer-section-end:session-checklist -->
 
 ---
 
+<!-- codesyncer-section-start:related-docs -->
 ## 📚 Related Documents
 
 - **Comment Guide**: `.claude/COMMENT_GUIDE.md` - Detailed comment writing guide
 - **Project Structure**: `.claude/ARCHITECTURE.md` - Folder structure, statistics
 - **Discussion Records**: `.claude/DECISIONS.md` - All discussion decisions
 - **Master Document**: `../.codesyncer/MASTER_CODESYNCER.md` - Multi-repo switching
+<!-- codesyncer-section-end:related-docs -->
 
 ---
 
+<!-- codesyncer-section-start:footer -->
 ## 🔍 Comment Search
 
 All comment tags are searchable:
@@ -279,5 +290,6 @@ grep -r "@codesyncer-rule" ./
 ---
 
 *This collaboration system is open source. Suggest improvements at [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer)!*
+<!-- codesyncer-section-end:footer -->
 
-<!-- codesyncer-version: 3.1.0 -->
+<!-- codesyncer-version: 3.1.1 -->

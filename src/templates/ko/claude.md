@@ -1,3 +1,4 @@
+<!-- codesyncer-section-start:header -->
 # CLAUDE.md - [PROJECT_NAME] 코딩 가이드 v3.0
 
 > **Powered by CodeSyncer** - AI 협업 시스템
@@ -39,6 +40,7 @@ CodeSyncer는 @codesyncer-* 태그를 통해 AI 세션 간 맥락을 유지합�
 ```
 
 ---
+<!-- codesyncer-section-end:header -->
 
 ## 🏗️ 프로젝트 정보
 - **프로젝트명**: [PROJECT_NAME]
@@ -88,6 +90,7 @@ CodeSyncer는 @codesyncer-* 태그를 통해 AI 세션 간 맥락을 유지합�
 
 ---
 
+<!-- codesyncer-section-start:comment-rules -->
 ## 📝 주석 작성 규칙
 
 ### 주석 태그 (두 형식 모두 지원)
@@ -190,6 +193,7 @@ async function deleteUser(id: string) {
 "템플릿 추가"       → 반복 패턴을 템플릿으로
 "통계 업데이트"     → 주석 태그 통계 갱신
 ```
+<!-- codesyncer-section-end:comment-rules -->
 
 ---
 
@@ -199,6 +203,7 @@ async function deleteUser(id: string) {
 
 ---
 
+<!-- codesyncer-section-start:work-process -->
 ## 🔄 작업 프로세스
 
 ### 일반적인 작업 흐름
@@ -227,9 +232,11 @@ async function deleteUser(id: string) {
 - ✅ 주석 자동 생성
 - ✅ 에러 핸들링 추가
 - ✅ 추론 내용 태그로 기록
+<!-- codesyncer-section-end:work-process -->
 
 ---
 
+<!-- codesyncer-section-start:session-checklist -->
 ## 💡 세션 시작 시 체크리스트
 
 AI가 이 파일을 읽으면 자동으로:
@@ -238,18 +245,22 @@ AI가 이 파일을 읽으면 자동으로:
 2. ✅ **프로젝트 구조 파악** - ARCHITECTURE.md 확인
 3. ✅ **최근 의논 확인** - DECISIONS.md 확인
 4. ✅ **준비 완료 메시지** - "준비되었습니다!"
+<!-- codesyncer-section-end:session-checklist -->
 
 ---
 
+<!-- codesyncer-section-start:related-docs -->
 ## 📚 관련 문서
 
 - **주석 가이드**: `.claude/COMMENT_GUIDE.md` - 주석 작성 상세 가이드
 - **프로젝트 구조**: `.claude/ARCHITECTURE.md` - 폴더 구조, 통계
 - **의논 기록**: `.claude/DECISIONS.md` - 모든 의논 결정 사항
 - **마스터 문서**: `../.codesyncer/MASTER_CODESYNCER.md` - 멀티 레포 전환
+<!-- codesyncer-section-end:related-docs -->
 
 ---
 
+<!-- codesyncer-section-start:footer -->
 ## 🔍 주석 검색
 
 모든 주석 태그는 검색 가능합니다:
@@ -279,5 +290,6 @@ grep -r "@codesyncer-rule" ./
 ---
 
 *이 협업 시스템은 오픈소스입니다. 개선 아이디어는 [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer)에서 제안해주세요!*
+<!-- codesyncer-section-end:footer -->
 
-<!-- codesyncer-version: 3.1.0 -->
+<!-- codesyncer-version: 3.1.1 -->
