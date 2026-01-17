@@ -6,6 +6,18 @@ import * as path from 'path';
 import { UpdateOptions, Language, RepositoryInfo } from '../types';
 import { scanForRepositories, hasMasterSetup, detectMonorepo, scanMonorepoPackages } from '../utils/scanner';
 import { getMonorepoToolName } from '../utils/monorepo-helpers';
+import {
+  scanTemplateVersions,
+  getOutdatedTemplates,
+  TemplateStatus,
+  getCurrentVersion,
+} from '../utils/template-version';
+import {
+  upgradeTemplates,
+  getTemplateVarsFromContext,
+  formatUpgradeSummary,
+  UpgradeResult,
+} from '../utils/template-upgrader';
 
 export async function updateCommand(options: UpdateOptions) {
   const isDryRun = options.dryRun || false;
@@ -777,10 +789,168 @@ rm .codesyncer/UPDATE_GUIDE.md
     }
   }
 
+  // Template Upgrade Check
+  await checkAndOfferTemplateUpgrade(currentDir, foundRepos, lang, isDryRun);
+
   if (isDryRun) {
     console.log(chalk.bold.yellow('\n✅ Dry run complete! No files were modified.\n'));
     console.log(chalk.gray('Run without --dry-run to apply changes.\n'));
   } else {
     console.log(chalk.bold.green('\n✅ Update complete!\n'));
+  }
+}
+
+/**
+ * Check for outdated templates and offer upgrade option
+ *
+ * @codesyncer-context Template upgrade feature - checks version metadata in files
+ * @codesyncer-decision [2026-01-17] Backup files before upgrade for user safety
+ */
+async function checkAndOfferTemplateUpgrade(
+  currentDir: string,
+  repos: RepositoryInfo[],
+  lang: Language,
+  isDryRun: boolean
+): Promise<void> {
+  const currentVersion = getCurrentVersion();
+
+  // Collect all outdated templates across all repos
+  const allOutdated: { repo: string; claudeDir: string; templates: TemplateStatus[] }[] = [];
+
+  for (const repo of repos) {
+    const claudeDir = path.join(repo.path, '.claude');
+    if (await fs.pathExists(claudeDir)) {
+      const outdated = await getOutdatedTemplates(claudeDir);
+      if (outdated.length > 0) {
+        allOutdated.push({
+          repo: repo.name,
+          claudeDir,
+          templates: outdated,
+        });
+      }
+    }
+  }
+
+  // Also check root .claude if it exists (for single repo setup)
+  const rootClaudeDir = path.join(currentDir, '.claude');
+  if (await fs.pathExists(rootClaudeDir)) {
+    const rootOutdated = await getOutdatedTemplates(rootClaudeDir);
+    if (rootOutdated.length > 0) {
+      // Avoid duplicates
+      const alreadyIncluded = allOutdated.some((o) => o.claudeDir === rootClaudeDir);
+      if (!alreadyIncluded) {
+        allOutdated.push({
+          repo: path.basename(currentDir),
+          claudeDir: rootClaudeDir,
+          templates: rootOutdated,
+        });
+      }
+    }
+  }
+
+  if (allOutdated.length === 0) {
+    return; // No outdated templates found
+  }
+
+  // Count total outdated files
+  const totalOutdated = allOutdated.reduce((sum, o) => sum + o.templates.length, 0);
+
+  // Display upgrade notification
+  console.log(chalk.bold.blue('\n📦 ' + (lang === 'ko' ? '새 버전 감지' : 'New Version Detected') + `: v${currentVersion}\n`));
+
+  // Show outdated files grouped by repo
+  allOutdated.forEach(({ repo, templates }) => {
+    console.log(chalk.yellow(`  📁 ${repo}/`));
+    templates.forEach((t) => {
+      const fileName = path.basename(t.file);
+      const versionInfo = t.currentVersion
+        ? `v${t.currentVersion} → v${t.latestVersion}`
+        : `(${lang === 'ko' ? '버전 없음' : 'no version'}) → v${t.latestVersion}`;
+      console.log(chalk.gray(`     • ${fileName} (${versionInfo})`));
+    });
+  });
+  console.log();
+
+  // Prompt for upgrade
+  const { upgradeChoice } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'upgradeChoice',
+      message: lang === 'ko'
+        ? `${totalOutdated}개 템플릿을 업그레이드할까요?`
+        : `Upgrade ${totalOutdated} template(s)?`,
+      choices: [
+        {
+          name: lang === 'ko'
+            ? '예 - 업그레이드 (기존 파일 .backup으로 백업)'
+            : 'Yes - Upgrade (backup existing files to .backup)',
+          value: 'yes',
+        },
+        {
+          name: lang === 'ko' ? '아니오 - 건너뛰기' : 'No - Skip',
+          value: 'no',
+        },
+        {
+          name: lang === 'ko' ? '미리보기 - 변경 파일만 확인' : 'Preview - Show files only',
+          value: 'preview',
+        },
+      ],
+      default: 'yes',
+    },
+  ]);
+
+  if (upgradeChoice === 'preview') {
+    console.log(chalk.bold('\n' + (lang === 'ko' ? '📋 업그레이드 대상 파일:' : '📋 Files to upgrade:')));
+    allOutdated.forEach(({ repo, templates }) => {
+      templates.forEach((t) => {
+        console.log(chalk.gray(`  • ${repo}/.claude/${path.basename(t.file)}`));
+      });
+    });
+    console.log();
+    return;
+  }
+
+  if (upgradeChoice === 'no') {
+    console.log(chalk.gray(lang === 'ko' ? '  템플릿 업그레이드 건너뜀\n' : '  Template upgrade skipped\n'));
+    return;
+  }
+
+  // Perform upgrade
+  if (isDryRun) {
+    console.log(chalk.yellow(lang === 'ko'
+      ? '\n  [DRY RUN] 업그레이드 수행됨 (실제 파일 변경 없음)\n'
+      : '\n  [DRY RUN] Upgrade would be performed (no actual changes)\n'));
+    allOutdated.forEach(({ repo, templates }) => {
+      templates.forEach((t) => {
+        console.log(chalk.gray(`  • ${repo}/.claude/${path.basename(t.file)}`));
+      });
+    });
+    return;
+  }
+
+  const spinner = ora(lang === 'ko' ? '템플릿 업그레이드 중...' : 'Upgrading templates...').start();
+
+  const allResults: UpgradeResult[] = [];
+
+  for (const { claudeDir, templates } of allOutdated) {
+    const vars = await getTemplateVarsFromContext(claudeDir, lang);
+    const results = await upgradeTemplates(templates, { lang, vars, dryRun: isDryRun });
+    allResults.push(...results);
+  }
+
+  spinner.succeed(lang === 'ko' ? '템플릿 업그레이드 완료!' : 'Templates upgraded!');
+
+  // Show summary
+  console.log();
+  console.log(formatUpgradeSummary(allResults, lang));
+  console.log();
+
+  // Show backup notice
+  const successfulWithBackup = allResults.filter((r) => r.success && r.backupPath);
+  if (successfulWithBackup.length > 0) {
+    console.log(chalk.cyan(lang === 'ko'
+      ? '💡 백업 파일에서 커스터마이징 내용을 복사할 수 있습니다.'
+      : '💡 You can copy customizations from backup files.'));
+    console.log();
   }
 }

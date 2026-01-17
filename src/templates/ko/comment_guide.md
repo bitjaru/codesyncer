@@ -580,3 +580,5 @@ ARCHITECTURE.md에 자동 집계:
 **마지막 업데이트**: [TODAY]
 
 *주석이 곧 문서입니다. 모든 컨텍스트를 코드에 기록하세요.*
+
+<!-- codesyncer-version: 3.1.0 -->

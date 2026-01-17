@@ -225,3 +225,5 @@ grep "@codesyncer-decision" src/services/PaymentService.ts
 **Last Updated**: [TODAY]
 
 *All important decisions are permanently recorded. This is your team's knowledge asset.*
+
+<!-- codesyncer-version: 3.1.0 -->

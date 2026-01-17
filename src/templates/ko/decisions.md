@@ -225,3 +225,5 @@ grep "@codesyncer-decision" src/services/PaymentService.ts
 **마지막 업데이트**: [TODAY]
 
 *모든 중요한 의사결정이 영구 기록됩니다. 팀의 지식 자산입니다.*
+
+<!-- codesyncer-version: 3.1.0 -->

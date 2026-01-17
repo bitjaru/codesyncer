@@ -177,3 +177,5 @@ Both formats work identically, so use whichever you prefer!
 
 *CodeSyncer - Persistent context, controlled inference, live architecture sync for Claude Code*
 *Currently Supported: Claude Code | Coming Soon: Cursor, GitHub Copilot, Continue.dev*
+
+<!-- codesyncer-version: 3.1.0 -->

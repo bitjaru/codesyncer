@@ -239,3 +239,5 @@ grep -r "결제" ./*/
 ---
 
 *CodeSyncer는 오픈소스입니다: https://github.com/bitjaru/codesyncer*
+
+<!-- codesyncer-version: 3.1.0 -->

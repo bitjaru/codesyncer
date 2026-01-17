@@ -279,3 +279,5 @@ grep -r "@codesyncer-rule" ./
 ---
 
 *This collaboration system is open source. Suggest improvements at [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer)!*
+
+<!-- codesyncer-version: 3.1.0 -->

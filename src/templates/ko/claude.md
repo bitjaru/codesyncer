@@ -279,3 +279,5 @@ grep -r "@codesyncer-rule" ./
 ---
 
 *이 협업 시스템은 오픈소스입니다. 개선 아이디어는 [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer)에서 제안해주세요!*
+
+<!-- codesyncer-version: 3.1.0 -->

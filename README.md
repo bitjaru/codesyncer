@@ -237,6 +237,7 @@ Sync your project with the latest templates and features:
 3. ✅ Auto-detects your language settings (English/Korean)
 4. ✅ Prompts before creating any new files
 5. ✅ Preserves your existing customizations
+6. ✅ **NEW in v3.1.0**: Detects outdated templates and offers upgrade
 
 **Example output:**
 ```
@@ -263,6 +264,29 @@ Option 2) Apply immediately in current session
 
 ✅ Update complete!
 ```
+
+#### Template Upgrade (NEW in v3.1.0)
+
+When you update CodeSyncer to a new version, your existing template files may be outdated. The `update` command now automatically detects this:
+
+```
+📦 New Version Detected: v3.1.0
+
+  📁 my-project/
+     • CLAUDE.md (v3.0.0 → v3.1.0)
+     • COMMENT_GUIDE.md (no version → v3.1.0)
+
+? Upgrade 2 template(s)?
+  > Yes - Upgrade (backup existing files to .backup)
+    No - Skip
+    Preview - Show files only
+```
+
+**Features:**
+- 🔍 Automatically detects outdated templates by reading version metadata
+- 💾 Creates `.backup` files before upgrading (e.g., `CLAUDE.md.backup.2024-01-17`)
+- 📋 Preserves project variables (project name, tech stack) during upgrade
+- 👁️ Preview option to see what would change
 
 **After running `codesyncer update`:**
 
