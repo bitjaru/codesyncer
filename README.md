@@ -1,6 +1,6 @@
 # CodeSyncer CLI
 
-> Is your AI coding dumb? Make it smarter - Persistent project context, controlled inference, and live architecture sync for Claude Code
+> **Claude forgets everything when the session ends. CodeSyncer makes it remember.**
 
 [![npm version](https://img.shields.io/npm/v/codesyncer.svg)](https://www.npmjs.com/package/codesyncer)
 [![License](https://img.shields.io/badge/License-Commons%20Clause-red.svg)](./LICENSE)
@@ -11,92 +11,128 @@
 
 ---
 
+## ⚡ The Problem → The Solution
+
+| Problem | Without CodeSyncer | With CodeSyncer |
+|---------|-------------------|-----------------|
+| **Context loss** | Every session = start from scratch | Tags in code = permanent memory |
+| **Decision amnesia** | "Why did we use JWT?" → 🤷 | `@codesyncer-decision` → instant recall |
+| **Dangerous inference** | AI guesses prices, endpoints, auth | Auto-pause on critical keywords |
+| **Untracked changes** | No record of AI's reasoning | `codesyncer watch` catches everything |
+
+**Result**: AI that actually learns your project, not just your current prompt.
+
+---
+
 ## 🎬 Demo
 
 ![CodeSyncer Demo](https://raw.githubusercontent.com/bitjaru/codesyncer/main/demo.gif)
 
 ---
 
-## 🤔 The Problem
+## 🧠 How It Works
 
-Working with AI on real projects? You face these issues:
+**The core insight**: AI reads code. So put your context IN the code.
 
-**1. Context is lost every session** 😫
-- New AI session = Start from scratch
-- Explain the same architecture again and again
-- "What's the API endpoint?" "How does auth work?" - Every. Single. Time.
-
-**2. Multi-repo chaos** 🤯
+```mermaid
+flowchart LR
+    A[🧑‍💻 You code with Claude] --> B{Decision made?}
+    B -->|Yes| C[Add @codesyncer-decision tag]
+    B -->|No| D{Inference made?}
+    D -->|Yes| E[Add @codesyncer-inference tag]
+    D -->|No| F[Continue coding]
+    C --> G[📝 Saved in code forever]
+    E --> G
+    G --> H[🔄 Next session]
+    H --> I[Claude reads code]
+    I --> J[✅ Context recovered!]
 ```
-my-saas-project/
-├── api-server/      (backend)
-├── web-client/      (frontend)
-└── mobile-app/      (mobile)
+
+```typescript
+// @codesyncer-decision: [2024-01-15] Using JWT (session management is simpler)
+// @codesyncer-inference: Page size 20 (standard UX pattern)
+// @codesyncer-rule: Use httpOnly cookies (XSS prevention)
+const authConfig = { /* ... */ };
 ```
-- AI only sees one repo at a time
-- Missing context from other repos → Fragmented code
-- "Add login" needs backend API + frontend UI, but AI doesn't know both
 
-**3. AI makes dangerous assumptions** ⚠️
-- "I'll set the timeout to 30 seconds" - Wait, should be 5!
-- "Using /api/v1/..." - Wrong endpoint!
-- Guesses business logic, security settings, pricing rules
-
-**Result**: You spend more time explaining and fixing than actual coding.
+Next session? Claude reads your code and **automatically recovers all context**.
 
 ---
 
-## ✨ The Solution
+## 🔥 Watch Mode: Never Lose Context Again
 
-CodeSyncer gives AI the **full picture** through:
+**Problem**: Claude might forget to add tags while coding.
 
-1. **📝 Comments in code** - All decisions and context live where they belong
-2. **🗂️ Master document** - Cross-repo navigation and rules
-3. **📋 Per-repo docs** - Each repo's specific guidelines
-4. **🎯 Keyword system** - Auto-pause for critical decisions (payment, auth, etc.)
+**Solution**: Run `codesyncer watch` to catch untagged changes.
 
-**Result**: AI codes with **high accuracy** even in complex multi-repo projects. 🎯
+```bash
+codesyncer watch
+```
 
----
+```
+[14:32:10] 📝 Changed: src/utils/api.ts
+           └── ⚠️  No tags!
+               💡 Hint: Add @codesyncer-inference for inferences
 
-## 🎯 What is CodeSyncer?
+[14:33:22] 📝 Changed: src/auth/login.ts
+           └── 🎯 Found: @codesyncer-decision
+               "Use React Query instead of SWR"
+           └── ✅ Added to DECISIONS.md
+```
 
-CodeSyncer provides the **framework and rules** for AI coding assistants (like Claude Code) to set up an intelligent collaboration system across your multi-repository workspace.
-
-**How it works:**
-1. **You install** CodeSyncer CLI
-2. **You launch** your AI assistant (Claude Code, Cursor, etc.)
-3. **You run** `codesyncer init`
-4. **AI analyzes** your projects and generates documentation following CodeSyncer's structure
-
-CodeSyncer defines **WHERE** and **HOW** documentation should be created. Your AI assistant fills in the **WHAT** by analyzing your actual code.
-
-### Key Features
-
-- 🤖 **AI-Agnostic**: Works with Claude Code, Cursor, GitHub Copilot, and more
-- 📁 **Single & Multi-Repository Support**: Works with individual repos or entire workspaces
-- 📦 **Monorepo Support**: Auto-detects Turborepo, pnpm, Nx, Lerna, Yarn/npm workspaces
-- 🔄 **Watch Mode**: Real-time file monitoring with auto tag sync
-- ✅ **Validate Command**: Check your setup and get fix suggestions (NEW in v2.7.0)
-- 🏷️ **Comment Tag System**: `@codesyncer-*` tags to record decisions and inferences
-- 🤝 **Discussion Auto-Pause**: Automatically stops for critical decisions (payment, security, etc.)
-- 🌐 **Multi-Language**: Full Korean and English support
-- ⚡ **Quick Setup**: One-command installation for your entire workspace
-- 🔒 **Security**: Path traversal protection and input validation (v2.7.0)
+**Why this matters**: Every code change is an opportunity to capture context. Watch mode ensures nothing slips through.
 
 ---
 
-## ⚠️ Prerequisites
+## ✨ Full Feature List
 
-**CodeSyncer requires an AI coding assistant to be active.**
+| Feature | Description |
+|---------|-------------|
+| 🏷️ **Tag System** | `@codesyncer-decision`, `@codesyncer-inference`, `@codesyncer-rule` - permanent context in code |
+| 🔄 **Watch Mode** | Real-time monitoring, warns on untagged changes, auto-syncs to DECISIONS.md |
+| ✅ **Validate** | Check tag coverage, find missing documentation, get fix suggestions |
+| 🤝 **Auto-Pause** | Detects payment/security/auth keywords → asks before coding |
+| 📦 **Monorepo** | Auto-detects Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces |
+| 🌐 **Multi-Language** | Full Korean and English support |
+| 🔒 **Security** | Path traversal protection and input validation |
 
-Currently supported:
+---
+
+## 🔄 Complete Workflow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. SETUP (once)                                            │
+│     $ npm install -g codesyncer                             │
+│     $ codesyncer init                                       │
+│     → Creates CLAUDE.md, SETUP_GUIDE.md                     │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  2. TEACH AI (once per session)                             │
+│     Open Claude Code and say:                               │
+│     "Read CLAUDE.md"                                        │
+│     → Claude learns the tagging system                      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  3. CODE (with watch mode running)                          │
+│     $ codesyncer watch     ← Run in background              │
+│     Code with Claude as normal                              │
+│     → Claude adds @codesyncer-* tags automatically          │
+│     → Watch mode alerts if tags are missing                 │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  4. NEXT SESSION                                            │
+│     Claude reads your code → sees the tags                  │
+│     → Context automatically recovered!                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Supported AI Tools:**
 - ✅ **Claude Code** (Recommended)
-- 🚧 Cursor (Coming soon)
-- 🚧 GitHub Copilot (Coming soon)
-- 🚧 Continue.dev (Coming soon)
-
-**Important**: Make sure your AI coding assistant is **running and active** before using CodeSyncer. The AI will analyze your projects and help generate accurate documentation.
+- 🚧 Cursor, GitHub Copilot, Continue.dev (Coming soon)
 
 ---
 

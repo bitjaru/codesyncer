@@ -12,6 +12,68 @@ import { displayProgress } from '../utils/progress';
 import { saveSetupState, loadSetupState, clearSetupState, SetupState } from '../utils/setup-state';
 import { VERSION } from '../utils/version';
 
+/**
+ * Display onboarding explanation for first-time users
+ */
+async function displayOnboarding(lang: Language): Promise<boolean> {
+  const isKo = lang === 'ko';
+
+  console.log();
+  console.log(chalk.bold.cyan('─'.repeat(60)));
+  console.log();
+  console.log(chalk.bold(isKo ? '🧠 CodeSyncer란?' : '🧠 What is CodeSyncer?'));
+  console.log();
+
+  console.log(chalk.white(isKo ? '문제:' : 'Problem:'));
+  console.log(chalk.gray(
+    isKo
+      ? '  AI 코딩 어시스턴트는 세션이 끝나면 모든 맥락을 잊습니다.'
+      : '  AI coding assistants forget all context when the session ends.'
+  ));
+  console.log(chalk.gray(
+    isKo
+      ? '  - 어제 왜 그렇게 구현했는지?'
+      : '  - Why was it implemented that way yesterday?'
+  ));
+  console.log(chalk.gray(
+    isKo
+      ? '  - 어떤 결정을 내렸는지?'
+      : '  - What decisions were made?'
+  ));
+  console.log();
+
+  console.log(chalk.white(isKo ? '해결:' : 'Solution:'));
+  console.log(chalk.gray(
+    isKo
+      ? '  코드에 특별한 태그를 남겨 영구적인 컨텍스트를 만듭니다.'
+      : '  Leave special tags in code to create permanent context.'
+  ));
+  console.log();
+  console.log(chalk.cyan('  // @codesyncer-decision: [2024-01-15] JWT 선택 (세션 관리 간편)'));
+  console.log(chalk.cyan('  // @codesyncer-inference: 페이지 크기 20 (일반적 UX 패턴)'));
+  console.log();
+
+  console.log(chalk.gray(
+    isKo
+      ? '  → 다음 세션에서 AI가 코드를 읽으면 자동으로 맥락 복구!'
+      : '  → Next session, AI reads code and automatically recovers context!'
+  ));
+  console.log();
+  console.log(chalk.bold.cyan('─'.repeat(60)));
+  console.log();
+
+  const { proceed } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'proceed',
+      message: isKo ? '설정을 시작할까요?' : 'Start setup?',
+      default: true,
+    },
+  ]);
+
+  return proceed;
+}
+
 export async function initCommand(options: InitOptions) {
   console.log(chalk.bold.cyan(`\n🤖 CodeSyncer v${VERSION} - AI-Powered Collaboration System\n`));
   console.log(chalk.gray('Framework provider for AI coding assistants\n'));
@@ -79,6 +141,15 @@ export async function initCommand(options: InitOptions) {
   ]);
 
   const lang = language as Language;
+
+  // Show onboarding for first-time users (skip if resuming)
+  if (!resumeFromState) {
+    const proceed = await displayOnboarding(lang);
+    if (!proceed) {
+      console.log(chalk.gray(lang === 'ko' ? '\n설정이 취소되었습니다.\n' : '\nSetup cancelled.\n'));
+      return;
+    }
+  }
 
   // STEP 2: Basic project information
   displayProgress(1, lang);
@@ -296,22 +367,20 @@ export async function initCommand(options: InitOptions) {
 
     console.log(chalk.gray('─'.repeat(60)));
     console.log();
-    console.log(chalk.bold(lang === 'ko' ? '💡 모노레포 모드 정보' : '💡 Monorepo Mode Info'));
+    console.log(chalk.bold.yellow(lang === 'ko' ? '🔥 Pro Tip: Watch Mode 사용하기' : '🔥 Pro Tip: Use Watch Mode'));
+    console.log();
     console.log(chalk.gray(
       lang === 'ko'
-        ? `• 모노레포 도구: ${getMonorepoToolName(monorepoInfo.tool)}`
-        : `• Monorepo tool: ${getMonorepoToolName(monorepoInfo.tool)}`
+        ? 'Claude는 코딩 중 태그를 잊을 수 있습니다!'
+        : 'Claude might forget to add tags while coding!'
     ));
     console.log(chalk.gray(
       lang === 'ko'
-        ? '• 각 패키지에 .claude/ 폴더가 생성됩니다'
-        : '• Each package will have its own .claude/ folder'
+        ? 'Watch mode를 켜두면 태그 없는 변경을 바로 알려줍니다:'
+        : 'Run watch mode to catch untagged changes:'
     ));
-    console.log(chalk.gray(
-      lang === 'ko'
-        ? '• 패키지 간 의존성이 문서화됩니다'
-        : '• Inter-package dependencies will be documented'
-    ));
+    console.log();
+    console.log(chalk.cyan('   codesyncer watch'));
     console.log();
     console.log(chalk.gray('─'.repeat(60)));
     console.log();
@@ -417,17 +486,20 @@ export async function initCommand(options: InitOptions) {
 
     console.log(chalk.gray('─'.repeat(60)));
     console.log();
-    console.log(chalk.bold(lang === 'ko' ? '💡 단일 레포 모드 정보' : '💡 Single Repo Mode Info'));
+    console.log(chalk.bold.yellow(lang === 'ko' ? '🔥 Pro Tip: Watch Mode 사용하기' : '🔥 Pro Tip: Use Watch Mode'));
+    console.log();
     console.log(chalk.gray(
       lang === 'ko'
-        ? '• 모든 설정 파일이 .claude/ 폴더에 생성됩니다'
-        : '• All config files will be created in .claude/ folder'
+        ? 'Claude는 코딩 중 태그를 잊을 수 있습니다!'
+        : 'Claude might forget to add tags while coding!'
     ));
     console.log(chalk.gray(
       lang === 'ko'
-        ? '• 멀티 레포가 필요하면 상위 폴더에서 init을 실행하세요'
-        : '• For multi-repo, run init in a parent workspace folder'
+        ? 'Watch mode를 켜두면 태그 없는 변경을 바로 알려줍니다:'
+        : 'Run watch mode to catch untagged changes:'
     ));
+    console.log();
+    console.log(chalk.cyan('   codesyncer watch'));
     console.log();
     console.log(chalk.gray('─'.repeat(60)));
     console.log();
@@ -569,18 +641,20 @@ export async function initCommand(options: InitOptions) {
 
   console.log(chalk.gray('─'.repeat(60)));
   console.log();
-  console.log(chalk.bold(lang === 'ko' ? '💡 CodeSyncer는 프레임워크만 제공합니다' : '💡 CodeSyncer provides the framework'));
-  console.log(chalk.gray(
-    lang === 'ko'
-      ? 'AI 어시스턴트가 실제 코드를 분석하고 문서를 생성합니다.'
-      : 'Your AI assistant analyzes actual code and generates documentation.'
-  ));
+  console.log(chalk.bold.yellow(lang === 'ko' ? '🔥 Pro Tip: Watch Mode 사용하기' : '🔥 Pro Tip: Use Watch Mode'));
   console.log();
   console.log(chalk.gray(
     lang === 'ko'
-      ? '현재 Claude Code에 최적화되어 있습니다 | Cursor, Copilot 향후 지원'
-      : 'Currently optimized for Claude Code | Cursor, Copilot support coming soon'
+      ? 'Claude는 코딩 중 태그를 잊을 수 있습니다!'
+      : 'Claude might forget to add tags while coding!'
   ));
+  console.log(chalk.gray(
+    lang === 'ko'
+      ? 'Watch mode를 켜두면 태그 없는 변경을 바로 알려줍니다:'
+      : 'Run watch mode to catch untagged changes:'
+  ));
+  console.log();
+  console.log(chalk.cyan('   codesyncer watch'));
   console.log();
   console.log(chalk.gray('─'.repeat(60)));
   console.log();

@@ -2,6 +2,43 @@
 
 All notable changes to CodeSyncer will be documented in this file.
 
+## [3.0.0] - 2026-01-17
+
+### 🎉 Major Release: "Claude Remembers"
+
+**New tagline**: "Claude forgets everything when the session ends. CodeSyncer makes it remember."
+
+### Added
+
+#### Watch Mode Enhancements
+- **Untagged file warnings**: When a file is changed without adding `@codesyncer-*` tags, watch mode now displays a warning with hints
+- **Tag statistics in shutdown summary**: Shows count of "changes without tags" warnings during session
+- **Pro Tip in init command**: All modes (single-repo, multi-repo, monorepo) now recommend using watch mode
+
+#### Improved Onboarding
+- **First-time user explanation**: `codesyncer init` now explains the problem (context loss) and solution (tags) before setup
+- **Watch mode promotion**: Every init completion now shows "Claude might forget to add tags - use watch mode!"
+
+#### README Improvements (Gas Town style)
+- **Punchy tagline**: New memorable hook focusing on the core problem
+- **Problem/Solution table**: Clear before/after comparison at the top
+- **How It Works section**: Simple explanation of the core insight
+- **Watch Mode highlight section**: Dedicated section explaining why watch mode is essential
+- **Cleaner feature table**: Condensed feature list in table format
+
+#### CLAUDE.md Template Improvements
+- **TL;DR section**: Quick reference that Claude won't forget
+- **"Why use this system" explanation**: Problem/solution format at the top
+- **Better code examples**: Shows how tags create permanent context
+
+### Changed
+
+- Version bump to 3.0.0 (major UX improvements)
+- Updated package description to new tagline
+- All success messages now include watch mode recommendation
+
+---
+
 ## [2.7.0] - 2026-01-09
 
 ### Added

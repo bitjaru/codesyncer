@@ -17,7 +17,7 @@
 - **프로젝트 타입**: CLI Tool (Node.js)
 - **기술 스택**: TypeScript, Node.js, Commander.js, Chalk, Inquirer, Chokidar, Jest
 - **생성일**: 2026-01-09
-- **버전**: 2.7.1
+- **버전**: 3.0.0
 
 ## 📁 프로젝트 구조
 자세한 구조는 `.claude/ARCHITECTURE.md` 참조
@@ -147,7 +147,7 @@ src/utils/
 
 ---
 
-**버전**: 2.7.1 (Powered by CodeSyncer)
+**버전**: 3.0.0 (Powered by CodeSyncer)
 **생성일**: 2026-01-09
 **AI 도구**: Claude Code 지원 | 향후: Cursor, GitHub Copilot
 

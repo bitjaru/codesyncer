@@ -1,7 +1,7 @@
 {
   "name": "codesyncer",
-  "version": "2.7.6",
-  "description": "Is your AI coding dumb? Make it smarter - Persistent project context, controlled inference, and live architecture sync for Claude Code",
+  "version": "3.0.0",
+  "description": "Claude forgets everything when the session ends. CodeSyncer makes it remember.",
   "keywords": [
     "ai-collaboration",
     "claude-code",

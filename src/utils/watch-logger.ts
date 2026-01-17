@@ -9,6 +9,7 @@ export interface WatchStats {
   filesWatched: number;
   changesDetected: number;
   tagsSynced: number;
+  noTagWarnings: number;
   errors: number;
 }
 
@@ -34,6 +35,7 @@ export class WatchLogger {
       filesWatched: 0,
       changesDetected: 0,
       tagsSynced: 0,
+      noTagWarnings: 0,
       errors: 0,
     };
 
@@ -227,13 +229,32 @@ export class WatchLogger {
   }
 
   /**
-   * Log no tags found
+   * Log no tags found (neutral - for initial file adds)
    */
   logNoTags(): void {
     const { lang } = this.options;
     const isKo = lang === 'ko';
 
     console.log(chalk.gray(`           └── ${isKo ? '태그 없음' : 'No tags found'}`));
+  }
+
+  /**
+   * Log warning when file is changed without tags
+   */
+  logNoTagsWarning(filePath: string): void {
+    this.stats.noTagWarnings++;
+    const { lang } = this.options;
+    const isKo = lang === 'ko';
+    const relativePath = path.relative(this.options.rootPath, filePath);
+
+    console.log(chalk.yellow(`           └── ⚠️  ${isKo ? '태그 없음!' : 'No tags!'}`));
+    console.log(chalk.gray(
+      isKo
+        ? `               💡 힌트: 추론하면 @codesyncer-inference 추가`
+        : `               💡 Hint: Add @codesyncer-inference for inferences`
+    ));
+
+    this.writeToLog(`[${this.getTimestamp()}] WARNING no tags in ${relativePath}`);
   }
 
   /**
@@ -291,6 +312,9 @@ export class WatchLogger {
     console.log(`   ${chalk.gray(isKo ? '👁  감시 파일:' : '👁  Files watched:')} ${chalk.white(String(this.stats.filesWatched))}`);
     console.log(`   ${chalk.gray(isKo ? '✏️  변경 감지:' : '✏️  Changes detected:')} ${chalk.white(String(this.stats.changesDetected))}`);
     console.log(`   ${chalk.gray(isKo ? '📝  태그 동기화:' : '📝  Tags synced:')} ${chalk.green(String(this.stats.tagsSynced))}`);
+    if (this.stats.noTagWarnings > 0) {
+      console.log(`   ${chalk.gray(isKo ? '⚠️  태그 없는 변경:' : '⚠️  Changes without tags:')} ${chalk.yellow(String(this.stats.noTagWarnings))}`);
+    }
     if (this.stats.errors > 0) {
       console.log(`   ${chalk.gray(isKo ? '❌  오류:' : '❌  Errors:')} ${chalk.red(String(this.stats.errors))}`);
     }
@@ -312,6 +336,7 @@ export class WatchLogger {
     this.writeToLog(`Files watched: ${this.stats.filesWatched}`);
     this.writeToLog(`Changes detected: ${this.stats.changesDetected}`);
     this.writeToLog(`Tags synced: ${this.stats.tagsSynced}`);
+    this.writeToLog(`No-tag warnings: ${this.stats.noTagWarnings}`);
     this.writeToLog(`Errors: ${this.stats.errors}`);
     this.writeToLog(`${'='.repeat(60)}\n`);
 

@@ -1,8 +1,8 @@
-# VHS Demo Script for CodeSyncer v3.0 (English)
-# Run: vhs demo.tape
+# VHS Demo Script for CodeSyncer v3.0 (한국어)
+# Run: vhs demo-ko.tape
 
-Output demo.gif
-Output demo.mp4
+Output demo-ko.gif
+Output demo-ko.mp4
 
 Set FontSize 20
 Set Width 800
@@ -24,10 +24,10 @@ Show
 Sleep 1.5s
 
 # ============================================
-# Step 1: Install
+# 1단계: 설치
 # ============================================
 
-Type "# Step 1: Install"
+Type "# 1단계: 설치"
 Enter
 Sleep 2s
 
@@ -36,10 +36,10 @@ Enter
 Sleep 3s
 
 # ============================================
-# Step 2: Initialize
+# 2단계: 초기화
 # ============================================
 
-Type "# Step 2: Initialize"
+Type "# 2단계: 초기화"
 Enter
 Sleep 2s
 
@@ -47,29 +47,31 @@ Type "codesyncer init"
 Enter
 Sleep 4s
 
-# Language: English is DEFAULT - just press Enter!
+# 언어 선택: 기본값 English에서 Up으로 한국어 선택
+Up
+Sleep 500ms
 Enter
 Sleep 3s
 
-# Start setup? Yes
+# 설정 시작? 예
 Enter
 Sleep 2s
 
-# Project name: default
+# 프로젝트 이름: 기본값
 Enter
 Sleep 1s
 
-# GitHub username
+# GitHub 사용자명
 Type "your-name"
 Enter
 Sleep 5s
 
 # ============================================
-# Step 3: Done!
+# 3단계: 완료!
 # ============================================
 
 Sleep 2s
 
-Type "# Done! Tell Claude: 'Read CLAUDE.md'"
+Type "# 완료! Claude에게: 'CLAUDE.md 읽어줘'"
 Enter
 Sleep 4s

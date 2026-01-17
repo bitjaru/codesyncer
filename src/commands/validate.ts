@@ -8,9 +8,10 @@ import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Language } from '../types';
+import { Language, AVAILABLE_TAGS, TAG_PREFIXES } from '../types';
 import { detectLanguage } from '../utils/language';
 import { hasMasterSetup, hasSingleRepoSetup, detectMonorepo, scanMonorepoPackages, scanForRepositories } from '../utils/scanner';
+import { getSupportedExtensions } from '../utils/tag-parser';
 
 export interface ValidateOptions {
   verbose?: boolean;
@@ -43,6 +44,17 @@ interface ValidationInfo {
   value: string;
 }
 
+interface TagStats {
+  decision: number;
+  inference: number;
+  rule: number;
+  todo: number;
+  context: number;
+  total: number;
+  filesWithTags: number;
+  filesScanned: number;
+}
+
 /**
  * Required files in each .claude directory
  */
@@ -52,6 +64,95 @@ const REQUIRED_FILES = [
   'COMMENT_GUIDE.md',
   'DECISIONS.md',
 ];
+
+/**
+ * Directories to skip when scanning for tags
+ */
+const SKIP_DIRS = [
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.next',
+  'coverage',
+  '.claude',
+  '.codesyncer',
+];
+
+/**
+ * Scan directory for @codesyncer-* and @claude-* tags
+ */
+async function scanTagStats(rootPath: string): Promise<TagStats> {
+  const stats: TagStats = {
+    decision: 0,
+    inference: 0,
+    rule: 0,
+    todo: 0,
+    context: 0,
+    total: 0,
+    filesWithTags: 0,
+    filesScanned: 0,
+  };
+
+  const supportedExts = getSupportedExtensions();
+
+  async function scanDir(dirPath: string): Promise<void> {
+    try {
+      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        if (entry.isDirectory()) {
+          if (!SKIP_DIRS.includes(entry.name)) {
+            await scanDir(fullPath);
+          }
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (supportedExts.includes(ext)) {
+            await scanFile(fullPath);
+          }
+        }
+      }
+    } catch {
+      // Ignore read errors
+    }
+  }
+
+  async function scanFile(filePath: string): Promise<void> {
+    try {
+      const content = await fs.readFile(filePath, 'utf-8');
+      stats.filesScanned++;
+
+      let fileHasTags = false;
+
+      for (const tagType of AVAILABLE_TAGS) {
+        // Count both @codesyncer-* and @claude-* tags
+        const primaryPattern = new RegExp(`@${TAG_PREFIXES.primary}-${tagType}`, 'gi');
+        const legacyPattern = new RegExp(`@${TAG_PREFIXES.legacy}-${tagType}`, 'gi');
+
+        const primaryMatches = content.match(primaryPattern) || [];
+        const legacyMatches = content.match(legacyPattern) || [];
+        const count = primaryMatches.length + legacyMatches.length;
+
+        if (count > 0) {
+          fileHasTags = true;
+          stats[tagType as keyof Pick<TagStats, 'decision' | 'inference' | 'rule' | 'todo' | 'context'>] += count;
+          stats.total += count;
+        }
+      }
+
+      if (fileHasTags) {
+        stats.filesWithTags++;
+      }
+    } catch {
+      // Ignore read errors
+    }
+  }
+
+  await scanDir(rootPath);
+  return stats;
+}
 
 /**
  * Main validate command
@@ -336,6 +437,13 @@ export async function validateCommand(options: ValidateOptions = {}): Promise<vo
 
   // Display results
   displayResults(result, options.verbose, isKo);
+
+  // Scan and display tag statistics
+  const tagSpinner = ora(isKo ? '태그 통계 수집 중...' : 'Collecting tag statistics...').start();
+  const tagStats = await scanTagStats(currentDir);
+  tagSpinner.succeed(isKo ? '태그 통계 수집 완료' : 'Tag statistics collected');
+
+  displayTagStats(tagStats, isKo);
 }
 
 /**
@@ -424,4 +532,134 @@ function displayResults(result: ValidationResult, verbose: boolean = false, isKo
     console.log(chalk.cyan('   codesyncer update'));
     console.log();
   }
+}
+
+/**
+ * Display tag statistics with explanation
+ */
+function displayTagStats(stats: TagStats, isKo: boolean = false) {
+  console.log();
+  console.log(chalk.bold(isKo ? '🏷️  태그 통계' : '🏷️  Tag Statistics'));
+  console.log(chalk.gray('─'.repeat(50)));
+
+  // Explain what tags are for
+  console.log(chalk.gray(
+    isKo
+      ? '  태그는 AI가 다음 세션에서도 맥락을 기억하게 해줍니다.'
+      : '  Tags help AI remember context across sessions.'
+  ));
+  console.log();
+
+  if (stats.total === 0) {
+    console.log(chalk.yellow(
+      isKo
+        ? '  ⚠️  태그가 없습니다!'
+        : '  ⚠️  No tags found!'
+    ));
+    console.log();
+    console.log(chalk.gray(isKo ? '  태그를 추가하면:' : '  With tags:'));
+    console.log(chalk.gray(
+      isKo
+        ? '  • AI가 "왜 이렇게 구현했는지" 기억합니다'
+        : '  • AI remembers "why it was implemented this way"'
+    ));
+    console.log(chalk.gray(
+      isKo
+        ? '  • 새 세션에서도 이전 결정을 이해합니다'
+        : '  • New sessions understand previous decisions'
+    ));
+    console.log();
+    console.log(chalk.white(isKo ? '  사용 예시:' : '  Example usage:'));
+    console.log(chalk.cyan('    // @codesyncer-decision: [2024-01-15] JWT 선택 (세션 관리 간편)'));
+    console.log(chalk.cyan('    // @codesyncer-inference: 페이지 크기 20 (일반적 UX 패턴)'));
+  } else {
+    // Tag counts with icons and descriptions
+    const tagInfo = {
+      decision: {
+        icon: '🎯',
+        descKo: '의논 후 결정한 사항',
+        descEn: 'Decisions made after discussion',
+      },
+      inference: {
+        icon: '💡',
+        descKo: 'AI가 추론한 내용',
+        descEn: 'AI inferences with rationale',
+      },
+      rule: {
+        icon: '📏',
+        descKo: '특별한 규칙/예외',
+        descEn: 'Special rules/exceptions',
+      },
+      todo: {
+        icon: '📝',
+        descKo: '확인이 필요한 항목',
+        descEn: 'Items needing confirmation',
+      },
+      context: {
+        icon: '📚',
+        descKo: '비즈니스 맥락 설명',
+        descEn: 'Business context explanations',
+      },
+    };
+
+    console.log(chalk.gray(`  ${isKo ? '스캔된 파일' : 'Files scanned'}: ${chalk.white(stats.filesScanned)}`));
+    console.log(chalk.gray(`  ${isKo ? '태그 있는 파일' : 'Files with tags'}: ${chalk.white(stats.filesWithTags)}`));
+    console.log();
+
+    for (const [tag, info] of Object.entries(tagInfo)) {
+      const count = stats[tag as keyof typeof tagInfo];
+      const desc = isKo ? info.descKo : info.descEn;
+      if (count > 0) {
+        console.log(chalk.green(`  ${info.icon} @codesyncer-${tag}: ${count}`));
+        console.log(chalk.gray(`     └─ ${desc}`));
+      } else {
+        console.log(chalk.gray(`  ${info.icon} @codesyncer-${tag}: 0`));
+      }
+    }
+
+    console.log();
+    console.log(chalk.gray('─'.repeat(50)));
+
+    // Coverage assessment with explanation
+    const coverage = stats.filesScanned > 0
+      ? Math.round((stats.filesWithTags / stats.filesScanned) * 100)
+      : 0;
+
+    if (coverage >= 50) {
+      console.log(chalk.bold.green(
+        isKo
+          ? `✅ 좋습니다! 파일의 ${coverage}%가 태그를 사용 중입니다.`
+          : `✅ Great! ${coverage}% of files are using tags.`
+      ));
+      console.log(chalk.gray(
+        isKo
+          ? '   AI가 프로젝트 맥락을 잘 이해할 수 있습니다.'
+          : '   AI can understand project context well.'
+      ));
+    } else if (coverage >= 20) {
+      console.log(chalk.bold.yellow(
+        isKo
+          ? `⚠️  파일의 ${coverage}%만 태그를 사용 중입니다.`
+          : `⚠️  Only ${coverage}% of files use tags.`
+      ));
+      console.log(chalk.gray(
+        isKo
+          ? '   더 많은 태그 = AI가 더 잘 기억합니다.'
+          : '   More tags = AI remembers better.'
+      ));
+    } else {
+      console.log(chalk.bold.yellow(
+        isKo
+          ? `💡 파일의 ${coverage}%가 태그를 사용 중입니다.`
+          : `💡 ${coverage}% of files use tags.`
+      ));
+      console.log(chalk.gray(
+        isKo
+          ? '   태그를 추가하면 AI 협업이 크게 개선됩니다!'
+          : '   Adding tags will significantly improve AI collaboration!'
+      ));
+    }
+  }
+
+  console.log();
 }

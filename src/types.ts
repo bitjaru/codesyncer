@@ -42,6 +42,10 @@ export interface WatchOptions {
   log?: boolean;  // Enable file logging
 }
 
+export interface ValidateOptions {
+  verbose?: boolean;   // Show detailed output
+}
+
 export interface ProjectConfig {
   projectName: string;
   githubUsername: string;

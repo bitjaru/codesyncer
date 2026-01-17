@@ -233,7 +233,12 @@ export class CodeSyncerWatcher {
       const tags = await parseTagsFromFile(fullPath);
 
       if (tags.length === 0) {
-        this.logger.logNoTags();
+        // Show warning for changed files, neutral for new files
+        if (eventType === 'change') {
+          this.logger.logNoTagsWarning(fullPath);
+        } else {
+          this.logger.logNoTags();
+        }
         return;
       }
 

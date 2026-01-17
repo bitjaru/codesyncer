@@ -43,6 +43,6 @@ codesyncer validate  # 설정 검증
 ---
 
 **프로젝트**: CodeSyncer
-**버전**: 2.7.1
+**버전**: 3.0.0
 **생성일**: 2026-01-09
 **Powered by**: CodeSyncer
