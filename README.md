@@ -36,16 +36,16 @@
 
 ```mermaid
 flowchart LR
-    A[🧑‍💻 You code with Claude] --> B{Decision made?}
-    B -->|Yes| C[Add @codesyncer-decision tag]
-    B -->|No| D{Inference made?}
-    D -->|Yes| E[Add @codesyncer-inference tag]
-    D -->|No| F[Continue coding]
-    C --> G[📝 Saved in code forever]
+    A["🧑‍💻 You code with Claude"] --> B{"Decision made?"}
+    B -->|Yes| C["Add codesyncer-decision tag"]
+    B -->|No| D{"Inference made?"}
+    D -->|Yes| E["Add codesyncer-inference tag"]
+    D -->|No| F["Continue coding"]
+    C --> G["📝 Saved in code forever"]
     E --> G
-    G --> H[🔄 Next session]
-    H --> I[Claude reads code]
-    I --> J[✅ Context recovered!]
+    G --> H["🔄 Next session"]
+    H --> I["Claude reads code"]
+    I --> J["✅ Context recovered!"]
 ```
 
 ```typescript

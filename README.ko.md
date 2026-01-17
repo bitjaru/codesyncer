@@ -36,16 +36,16 @@
 
 ```mermaid
 flowchart LR
-    A[🧑‍💻 Claude와 코딩] --> B{결정 내림?}
-    B -->|예| C[@codesyncer-decision 태그 추가]
-    B -->|아니오| D{추론 했음?}
-    D -->|예| E[@codesyncer-inference 태그 추가]
-    D -->|아니오| F[계속 코딩]
-    C --> G[📝 코드에 영구 저장]
+    A["🧑‍💻 Claude와 코딩"] --> B{"결정 내림?"}
+    B -->|예| C["codesyncer-decision 태그 추가"]
+    B -->|아니오| D{"추론 했음?"}
+    D -->|예| E["codesyncer-inference 태그 추가"]
+    D -->|아니오| F["계속 코딩"]
+    C --> G["📝 코드에 영구 저장"]
     E --> G
-    G --> H[🔄 다음 세션]
-    H --> I[Claude가 코드 읽음]
-    I --> J[✅ 맥락 복구 완료!]
+    G --> H["🔄 다음 세션"]
+    H --> I["Claude가 코드 읽음"]
+    I --> J["✅ 맥락 복구 완료!"]
 ```
 
 ```typescript
