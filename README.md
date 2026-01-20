@@ -98,6 +98,119 @@ codesyncer watch
 
 ---
 
+## 🪝 Hooks: Auto-Reminder System (NEW in v3.2.0)
+
+**Problem**: In long coding sessions, AI might forget the tagging rules.
+
+**Solution**: Hooks automatically remind AI to add tags before completing each response.
+
+### How It Works
+
+When you run `codesyncer init`, you'll be asked:
+
+```
+🪝 Hooks Setup (Recommended)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+What are Hooks?
+In long sessions, AI might forget tagging rules.
+Hooks automatically remind AI to check:
+"Did you add the tags?" before each response.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+? Set up Hooks? (Recommended) (Y/n)
+```
+
+If you choose "Yes", CodeSyncer generates `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "prompt",
+        "prompt": "Before completing: CodeSyncer check - 1) Inference → @codesyncer-inference tag? 2) Decision → @codesyncer-decision tag? 3) 💰Payment/🔐Security → Did you ask the user? Add any missing tags now."
+      }]
+    }]
+  }
+}
+```
+
+### Hook Events
+
+| Event | When It Triggers | Purpose |
+|-------|------------------|---------|
+| **Stop** | Before AI completes response | Remind to add tags |
+| **PreCompact** | Before context compaction | Preserve key rules in memory |
+
+### Managing Hooks
+
+- **Enable**: Say "Set up CodeSyncer Hooks" to your AI
+- **Disable**: Delete `.claude/settings.json`
+- **Customize**: Edit `.claude/settings.json` directly
+
+---
+
+## 📂 Context Optimization for Large Projects (NEW in v3.2.0)
+
+As your codebase grows, AI can get confused. v3.2.0 introduces features to keep AI focused.
+
+### Subfolder CLAUDE.md
+
+When your project gets large, add CLAUDE.md files to specific folders:
+
+```
+project/
+├── CLAUDE.md                    # Global rules
+├── src/
+│   ├── payment/
+│   │   └── CLAUDE.md            # Payment-specific rules + tag reminder
+│   └── auth/
+│       └── CLAUDE.md            # Auth-specific rules
+```
+
+AI automatically reads the relevant CLAUDE.md when entering a folder.
+
+**Template included**: `src/templates/subfolder-claude.md`
+
+### Do Not Touch Zones
+
+Define folders that AI should never modify:
+
+```markdown
+## 🚫 Do Not Touch
+- `src/generated/` - Auto-generated files, do not modify
+- `src/legacy/` - Do not modify until migration
+- `.env*` - Environment variables, do not edit directly
+```
+
+This prevents AI from accidentally modifying critical or auto-generated code.
+
+---
+
+## 🔗 Multi-Repo Work Tracking (NEW in v3.2.0)
+
+### Git Branch = Work ID
+
+Use branch names as work identifiers:
+- `feature/AUTH-001-login`
+- `fix/PAY-002-webhook`
+
+### Cross-Repo Tags
+
+For work spanning multiple repos, use the same tag:
+
+```typescript
+// frontend repo
+// @codesyncer-work:AUTH-001 Login form
+
+// backend repo
+// @codesyncer-work:AUTH-001 Login API
+```
+
+Search across repos: `grep -r "@codesyncer-work:AUTH-001" ../`
+
+---
+
 ## ✨ Full Feature List
 
 | Feature | Description |
@@ -106,6 +219,7 @@ codesyncer watch
 | 🔄 **Watch Mode** | Real-time monitoring, warns on untagged changes, auto-syncs to DECISIONS.md |
 | ✅ **Validate** | Check tag coverage, find missing documentation, get fix suggestions |
 | 🤝 **Auto-Pause** | Detects payment/security/auth keywords → asks before coding |
+| 🪝 **Hooks** | Auto-reminder system - AI never forgets rules even in long sessions (NEW v3.2.0) |
 | 📦 **Monorepo** | Auto-detects Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces |
 | 🌐 **Multi-Language** | Full Korean and English support |
 | 🔒 **Security** | Path traversal protection and input validation |
@@ -636,7 +750,8 @@ my-project/
     ├── CLAUDE.md                  # Coding guidelines
     ├── COMMENT_GUIDE.md           # Tag usage guide
     ├── ARCHITECTURE.md            # Project structure
-    └── DECISIONS.md               # Decision log
+    ├── DECISIONS.md               # Decision log
+    └── settings.json              # Hooks config (v3.2.0+, optional)
 ```
 
 ### Multi-Repository Mode

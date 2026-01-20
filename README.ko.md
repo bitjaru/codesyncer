@@ -98,6 +98,119 @@ codesyncer watch
 
 ---
 
+## 🪝 Hooks: 자동 리마인드 시스템 (v3.2.0 신규)
+
+**문제**: 긴 코딩 세션에서 AI가 태그 규칙을 잊을 수 있습니다.
+
+**해결**: Hooks가 AI 응답 완료 전에 자동으로 태그 추가 여부를 리마인드합니다.
+
+### 작동 방식
+
+`codesyncer init` 실행 시 다음과 같이 묻습니다:
+
+```
+🪝 Hooks 설정 (권장)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Hooks란?
+세션이 길어지면 AI가 태그 규칙을 까먹을 수 있습니다.
+Hooks를 설정하면 AI가 응답 완료 전에
+자동으로 "태그 붙였어?" 확인합니다.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+? Hooks를 설정할까요? (권장) (Y/n)
+```
+
+"Y" 선택 시 `.claude/settings.json` 생성:
+
+```json
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "prompt",
+        "prompt": "작업 완료 전 CodeSyncer 체크: 1) 추론→@codesyncer-inference 태그? 2) 결정→@codesyncer-decision 태그? 3) 💰결제/🔐보안→사용자에게 물었나? 빠진 태그가 있으면 지금 추가하세요."
+      }]
+    }]
+  }
+}
+```
+
+### Hook 이벤트
+
+| 이벤트 | 트리거 시점 | 목적 |
+|--------|------------|------|
+| **Stop** | AI 응답 완료 전 | 태그 추가 리마인드 |
+| **PreCompact** | 컨텍스트 압축 전 | 핵심 규칙 메모리 유지 |
+
+### Hooks 관리
+
+- **활성화**: AI에게 "CodeSyncer Hooks 설정해줘" 말하기
+- **비활성화**: `.claude/settings.json` 삭제
+- **커스터마이징**: `.claude/settings.json` 직접 편집
+
+---
+
+## 📂 대규모 프로젝트 컨텍스트 최적화 (v3.2.0 신규)
+
+코드베이스가 커지면 AI가 헷갈릴 수 있습니다. v3.2.0에서 AI 집중력을 유지하는 기능이 추가되었습니다.
+
+### 서브폴더별 CLAUDE.md
+
+프로젝트가 커지면 특정 폴더에 CLAUDE.md를 추가하세요:
+
+```
+project/
+├── CLAUDE.md                    # 전체 규칙
+├── src/
+│   ├── payment/
+│   │   └── CLAUDE.md            # 결제 관련 규칙 + 태그 리마인드
+│   └── auth/
+│       └── CLAUDE.md            # 인증 관련 규칙
+```
+
+AI가 해당 폴더에 진입하면 자동으로 관련 CLAUDE.md를 읽습니다.
+
+**템플릿 포함**: `src/templates/subfolder-claude.md`
+
+### Do Not Touch 영역
+
+AI가 절대 수정하면 안 되는 폴더 정의:
+
+```markdown
+## 🚫 Do Not Touch
+- `src/generated/` - 자동 생성 파일, 수정 금지
+- `src/legacy/` - 마이그레이션 전까지 수정 금지
+- `.env*` - 환경 변수, 직접 수정 금지
+```
+
+이로써 AI가 실수로 중요하거나 자동 생성된 코드를 수정하는 것을 방지합니다.
+
+---
+
+## 🔗 멀티 레포 작업 추적 (v3.2.0 신규)
+
+### Git 브랜치 = 작업 ID
+
+브랜치명을 작업 ID로 사용하세요:
+- `feature/AUTH-001-login`
+- `fix/PAY-002-webhook`
+
+### 크로스 레포 태그
+
+여러 레포에 걸친 작업은 같은 태그 사용:
+
+```typescript
+// frontend 레포
+// @codesyncer-work:AUTH-001 로그인 폼
+
+// backend 레포
+// @codesyncer-work:AUTH-001 로그인 API
+```
+
+레포 전체 검색: `grep -r "@codesyncer-work:AUTH-001" ../`
+
+---
+
 ## ✨ 전체 기능 목록
 
 | 기능 | 설명 |
@@ -106,6 +219,7 @@ codesyncer watch
 | 🔄 **Watch 모드** | 실시간 모니터링, 태그 없는 변경 경고, DECISIONS.md 자동 동기화 |
 | ✅ **Validate** | 태그 커버리지 확인, 누락된 문서 찾기, 수정 제안 |
 | 🤝 **자동 일시정지** | 결제/보안/인증 키워드 감지 → 코딩 전 확인 |
+| 🪝 **Hooks** | 자동 리마인드 시스템 - 긴 세션에서도 AI가 규칙을 잊지 않음 (v3.2.0 신규) |
 | 📦 **모노레포** | Turborepo, pnpm, Nx, Lerna, npm/yarn workspaces 자동 감지 |
 | 🌐 **다국어** | 한글/영문 완벽 지원 |
 | 🔒 **보안** | 경로 탐색 방지 및 입력 검증 |
@@ -636,7 +750,8 @@ my-project/
     ├── CLAUDE.md                  # 코딩 가이드라인
     ├── COMMENT_GUIDE.md           # 태그 사용 가이드
     ├── ARCHITECTURE.md            # 프로젝트 구조
-    └── DECISIONS.md               # 의사결정 기록
+    ├── DECISIONS.md               # 의사결정 기록
+    └── settings.json              # Hooks 설정 (v3.2.0+, 선택)
 ```
 
 ### 멀티 레포지토리 모드
