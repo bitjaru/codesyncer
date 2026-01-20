@@ -13,6 +13,124 @@ import { saveSetupState, loadSetupState, clearSetupState, SetupState } from '../
 import { VERSION } from '../utils/version';
 
 /**
+ * Display Hooks explanation and ask for setup
+ */
+async function askHooksSetup(lang: Language): Promise<boolean> {
+  const isKo = lang === 'ko';
+
+  console.log();
+  console.log(chalk.bold.cyan('─'.repeat(60)));
+  console.log();
+  console.log(chalk.bold(isKo ? '🪝 Hooks 설정 (권장)' : '🪝 Hooks Setup (Recommended)'));
+  console.log();
+
+  console.log(chalk.white(isKo ? 'Hooks란?' : 'What are Hooks?'));
+  console.log(chalk.gray(
+    isKo
+      ? '  세션이 길어지면 AI가 규칙을 까먹을 수 있습니다.'
+      : '  AI might forget rules during long sessions.'
+  ));
+  console.log(chalk.gray(
+    isKo
+      ? '  Hooks를 설정하면 AI가 응답 완료 전에'
+      : '  With Hooks, AI automatically checks'
+  ));
+  console.log(chalk.gray(
+    isKo
+      ? '  자동으로 "태그 붙였어?" 확인합니다.'
+      : '  "Did you add tags?" before completing.'
+  ));
+  console.log();
+  console.log(chalk.bold.cyan('─'.repeat(60)));
+  console.log();
+
+  const { setupHooks } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'setupHooks',
+      message: isKo ? 'Hooks를 설정할까요?' : 'Set up Hooks?',
+      default: true,
+    },
+  ]);
+
+  return setupHooks;
+}
+
+/**
+ * Generate Hooks settings.json file
+ */
+async function generateHooksSettings(targetDir: string, lang: Language): Promise<void> {
+  const hooksTemplateFile = lang === 'ko' ? 'settings.ko.json' : 'settings.json';
+  const hooksTemplate = await fs.readFile(
+    path.join(__dirname, '..', 'templates', 'hooks', hooksTemplateFile),
+    'utf-8'
+  );
+
+  await fs.writeFile(
+    path.join(targetDir, 'settings.json'),
+    hooksTemplate,
+    'utf-8'
+  );
+}
+
+/**
+ * Get Hooks guide text for CLAUDE.md based on setup status
+ */
+function getHooksGuide(lang: Language, hooksEnabled: boolean): string {
+  const isKo = lang === 'ko';
+
+  if (hooksEnabled) {
+    return isKo
+      ? `> ✅ 이미 설정됨: \`.claude/settings.json\`
+
+**Hooks가 하는 일**:
+- AI가 응답 완료 전에 "태그 붙였어?" 자동 확인
+- 세션이 길어져도 규칙을 까먹지 않음
+
+**수정하려면**:
+- \`.claude/settings.json\` 직접 편집
+- 또는 "Hooks 수정해줘"라고 말하세요
+
+**비활성화하려면**:
+- \`.claude/settings.json\` 삭제`
+      : `> ✅ Already configured: \`.claude/settings.json\`
+
+**What Hooks do**:
+- AI auto-checks "Did you add tags?" before completing
+- Rules are remembered even in long sessions
+
+**To modify**:
+- Edit \`.claude/settings.json\` directly
+- Or say "Modify Hooks"
+
+**To disable**:
+- Delete \`.claude/settings.json\``;
+  } else {
+    return isKo
+      ? `> ⚠️ 아직 설정 안 됨
+
+**Hooks란?**
+세션이 길어지면 AI가 규칙을 까먹을 수 있습니다.
+Hooks를 설정하면 AI가 응답 완료 전에 자동으로 "태그 붙였어?" 확인합니다.
+
+**설정하려면**:
+"CodeSyncer Hooks 설정해줘"라고 말하세요.
+
+AI가 자동으로 \`.claude/settings.json\`을 생성합니다.`
+      : `> ⚠️ Not configured yet
+
+**What are Hooks?**
+AI might forget rules during long sessions.
+With Hooks, AI automatically checks "Did you add tags?" before completing.
+
+**To set up**:
+Say "Set up CodeSyncer Hooks".
+
+AI will automatically create \`.claude/settings.json\`.`;
+  }
+}
+
+/**
  * Display onboarding explanation for first-time users
  */
 async function displayOnboarding(lang: Language): Promise<boolean> {
@@ -429,6 +547,9 @@ export async function initCommand(options: InitOptions) {
       }
     }
 
+    // Ask for Hooks setup
+    const setupHooks = await askHooksSetup(lang);
+
     // Single-repo: skip select step, go directly to generate
     displayProgress(4, lang);
 
@@ -459,6 +580,12 @@ export async function initCommand(options: InitOptions) {
 
     console.log(chalk.green('✓') + ' .claude/SETUP_GUIDE.md');
 
+    // Generate Hooks settings.json if enabled
+    if (setupHooks) {
+      await generateHooksSettings(claudeDir, lang);
+      console.log(chalk.green('✓') + ' .claude/settings.json ' + chalk.gray('(Hooks)'));
+    }
+
     // Complete! Clear recovery state
     await clearSetupState(currentDir);
     displayProgress(5, lang);
@@ -467,7 +594,11 @@ export async function initCommand(options: InitOptions) {
     console.log(chalk.bold.green(`✅ ${lang === 'ko' ? 'CodeSyncer 초기화 완료! (단일 레포 모드)' : 'CodeSyncer initialized! (Single Repo Mode)'}\n`));
 
     console.log(chalk.bold(lang === 'ko' ? '📋 생성된 파일:' : '📋 Created files:'));
-    console.log(`  ${chalk.cyan('.claude/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}\n`);
+    console.log(`  ${chalk.cyan('.claude/SETUP_GUIDE.md')} ${chalk.gray('- AI setup instructions')}`);
+    if (setupHooks) {
+      console.log(`  ${chalk.cyan('.claude/settings.json')} ${chalk.gray('- Hooks (auto-reminder)')}`);
+    }
+    console.log();
 
     console.log(chalk.bold(lang === 'ko' ? '🚀 다음 단계:' : '🚀 Next steps:'));
     console.log();

@@ -285,6 +285,39 @@ CodeSyncer 사용 준비 완료!
 - `[GITHUB_USERNAME]` → 사용자 GitHub 사용자명
 - `[KEYWORDS]` → 사용자 확인 의논 키워드
 - `[TEMPLATES]` → 프로젝트 타입별 템플릿
+- `[HOOKS_GUIDE]` → Hooks 상태에 따른 가이드 (아래 참조)
+
+### [HOOKS_GUIDE] 교체 방법
+
+`.claude/settings.json` 파일이 있으면 (Hooks 설정됨):
+```markdown
+> ✅ 이미 설정됨: `.claude/settings.json`
+
+**Hooks가 하는 일**:
+- AI가 응답 완료 전에 "태그 붙였어?" 자동 확인
+- 세션이 길어져도 규칙을 까먹지 않음
+
+**수정하려면**:
+- `.claude/settings.json` 직접 편집
+- 또는 "Hooks 수정해줘"라고 말하세요
+
+**비활성화하려면**:
+- `.claude/settings.json` 삭제
+```
+
+`.claude/settings.json` 파일이 없으면 (Hooks 설정 안 됨):
+```markdown
+> ⚠️ 아직 설정 안 됨
+
+**Hooks란?**
+세션이 길어지면 AI가 규칙을 까먹을 수 있습니다.
+Hooks를 설정하면 AI가 응답 완료 전에 자동으로 "태그 붙였어?" 확인합니다.
+
+**설정하려면**:
+"CodeSyncer Hooks 설정해줘"라고 말하세요.
+
+AI가 자동으로 `.claude/settings.json`을 생성합니다.
+```
 
 ---
 
@@ -323,4 +356,4 @@ rm .claude/SETUP_GUIDE.md
 
 *이 설정 가이드는 CodeSyncer CLI에 의해 생성됩니다. 문제나 개선사항은 https://github.com/bitjaru/codesyncer 방문*
 
-<!-- codesyncer-version: 3.1.1 -->
+<!-- codesyncer-version: 3.2.0 -->

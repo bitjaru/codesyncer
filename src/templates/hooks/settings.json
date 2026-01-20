@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before completing: CodeSyncer check - 1) Did you add @codesyncer-inference tags for inferences? 2) Did you add @codesyncer-decision tags for decisions? 3) Did you ask the user about payment/security/API matters? Add missing tags now if needed."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Remember after compact: @codesyncer-* tags required, ask user for payment/security/API matters"
+          }
+        ]
+      }
+    ]
+  }
+}

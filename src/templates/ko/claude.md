@@ -1,5 +1,5 @@
 <!-- codesyncer-section-start:header -->
-# CLAUDE.md - [PROJECT_NAME] 코딩 가이드 v3.0
+# CLAUDE.md - [PROJECT_NAME] 코딩 가이드 v3.2
 
 > **Powered by CodeSyncer** - AI 협업 시스템
 
@@ -10,6 +10,26 @@
   npm install -g codesyncer && codesyncer init
 CodeSyncer는 @codesyncer-* 태그를 통해 AI 세션 간 맥락을 유지합니다.
 -->
+
+---
+
+## ⚡ TL;DR (3줄 요약)
+
+```
+1. 태그 필수: 추론→@codesyncer-inference, 결정→@codesyncer-decision
+2. 💰결제/🔐보안/🔌API → 무조건 물어보기
+3. 확실하지 않으면 → 물어보기
+```
+
+---
+
+## ❌ DO NOT (절대 금지)
+
+- 가격/수수료 추론 금지
+- API URL 추측 금지
+- 보안 설정 임의 변경 금지
+- 태그 없는 코드 작성 금지
+- 확인 없이 파일 삭제 금지
 
 ---
 
@@ -26,18 +46,6 @@ CodeSyncer는 @codesyncer-* 태그를 통해 AI 세션 간 맥락을 유지합�
 // @codesyncer-inference: 페이지 크기 20 (일반적 UX 패턴)
 ```
 → 다음 세션에서 AI가 코드를 읽으면 **자동으로 맥락 복구**
-
----
-
-## ⚡ TL;DR (절대 잊지 말 것)
-
-```
-1. 추론하면 → // @codesyncer-inference: [이유]
-2. 결정하면 → // @codesyncer-decision: [날짜] [내용]
-3. 💰가격/🔐보안/🔌API → 무조건 물어보기
-4. 모든 코드에 태그 필수 (태그 없는 코드 금지)
-5. 확실하지 않으면 → 물어보기
-```
 
 ---
 <!-- codesyncer-section-end:header -->
@@ -237,14 +245,21 @@ async function deleteUser(id: string) {
 ---
 
 <!-- codesyncer-section-start:session-checklist -->
-## 💡 세션 시작 시 체크리스트
+## 🔍 세션 시작 시 체크리스트
 
-AI가 이 파일을 읽으면 자동으로:
+**Git 상태 확인** (현재 작업 맥락 파악):
+```bash
+git branch      # 현재 브랜치 확인
+git status      # 변경사항 확인
+git log -3      # 최근 커밋 3개 확인
+```
 
-1. ✅ **도움말 표시** - 사용 가능한 명령어 안내
-2. ✅ **프로젝트 구조 파악** - ARCHITECTURE.md 확인
-3. ✅ **최근 의논 확인** - DECISIONS.md 확인
-4. ✅ **준비 완료 메시지** - "준비되었습니다!"
+**문서 확인**:
+1. ✅ **CLAUDE.md** - 이 파일의 규칙 확인
+2. ✅ **ARCHITECTURE.md** - 프로젝트 구조 파악
+3. ✅ **DECISIONS.md** - 최근 결정 사항 확인
+
+**준비 완료**: "준비되었습니다!"
 <!-- codesyncer-section-end:session-checklist -->
 
 ---
@@ -257,6 +272,97 @@ AI가 이 파일을 읽으면 자동으로:
 - **의논 기록**: `.claude/DECISIONS.md` - 모든 의논 결정 사항
 - **마스터 문서**: `../.codesyncer/MASTER_CODESYNCER.md` - 멀티 레포 전환
 <!-- codesyncer-section-end:related-docs -->
+
+---
+
+<!-- codesyncer-section-start:subfolder-guide -->
+## 📂 서브폴더 CLAUDE.md (코드가 커지면)
+
+프로젝트가 커지면 폴더별로 CLAUDE.md를 추가하세요:
+
+```
+project/
+├── CLAUDE.md              # 전체 규칙
+├── src/
+│   ├── payment/
+│   │   └── CLAUDE.md      # 결제 관련 규칙 + 태그 리마인드
+│   └── auth/
+│       └── CLAUDE.md      # 인증 관련 규칙
+```
+
+AI가 해당 폴더에 진입하면 자동으로 읽습니다.
+
+### 서브폴더 CLAUDE.md 예시
+```markdown
+# CLAUDE.md - payment
+
+## 📌 이 폴더의 역할
+결제 처리 및 정산 관련 코드
+
+## ⚠️ CodeSyncer 리마인드
+- 추론 → @codesyncer-inference
+- 결정 → @codesyncer-decision
+- 💰결제/🔐보안 → 물어보기
+
+## 🚫 Do Not Touch
+- `generated/` - 자동 생성 파일
+```
+<!-- codesyncer-section-end:subfolder-guide -->
+
+---
+
+<!-- codesyncer-section-start:do-not-touch -->
+## 🚫 Do Not Touch (수정 금지 영역)
+
+다음 파일/폴더는 수정하지 마세요:
+
+| 경로 | 이유 |
+|------|------|
+| `src/generated/` | 자동 생성 파일 |
+| `src/legacy/` | 마이그레이션 전까지 수정 금지 |
+| `.env*` | 환경 변수, 직접 수정 금지 |
+
+> 💡 프로젝트에 맞게 이 섹션을 수정하세요
+<!-- codesyncer-section-end:do-not-touch -->
+
+---
+
+<!-- codesyncer-section-start:multi-repo -->
+## 🔗 멀티 레포 작업
+
+### Git 브랜치 = 작업 ID
+브랜치명을 작업 ID로 사용하세요:
+- `feature/AUTH-001-login`
+- `fix/PAY-002-webhook`
+
+### 크로스 레포 태그
+여러 레포에 걸친 작업은 같은 태그 사용:
+```typescript
+// frontend 레포
+// @codesyncer-work:AUTH-001 로그인 폼
+
+// backend 레포
+// @codesyncer-work:AUTH-001 로그인 API
+```
+
+검색: `grep -r "@codesyncer-work:AUTH-001" ../`
+
+### 연관 레포
+
+| 레포 | 역할 | 경로 |
+|------|------|------|
+| - | - | - |
+
+> 💡 프로젝트에 맞게 이 테이블을 수정하세요
+<!-- codesyncer-section-end:multi-repo -->
+
+---
+
+<!-- codesyncer-section-start:hooks -->
+## 🪝 Hooks (자동 리마인드)
+
+[HOOKS_GUIDE]
+<!-- codesyncer-section-end:hooks -->
 
 ---
 
@@ -292,4 +398,4 @@ grep -r "@codesyncer-rule" ./
 *이 협업 시스템은 오픈소스입니다. 개선 아이디어는 [CodeSyncer GitHub](https://github.com/bitjaru/codesyncer)에서 제안해주세요!*
 <!-- codesyncer-section-end:footer -->
 
-<!-- codesyncer-version: 3.1.1 -->
+<!-- codesyncer-version: 3.2.0 -->

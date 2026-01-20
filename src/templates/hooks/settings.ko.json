@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "작업 완료 전 CodeSyncer 체크: 1) 추론→@codesyncer-inference 태그? 2) 결정→@codesyncer-decision 태그? 3) 결제/보안/API→사용자에게 물었나? 빠진 태그가 있으면 지금 추가하세요."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "컴팩트 후에도 기억: @codesyncer-* 태그 필수, 결제/보안/API→물어보기"
+          }
+        ]
+      }
+    ]
+  }
+}
