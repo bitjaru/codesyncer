@@ -1,11 +1,11 @@
 {
   "hooks": {
-    "Stop": [
+    "SessionStart": [
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Before completing: CodeSyncer check - 1) Did you add @codesyncer-inference tags for inferences? 2) Did you add @codesyncer-decision tags for decisions? 3) Did you ask the user about payment/security/API matters? Add missing tags now if needed."
+            "type": "command",
+            "command": "echo '[CodeSyncer] Rules: 1) @codesyncer-inference for inferences 2) @codesyncer-decision for decisions 3) Always ask user about payment/security/API'"
           }
         ]
       }
@@ -14,8 +14,8 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Remember after compact: @codesyncer-* tags required, ask user for payment/security/API matters"
+            "type": "command",
+            "command": "echo '[CodeSyncer] Remember after compaction: @codesyncer-* tags required, ask user for payment/security/API matters'"
           }
         ]
       }
