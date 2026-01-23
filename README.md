@@ -14,9 +14,10 @@
 
 | Problem | Without CodeSyncer | With CodeSyncer |
 |---------|-------------------|-----------------|
-| **Context loss** | Every session = start from scratch | Tags in code = permanent memory |
-| **Decision amnesia** | "Why did we use JWT?" → 🤷 | `@codesyncer-decision` → instant recall |
-| **Dangerous inference** | AI guesses prices, endpoints, auth | Auto-pause on critical keywords |
+| **Context loss** | Every session = start from scratch | `@codesyncer-*` tags = permanent memory |
+| **Forgot to tag** | Changes go untracked | `codesyncer watch` catches everything |
+| **Rules forgotten** | AI forgets guidelines mid-session | Hooks auto-remind at optimal moments |
+| **Dangerous inference** | AI guesses prices, security, APIs | Auto-pause on critical keywords |
 
 ---
 
