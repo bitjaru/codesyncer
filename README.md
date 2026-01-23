@@ -44,6 +44,12 @@ codesyncer init
 "Read CLAUDE.md"
 ```
 
+### Upgrade
+
+```bash
+npm install -g codesyncer@latest
+```
+
 ---
 
 ## Core Features

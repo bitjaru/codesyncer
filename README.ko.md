@@ -44,6 +44,12 @@ codesyncer init
 "CLAUDE.md 읽어줘"
 ```
 
+### 업그레이드
+
+```bash
+npm install -g codesyncer@latest
+```
+
 ---
 
 ## 핵심 기능
