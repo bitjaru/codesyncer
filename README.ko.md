@@ -125,6 +125,7 @@ codesyncer update     # 템플릿 업데이트
 codesyncer validate   # 설정 검증
 codesyncer watch      # 실시간 모니터링
 codesyncer add-repo   # 워크스페이스에 레포 추가
+codesyncer skills     # skills.sh 리더보드 보기
 ```
 
 ---

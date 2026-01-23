@@ -1,6 +1,6 @@
 {
   "name": "codesyncer",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Claude forgets everything when the session ends. CodeSyncer makes it remember.",
   "keywords": [
     "ai-collaboration",

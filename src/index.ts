@@ -7,6 +7,7 @@ import { updateCommand } from './commands/update';
 import { addRepoCommand } from './commands/add-repo';
 import { watchCommand } from './commands/watch';
 import { validateCommand } from './commands/validate';
+import { skillsCommand } from './commands/skills';
 import { VERSION } from './utils/version';
 import * as os from 'os';
 
@@ -56,6 +57,8 @@ ${chalk.bold('Examples:')}
   $ codesyncer watch             ${chalk.gray('# Real-time file monitoring')}
   $ codesyncer validate          ${chalk.gray('# Validate setup and report issues')}
   $ codesyncer add-repo          ${chalk.gray('# Add new repository to workspace')}
+  $ codesyncer skills            ${chalk.gray('# Browse skills.sh leaderboard')}
+  $ codesyncer skills add <repo> ${chalk.gray('# Install a skill')}
   `);
 
 program
@@ -91,5 +94,10 @@ program
   .description('Validate CodeSyncer setup and report issues')
   .option('--verbose', 'Show detailed output including file paths')
   .action(validateCommand);
+
+program
+  .command('skills [subcommand] [name]')
+  .description('Browse skills.sh leaderboard or install skills')
+  .action(skillsCommand);
 
 program.parse(process.argv);

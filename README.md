@@ -125,6 +125,7 @@ codesyncer update     # Update templates
 codesyncer validate   # Check setup
 codesyncer watch      # Real-time monitoring
 codesyncer add-repo   # Add repo to workspace
+codesyncer skills     # Browse skills.sh leaderboard
 ```
 
 ---
